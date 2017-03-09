@@ -389,9 +389,10 @@ def eyeLinkDataParser(FILENAME, **par):
         parsedData[newKey] = fixTraceDict[oldKey]
     for oldKey, newKey in izip(saccTraceKw, newSaccTraceKw):
         parsedData[newKey] = saccTraceDict[oldKey]
-    parsedData[keyPrefix+'euclidDist']   = euclidDistance
-    parsedData[keyPrefix+'curvature']    = saccCurvature
-    parsedData[keyPrefix+'saccAngle']    = saccAngles
+    parsedData[keyPrefix+'euclidDist'] = euclidDistance
+    parsedData[keyPrefix+'curvature'] = saccCurvature
+    parsedData[keyPrefix+'saccAngle'] = saccAngles
+    parsedData[keyPrefix+'includedTrial'] = True
     
     varDf   = pd.DataFrame(varDict)
     msgDf   = pd.DataFrame(msgDict)
