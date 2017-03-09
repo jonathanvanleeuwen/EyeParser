@@ -9,6 +9,7 @@
 from PyQt4 import QtCore, QtGui
 import os
 import pandas as pd
+import numpy as np
 from plottingGUI import plotTrial
 
 try:
@@ -35,26 +36,51 @@ class Ui_Eyelinkplotter(object):
         self.centralwidget.setStyleSheet(_fromUtf8(""))
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.gridLayoutWidget = QtGui.QWidget(self.centralwidget)
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(250, 10, 295, 121))
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(240, 80, 447, 124))
         self.gridLayoutWidget.setObjectName(_fromUtf8("gridLayoutWidget"))
         self.gridLayout = QtGui.QGridLayout(self.gridLayoutWidget)
         self.gridLayout.setHorizontalSpacing(6)
         self.gridLayout.setVerticalSpacing(12)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        self.previousTrialLabel = QtGui.QLabel(self.gridLayoutWidget)
-        self.previousTrialLabel.setObjectName(_fromUtf8("previousTrialLabel"))
-        self.gridLayout.addWidget(self.previousTrialLabel, 3, 0, 1, 1, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
-        self.currentTrialLabel = QtGui.QLabel(self.gridLayoutWidget)
-        self.currentTrialLabel.setObjectName(_fromUtf8("currentTrialLabel"))
-        self.gridLayout.addWidget(self.currentTrialLabel, 3, 1, 1, 1, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
-        self.updateButton = QtGui.QPushButton(self.gridLayoutWidget)
-        self.updateButton.setEnabled(True)
-        self.updateButton.setObjectName(_fromUtf8("updateButton"))
-        self.gridLayout.addWidget(self.updateButton, 1, 1, 1, 1)
+        self.jumpToTrialNr = QtGui.QSpinBox(self.gridLayoutWidget)
+        self.jumpToTrialNr.setMinimum(1)
+        self.jumpToTrialNr.setMaximum(1000000)
+        self.jumpToTrialNr.setObjectName(_fromUtf8("jumpToTrialNr"))
+        self.gridLayout.addWidget(self.jumpToTrialNr, 2, 4, 1, 1)
         self.backButton = QtGui.QPushButton(self.gridLayoutWidget)
         self.backButton.setEnabled(True)
         self.backButton.setObjectName(_fromUtf8("backButton"))
-        self.gridLayout.addWidget(self.backButton, 1, 0, 1, 1)
+        self.gridLayout.addWidget(self.backButton, 4, 1, 1, 1)
+        self.nextButton = QtGui.QPushButton(self.gridLayoutWidget)
+        self.nextButton.setEnabled(True)
+        self.nextButton.setObjectName(_fromUtf8("nextButton"))
+        self.gridLayout.addWidget(self.nextButton, 4, 3, 1, 1)
+        self.updateButton = QtGui.QPushButton(self.gridLayoutWidget)
+        self.updateButton.setEnabled(True)
+        self.updateButton.setObjectName(_fromUtf8("updateButton"))
+        self.gridLayout.addWidget(self.updateButton, 4, 2, 1, 1)
+        self.jumpToTrial = QtGui.QPushButton(self.gridLayoutWidget)
+        self.jumpToTrial.setObjectName(_fromUtf8("jumpToTrial"))
+        self.gridLayout.addWidget(self.jumpToTrial, 4, 4, 1, 1)
+        self.trialsToPlot = QtGui.QComboBox(self.gridLayoutWidget)
+        self.trialsToPlot.setObjectName(_fromUtf8("trialsToPlot"))
+        self.trialsToPlot.addItem(_fromUtf8(""))
+        self.trialsToPlot.addItem(_fromUtf8(""))
+        self.trialsToPlot.addItem(_fromUtf8(""))
+        self.gridLayout.addWidget(self.trialsToPlot, 4, 0, 1, 1)
+        self.trialScroll = QtGui.QScrollBar(self.gridLayoutWidget)
+        self.trialScroll.setMaximum(0)
+        self.trialScroll.setOrientation(QtCore.Qt.Horizontal)
+        self.trialScroll.setObjectName(_fromUtf8("trialScroll"))
+        self.gridLayout.addWidget(self.trialScroll, 5, 0, 1, 5)
+        self.includedOrExcluded = QtGui.QLineEdit(self.gridLayoutWidget)
+        self.includedOrExcluded.setEnabled(False)
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setWeight(75)
+        self.includedOrExcluded.setFont(font)
+        self.includedOrExcluded.setObjectName(_fromUtf8("includedOrExcluded"))
+        self.gridLayout.addWidget(self.includedOrExcluded, 2, 0, 1, 1)
         self.currentTrialDisp = QtGui.QLCDNumber(self.gridLayoutWidget)
         font = QtGui.QFont()
         font.setPointSize(10)
@@ -63,29 +89,10 @@ class Ui_Eyelinkplotter(object):
         self.currentTrialDisp.setFont(font)
         self.currentTrialDisp.setSegmentStyle(QtGui.QLCDNumber.Flat)
         self.currentTrialDisp.setObjectName(_fromUtf8("currentTrialDisp"))
-        self.gridLayout.addWidget(self.currentTrialDisp, 2, 1, 1, 1)
-        self.nextTrialDisp = QtGui.QLCDNumber(self.gridLayoutWidget)
-        self.nextTrialDisp.setSmallDecimalPoint(False)
-        self.nextTrialDisp.setSegmentStyle(QtGui.QLCDNumber.Flat)
-        self.nextTrialDisp.setObjectName(_fromUtf8("nextTrialDisp"))
-        self.gridLayout.addWidget(self.nextTrialDisp, 2, 2, 1, 1)
-        self.nextButton = QtGui.QPushButton(self.gridLayoutWidget)
-        self.nextButton.setEnabled(True)
-        self.nextButton.setObjectName(_fromUtf8("nextButton"))
-        self.gridLayout.addWidget(self.nextButton, 1, 2, 1, 1)
-        self.previousTrialDisp = QtGui.QLCDNumber(self.gridLayoutWidget)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        font.setBold(True)
-        font.setWeight(75)
-        self.previousTrialDisp.setFont(font)
-        self.previousTrialDisp.setMode(QtGui.QLCDNumber.Dec)
-        self.previousTrialDisp.setSegmentStyle(QtGui.QLCDNumber.Flat)
-        self.previousTrialDisp.setObjectName(_fromUtf8("previousTrialDisp"))
-        self.gridLayout.addWidget(self.previousTrialDisp, 2, 0, 1, 1)
-        self.nextTrialLabel = QtGui.QLabel(self.gridLayoutWidget)
-        self.nextTrialLabel.setObjectName(_fromUtf8("nextTrialLabel"))
-        self.gridLayout.addWidget(self.nextTrialLabel, 3, 2, 1, 1, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
+        self.gridLayout.addWidget(self.currentTrialDisp, 2, 2, 1, 1)
+        self.toggleIncluded = QtGui.QPushButton(self.gridLayoutWidget)
+        self.toggleIncluded.setObjectName(_fromUtf8("toggleIncluded"))
+        self.gridLayout.addWidget(self.toggleIncluded, 2, 1, 1, 1)
         self.gridLayoutWidget_2 = QtGui.QWidget(self.centralwidget)
         self.gridLayoutWidget_2.setGeometry(QtCore.QRect(10, 10, 160, 121))
         self.gridLayoutWidget_2.setObjectName(_fromUtf8("gridLayoutWidget_2"))
@@ -103,11 +110,15 @@ class Ui_Eyelinkplotter(object):
         self.gridLayout_2.addWidget(self.selectedFile, 2, 0, 1, 1)
         self.unLockSettings = QtGui.QCheckBox(self.gridLayoutWidget_2)
         self.unLockSettings.setObjectName(_fromUtf8("unLockSettings"))
-        self.gridLayout_2.addWidget(self.unLockSettings, 3, 0, 1, 1)
+        self.gridLayout_2.addWidget(self.unLockSettings, 4, 0, 1, 1)
+        self.saveFile = QtGui.QPushButton(self.gridLayoutWidget_2)
+        self.saveFile.setEnabled(False)
+        self.saveFile.setObjectName(_fromUtf8("saveFile"))
+        self.gridLayout_2.addWidget(self.saveFile, 3, 0, 1, 1)
         self.heatmapTab = QtGui.QTabWidget(self.centralwidget)
         self.heatmapTab.setEnabled(False)
         self.heatmapTab.setGeometry(QtCore.QRect(10, 210, 771, 381))
-        self.heatmapTab.setStyleSheet(_fromUtf8("background-color: rgb(235, 235, 235);"))
+        self.heatmapTab.setStyleSheet(_fromUtf8("background-color: rgb(255, 255, 255);"))
         self.heatmapTab.setObjectName(_fromUtf8("heatmapTab"))
         self.windowTab = QtGui.QWidget()
         self.windowTab.setObjectName(_fromUtf8("windowTab"))
@@ -266,31 +277,11 @@ class Ui_Eyelinkplotter(object):
         self.settingsLine.setFrameShape(QtGui.QFrame.HLine)
         self.settingsLine.setFrameShadow(QtGui.QFrame.Sunken)
         self.settingsLine.setObjectName(_fromUtf8("settingsLine"))
-        self.verticalLayoutWidget = QtGui.QWidget(self.centralwidget)
-        self.verticalLayoutWidget.setGeometry(QtCore.QRect(570, 10, 151, 71))
-        self.verticalLayoutWidget.setObjectName(_fromUtf8("verticalLayoutWidget"))
-        self.verticalLayout = QtGui.QVBoxLayout(self.verticalLayoutWidget)
-        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.jumpToTrial = QtGui.QPushButton(self.verticalLayoutWidget)
-        self.jumpToTrial.setObjectName(_fromUtf8("jumpToTrial"))
-        self.verticalLayout.addWidget(self.jumpToTrial, QtCore.Qt.AlignTop)
-        self.jumpToTrialNr = QtGui.QSpinBox(self.verticalLayoutWidget)
-        self.jumpToTrialNr.setMinimum(1)
-        self.jumpToTrialNr.setMaximum(1000000)
-        self.jumpToTrialNr.setObjectName(_fromUtf8("jumpToTrialNr"))
-        self.verticalLayout.addWidget(self.jumpToTrialNr, QtCore.Qt.AlignTop)
-        self.trialScroll = QtGui.QScrollBar(self.centralwidget)
-        self.trialScroll.setGeometry(QtCore.QRect(250, 170, 471, 20))
-        self.trialScroll.setMaximum(0)
-        self.trialScroll.setOrientation(QtCore.Qt.Horizontal)
-        self.trialScroll.setObjectName(_fromUtf8("trialScroll"))
         self.gridLayoutWidget.raise_()
         self.gridLayoutWidget_2.raise_()
         self.heatmapTab.raise_()
         self.settingsLine.raise_()
         self.settingsLabel.raise_()
-        self.verticalLayoutWidget.raise_()
-        self.trialScroll.raise_()
         Eyelinkplotter.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(Eyelinkplotter)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 798, 21))
@@ -310,22 +301,22 @@ class Ui_Eyelinkplotter(object):
         self.heatmapTab.setCurrentIndex(0)
         QtCore.QObject.connect(self.unLockSettings, QtCore.SIGNAL(_fromUtf8("toggled(bool)")), self.heatmapTab.setEnabled)
         QtCore.QMetaObject.connectSlotsByName(Eyelinkplotter)
-        Eyelinkplotter.setTabOrder(self.selectFile, self.backButton)
-        Eyelinkplotter.setTabOrder(self.backButton, self.updateButton)
-        Eyelinkplotter.setTabOrder(self.updateButton, self.nextButton)
-        Eyelinkplotter.setTabOrder(self.nextButton, self.selectedFile)
+        Eyelinkplotter.setTabOrder(self.selectFile, self.selectedFile)
         Eyelinkplotter.setTabOrder(self.selectedFile, self.unLockSettings)
 
     def retranslateUi(self, Eyelinkplotter):
         Eyelinkplotter.setWindowTitle(_translate("Eyelinkplotter", "MainWindow", None))
-        self.previousTrialLabel.setText(_translate("Eyelinkplotter", "Previous trial", None))
-        self.currentTrialLabel.setText(_translate("Eyelinkplotter", "Current trial", None))
-        self.updateButton.setText(_translate("Eyelinkplotter", "Update", None))
         self.backButton.setText(_translate("Eyelinkplotter", "Back", None))
         self.nextButton.setText(_translate("Eyelinkplotter", "Next", None))
-        self.nextTrialLabel.setText(_translate("Eyelinkplotter", "Next trial", None))
+        self.updateButton.setText(_translate("Eyelinkplotter", "Update", None))
+        self.jumpToTrial.setText(_translate("Eyelinkplotter", "Plot trial number", None))
+        self.trialsToPlot.setItemText(0, _translate("Eyelinkplotter", "All", None))
+        self.trialsToPlot.setItemText(1, _translate("Eyelinkplotter", "Included", None))
+        self.trialsToPlot.setItemText(2, _translate("Eyelinkplotter", "Excluded", None))
+        self.toggleIncluded.setText(_translate("Eyelinkplotter", "Include/Exclude", None))
         self.selectFile.setText(_translate("Eyelinkplotter", "Select file", None))
         self.unLockSettings.setText(_translate("Eyelinkplotter", "Unlock settings", None))
+        self.saveFile.setText(_translate("Eyelinkplotter", "Save file", None))
         self.plotTypeLabel.setText(_translate("Eyelinkplotter", "Plot type", None))
         self.aspectRatioLabel.setText(_translate("Eyelinkplotter", "Aspect ratio", None))
         self.plotBackground.setItemText(0, _translate("Eyelinkplotter", "False", None))
@@ -347,15 +338,15 @@ class Ui_Eyelinkplotter(object):
         self.kernelAlphaLabel.setText(_translate("Eyelinkplotter", "Kernel alpha", None))
         self.heatmapTab.setTabText(self.heatmapTab.indexOf(self.tab_2), _translate("Eyelinkplotter", "Heatmap", None))
         self.settingsLabel.setText(_translate("Eyelinkplotter", "Settings", None))
-        self.jumpToTrial.setText(_translate("Eyelinkplotter", "Plot trial number", None))
         self.menuFile.setTitle(_translate("Eyelinkplotter", "File", None))
         self.actionSelect_file.setText(_translate("Eyelinkplotter", "Select file", None))
-
+        
 #==============================================================================
 #         # Initiate drop down menus
 #         # From here its my own code
 #==============================================================================
         Eyelinkplotter.setWindowTitle(_translate("Eyelinkplotter", "Eyelink data plotter", None))
+        Eyelinkplotter.setWindowIcon(QtGui.QIcon('eye.png'))
         self.imDir = None
         self.populateLists()
         # Run button press initiation
@@ -419,6 +410,8 @@ class Ui_Eyelinkplotter(object):
         
     def defineButtonPresses(self):
         self.selectFile.clicked.connect(self.selectDataFile)
+        self.saveFile.clicked.connect(self.saveDataFile)
+        self.actionSelect_file.triggered.connect(self.selectDataFile)
         self.selectImageFolder.clicked.connect(self.selectImDir)
         self.backButton.clicked.connect(self.backButtonClick)
         self.updateButton.clicked.connect(self.updateButtonClick)
@@ -426,7 +419,9 @@ class Ui_Eyelinkplotter(object):
         self.jumpToTrial.clicked.connect(self.plotSpecificTrial)
         self.resetVariables.clicked.connect(self.resetVars)
         self.trialScroll.valueChanged.connect(self.trialScrollChange)
-            
+        self.toggleIncluded.clicked.connect(self.toggleIncludedTrial)
+        self.trialsToPlot.activated.connect(self.toggleTrialsToPlot)
+        
     def varInitiation(self):
         # imageDirectory
         if self.imDir is None:
@@ -444,19 +439,20 @@ class Ui_Eyelinkplotter(object):
         self.kernelThreshold.setValue(0.01)
         self.kernelAlpha.setValue(0.75)
         
-        
     def selectDataFile(self):
-        tempFile = QtGui.QFileDialog.getOpenFileName(None, 'Select file')
-        if tempFile:
-            fileName = os.path.basename(tempFile)
-            self.selectedFile.setText(fileName[:-2])
-            self.data = pd.read_pickle(tempFile)
+        self.fileName = QtGui.QFileDialog.getOpenFileName(None, 'Select file')
+        if self.fileName:
+            fileBase = os.path.basename(self.fileName)
+            self.selectedFile.setText(fileBase[:-2])
+            self.data = pd.read_pickle(self.fileName)
+            self.allowedIndexes = self.data.index.get_values()
             
             # Trial counters
             self.previousTrial = 0
             self.currTrial = 1
             self.nextTrial = 2
             self.maxTrialNr = len(self.data)
+            self.trialIndex = self.currTrial - 1
             
             # Set background variable options
             self.data.keys()
@@ -470,16 +466,23 @@ class Ui_Eyelinkplotter(object):
             self.setCounters()
             self.plotData()
             
+            # Initiate save file button
+            self.saveFile.setEnabled(True)
+        
+    def saveDataFile(self):
+        self.data.to_pickle(self.fileName)
+            
     def selectImDir(self):
         self.imDir = QtGui.QFileDialog.getExistingDirectory(None, 'Select image folder')        
         self.imDir +='\\'
         
     def setCounters(self):
         # Set counters
-        self.previousTrialDisp.display(self.previousTrial)
         self.currentTrialDisp.display(self.currTrial)
-        self.nextTrialDisp.display(self.nextTrial)
         self.trialScroll.setValue(self.currTrial)
+        # Set included trial
+        included = str(self.data.DK_includedTrial[self.trialIndex])
+        self.includedOrExcluded.setText(included)
         
     def backButtonClick(self):
         if self.previousTrial > 0:
@@ -488,10 +491,25 @@ class Ui_Eyelinkplotter(object):
             self.nextTrial -= 1
         if self.nextTrial == self.currTrial:
             self.nextTrial += 1
-        self.setCounters()
-        self.plotData()
+            
+        # check if the trial is in the allowed list
+        if self.currTrial-1 not in self.allowedIndexes and self.currTrial-1 > np.min(self.allowedIndexes):
+            self.backButtonClick()
+        elif self.currTrial-1 < np.min(self.allowedIndexes):
+            self.nextTrial = np.min(self.allowedIndexes)+2
+            self.previousTrial = self.nextTrial-2
+            self.currTrial = self.nextTrial-1
+            self.setCounters()
+            self.plotData()
+        else:
+            self.setCounters()
+            self.plotData()
     
     def updateButtonClick(self):
+        if self.currTrial-1 not in self.allowedIndexes:
+            self.currTrial = self.allowedIndexes.flat[np.abs(self.allowedIndexes - (self.currTrial-1)).argmin()]+1
+            self.nextTrial = self.currTrial+1
+            self.previousTrial = self.currTrial-1
         self.setCounters()
         self.plotData()
     
@@ -502,11 +520,24 @@ class Ui_Eyelinkplotter(object):
             self.currTrial = self.nextTrial-1
         if self.nextTrial > self.maxTrialNr:
             self.nextTrial -= 1
-        self.setCounters()
-        self.plotData()
-    
+        # check if the trial is in the allowed list
+        if self.currTrial-1 not in self.allowedIndexes and self.currTrial-1 < np.max(self.allowedIndexes):
+            self.nextButtonClick()
+        elif self.currTrial-1 > np.max(self.allowedIndexes):
+            self.nextTrial = np.max(self.allowedIndexes)+2
+            self.previousTrial = self.nextTrial-2
+            self.currTrial = self.nextTrial-1
+            self.setCounters()
+            self.plotData()
+        else:
+            self.setCounters()
+            self.plotData()
+            
     def plotSpecificTrial(self):
         trialToPlot = self.jumpToTrialNr.value()
+        if trialToPlot-1 not in self.allowedIndexes:
+            trialToPlot = self.allowedIndexes.flat[np.abs(self.allowedIndexes - (trialToPlot-1)).argmin()]+1
+            self.jumpToTrialNr.setValue(trialToPlot)
         if trialToPlot >= self.maxTrialNr:
             self.previousTrial = self.maxTrialNr-1
             self.currTrial = self.maxTrialNr
@@ -526,14 +557,32 @@ class Ui_Eyelinkplotter(object):
         self.populateLists()
         self.plotData()
         
+    def toggleIncludedTrial(self):
+        if self.data.DK_includedTrial.loc[self.trialIndex] == True:
+            self.data.loc[self.trialIndex, 'DK_includedTrial'] = False
+        elif self.data.DK_includedTrial[self.trialIndex] == False:
+            self.data.loc[self.trialIndex, 'DK_includedTrial']  = True
+        self.toggleTrialsToPlot()
+        self.setCounters()
+
+    def toggleTrialsToPlot(self):
+        if self.trialsToPlot.currentText() == 'All':
+            self.allowedIndexes = self.data.index.get_values()
+        elif self.trialsToPlot.currentText() == 'Included':
+            self.allowedIndexes = self.data.loc[self.data.DK_includedTrial == True, :].index.get_values()
+        elif self.trialsToPlot.currentText() == 'Excluded':
+            self.allowedIndexes = self.data.loc[self.data.DK_includedTrial == False, :].index.get_values()
+        if len(self.allowedIndexes) == 0:
+            self.allowedIndexes = self.data.index
+        
     def plotData(self):
-        trialIndex = self.currTrial-1
-        self.time = self.data.DK_rawTime[trialIndex]
-        self.x = self.data.DK_rawX[trialIndex]
-        self.y = self.data.DK_rawY[trialIndex]
-        self.ssacc = self.data.DK_ssacc[trialIndex]
-        self.saccDur = self.data.DK_durSacc[trialIndex] 
-        self.euclidDist = self.data.DK_euclidDist[trialIndex]
+        self.trialIndex = self.currTrial-1
+        self.time = self.data.DK_rawTime[self.trialIndex]
+        self.x = self.data.DK_rawX[self.trialIndex]
+        self.y = self.data.DK_rawY[self.trialIndex]
+        self.ssacc = self.data.DK_ssacc[self.trialIndex]
+        self.saccDur = self.data.DK_durSacc[self.trialIndex] 
+        self.euclidDist = self.data.DK_euclidDist[self.trialIndex]
         
         # Do some sanity checks on settings
         pltBg = self.plotBackground.currentText()
@@ -547,7 +596,7 @@ class Ui_Eyelinkplotter(object):
         if not self.imDir:
             pltBg = False
         elif pltBg == True:
-            bgImage = self.imDir + os.path.basename(self.data[self.bgImageVariable.currentText()][trialIndex])
+            bgImage = self.imDir + os.path.basename(self.data[self.bgImageVariable.currentText()][self.trialIndex])
             
         # Check kernel inverse color
         inverseKernel = self.kernelCMInverse.currentText()
@@ -562,7 +611,7 @@ class Ui_Eyelinkplotter(object):
             'pltBg': pltBg,\
             'bgImage': bgImage,\
             'bgAspect': self.aspectRatio.currentText().split()[0],\
-            'trial': trialIndex,\
+            'trial': self.trialIndex,\
             'dataScaling': self.kernelScale.value(),\
             'kernel': self.kernel.currentText().split()[0],\
             'kernelPar': self.kernelParameter.value(),\
@@ -578,7 +627,7 @@ class Ui_Eyelinkplotter(object):
         # Plot the trial 
         plotTrial(self.time, self.x, self.y, self.ssacc, self.saccDur, 
                   self.euclidDist, **self.par)
-                  
+
 if __name__ == "__main__":
     import sys
     app = QtGui.QApplication(sys.argv)
