@@ -1,0 +1,48 @@
+saveRawFiles:No
+saveExtension:Parsed
+saveRawExtension:Raw
+saveMergedFiles:No
+mergedFileNames:AllDataMerged
+startTrialKey:start_trial
+stopTrialKey:stop_trial
+variableKey:var
+regExpSamp:(\d{3,12})\t\s+(\d+\..)\t\s+(\d+\..)\t\s+(\d+\..).+\n
+regExpEfix:EFIX\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(.+)\t\s+(.+)\t\s+(\d+)\n
+regExpEsacc:ESACC\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+)\n
+regExpEblink:EBLINK\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\n
+regExpStart:Output of this expression needs to be [int, str]
+regExpStop:Output of this expression needs to be [int, str]
+regExpVar:Output of this expression needs to be [int, str, str]
+regExpMsg:Output of this expression needs to be [int, str, str]
+regExpStartNew:False
+regExpStopNew:False
+regExpVarNew:False
+regExpMsgNew:False
+runParallel:No
+nrCores:7
+pxPerDeg:48
+pxMode:Automatic
+DFsaveRawFiles:No
+DFsaveExtension:Parsed
+DFsaveRawExtension:Raw
+DFsaveMergedFiles:No
+DFmergedFileNames:AllDataMerged
+DFstartTrialKey:start_trial
+DFstopTrialKey:stop_trial
+DFvariableKey:var
+DFregExpSamp:(\d{3,12})\t\s+(\d+\..)\t\s+(\d+\..)\t\s+(\d+\..).+\n
+DFregExpEfix:EFIX\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(.+)\t\s+(.+)\t\s+(\d+)\n
+DFregExpEsacc:ESACC\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+)\n
+DFregExpEblink:EBLINK\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\n
+DFregExpStart:Output of this expression needs to be [int, str]
+DFregExpStop:Output of this expression needs to be [int, str]
+DFregExpVar:Output of this expression needs to be [int, str, str]
+DFregExpMsg:Output of this expression needs to be [int, str, str]
+DFregExpStartNew:False
+DFregExpStopNew:False
+DFregExpVarNew:False
+DFregExpMsgNew:False
+DFrunParallel:Yes
+DFnrCores:64
+DFpxPerDeg:48
+DFpxMode:Automatic
