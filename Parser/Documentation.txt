@@ -97,7 +97,7 @@ multiprocessing
 
 ###
 # Installing dependancies
-k
+
 If you use Anaconda 64bit most
 of the labraries are allready installed.
 The remaining libraries can be installed
