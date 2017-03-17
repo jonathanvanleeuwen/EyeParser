@@ -144,7 +144,7 @@ def eyeLinkDataParser(FILENAME, **par):
     if par.pop('regExpVarNew', False) == True:
         regVar = par.pop('regExpVar')
     else:
-        regVar = 'MSG\\t(\d+)\s+('+var+')\s+(.+)[\s+]?.*\\n'
+        regVar = 'MSG\\t(\d+)\s+('+var+')\s+(.+).*\\n'
     # RegExp for messages
     if par.pop('regExpMsgNew', False) == True:
         regMsg = par.pop('regExpMsg')
