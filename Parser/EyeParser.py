@@ -48,11 +48,13 @@ class workerClass(QtCore.QThread):
     def run(self):
         #Do the analysis single core
         for indx, FILENAME in enumerate(self.files):
-            FILENAME, parsedData, rawData = parseWrapper(self.files[indx], self.par)
+            FILENAME, parsedData, rawData, parsedLong = parseWrapper(self.files[indx], self.par)
             # Save data
             parsedData.to_pickle(self.par['savefileNames'][indx])
             if self.par['saveRawFiles'] == 'Yes':
                 rawData.to_pickle(self.par['saveFileNamesRaw'][indx])
+            if self.par['longFormat'] == 'Yes':
+                parsedLong.to_csv(self.par['savefileNames'][indx][:-2]+'Long.csv', index = False)
             # Send progress
             self.emit(QtCore.SIGNAL('PROGRESS'), 1)
 
@@ -371,6 +373,42 @@ class Window(QtGui.QMainWindow):
         else:
             self.saveRawbtn.setCurrentIndex(1)
             
+#==============================================================================
+# Work in progress
+#==============================================================================
+        # Save longformat yes/no
+        # Save long format button
+        longL = QtGui.QLabel("Save longformat", self)
+        longL.move(425,770)
+        longL.resize(longL.minimumSizeHint())
+        self.longbtn = QtGui.QComboBox(self)
+        self.longbtn.addItem("No")
+        self.longbtn.addItem("Yes")
+        self.longbtn.resize(100,25)
+        self.longbtn.move(425, 790)
+        self.longbtn.setEnabled(False)
+        if self.par['longFormat'] == 'No':
+            self.longbtn.setCurrentIndex(0)
+        else:
+            self.longbtn.setCurrentIndex(1)
+
+        # Save raw button 
+        duplicLongL = QtGui.QLabel("Duplicate values Long", self)
+        duplicLongL.move(550,770)
+        duplicLongL.resize(duplicLongL.minimumSizeHint())
+        self.duplicLongbtn = QtGui.QComboBox(self)
+        self.duplicLongbtn.addItem("No")
+        self.duplicLongbtn.addItem("Yes")
+        self.duplicLongbtn.resize(100,25)
+        self.duplicLongbtn.move(550, 790)
+        self.duplicLongbtn.setEnabled(False)
+        if self.par['duplicateValues'] == 'No':
+            self.duplicLongbtn.setCurrentIndex(0)
+        else:
+            self.duplicLongbtn.setCurrentIndex(1)
+#==============================================================================
+# Work in progress
+#==============================================================================
         # Parallel processing
         paralellL = QtGui.QLabel("Parallel processing", self)
         paralellL.move(50,770)
@@ -585,7 +623,7 @@ class Window(QtGui.QMainWindow):
 
             
             # Set button defaults
-            # Parallel button is not set, sets depedning on file number
+            # Parallel button is not set, sets depending on file number
             if self.par['saveMergedFiles'] == 'No':
                 self.mergebtn.setCurrentIndex(0)
             else:
@@ -598,7 +636,14 @@ class Window(QtGui.QMainWindow):
                 self.pixMode.setCurrentIndex(0)
             else:
                 self.pixMode.setCurrentIndex(1)
-       
+            if self.par['longFormat'] == 'No':
+                self.longbtn.setCurrentIndex(0)
+            else:
+                self.longbtn.setCurrentIndex(1)
+            if self.par['duplicateValues'] == 'No':
+                self.duplicLongbtn.setCurrentIndex(0)
+            else:
+                self.duplicLongbtn.setCurrentIndex(1)
         else:
             pass
 
@@ -682,6 +727,8 @@ class Window(QtGui.QMainWindow):
         self.saveRawbtn.setEnabled(True)
         self.pixMode.setEnabled(True)
         self.pixPerDeg.setEnabled(True)
+        self.longbtn.setEnabled(True)
+        self.duplicLongbtn.setEnabled(True)
 
         # Enable lock button
         self.lockSettingsM.setEnabled(True)
@@ -706,6 +753,8 @@ class Window(QtGui.QMainWindow):
         self.saveRawbtn.setEnabled(False)
         self.pixMode.setEnabled(False)
         self.pixPerDeg.setEnabled(False)
+        self.longbtn.setEnabled(False)
+        self.duplicLongbtn.setEnabled(False)
 
         # disable lock button
         self.lockSettingsM.setEnabled(False)
@@ -783,7 +832,10 @@ class Window(QtGui.QMainWindow):
         self.par['nrCores'] = self.nrCores.toPlainText()
         self.par['pxMode'] = self.pixMode.currentText()
         self.par['pxPerDeg'] = self.pixPerDeg.toPlainText()
-        # number of available cores
+        self.par['longFormat'] = self.longbtn.currentText()
+        self.par['duplicateValues'] = self.duplicLongbtn.currentText()
+        
+        # Number of available cores
         maxCores = psutil.cpu_count()
         if int(self.par['nrCores']) > maxCores:
             self.par['nrCores'] = str(maxCores)
@@ -806,6 +858,8 @@ class Window(QtGui.QMainWindow):
         results[1].to_pickle(savefileName)
         if self.par['saveRawFiles'] == 'Yes':
             results[2].to_pickle(saveFileNamesRaw)
+        if self.par['longFormat'] == 'Yes':
+            results[3].to_csv(saveFileNamesRaw[:-2]+'Long.csv', index = False)
         self.updateProgress(1)
 
     def parse(self):

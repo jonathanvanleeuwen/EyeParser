@@ -18,10 +18,12 @@ regExpStartNew:False
 regExpStopNew:False
 regExpVarNew:False
 regExpMsgNew:False
-runParallel:No
-nrCores:7
+runParallel:Yes
+nrCores:64
 pxPerDeg:48
 pxMode:Automatic
+longFormat:No
+duplicateValues:No
 DFsaveRawFiles:No
 DFsaveExtension:Parsed
 DFsaveRawExtension:Raw
@@ -46,3 +48,5 @@ DFrunParallel:Yes
 DFnrCores:64
 DFpxPerDeg:48
 DFpxMode:Automatic
+DFlongFormat:No
+DFduplicateValues:No

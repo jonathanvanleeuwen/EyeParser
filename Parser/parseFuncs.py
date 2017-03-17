@@ -111,6 +111,81 @@ def calculateSaccadeCurvature(xSacc, ySacc, pixPerDegree, ignoreDist = 0.5, flip
         saccAngles.append(saccadeAngle)
     return curveData, saccAngles
 
+def parseToLongFormat(data, duplicate = 'No'):
+    '''
+    Turn a parsed datafile into long data file:
+    Deletes the raw data and only keeps events
+    '''
+    data = data.copy()
+    #==============================================================================
+    # Delete al the keys with raw data
+    #==============================================================================
+    LargeData = ['saccTraceTime', 'saccTraceX', 'saccTraceY', 'saccTracePup', 
+                 'euclidDist', 'rawPupSize', 'rawTime', 'rawX', 'rawY', 
+                 'fixTraceTime', 'fixTraceX', 'fixTraceY', 'fixTracePup']
+    LargeData = ['DK_'+i for i in LargeData]
+    LargeData.append('DV_description')
+    for key in LargeData:
+        if key in data.keys():
+            del data[key]
+        elif key[3:] in data.keys():
+            del data[key[3:]]
+
+    # Delete all headers with spaces
+    for key in data.keys():    
+        if len(key.split()) > 1:
+            del data[key]
+            
+    # Get the largest number of events for each trial
+    trialLengths = np.zeros(len(data))
+    for trial in xrange(len(data)):
+        for key in data.keys():        
+            try: 
+                if isinstance(data[key][trial], basestring): 
+                    keyLen = 1
+                else:
+                    keyLen = len(data[key][trial])
+            except:
+                keyLen = 1
+                pass
+            
+            if keyLen > trialLengths[trial]:
+                trialLengths[trial] = keyLen
+    
+    # Initiate a long format data frame
+    dataL = pd.DataFrame(index = xrange(int(np.sum(trialLengths))), columns = data.keys())
+    
+    # Itterate through each key and populate the long format data
+    for key in data.keys():
+        strtIndex = 0
+        stopIndex = int(trialLengths[0])
+        keyVector = np.empty(len(dataL[key]))
+        keyVector[:] = np.NAN
+        keyVector = pd.Series(keyVector)
+        for trial in xrange(len(data)):
+            try:
+                dataLen = len(data[key][trial])
+                if isinstance(data[key][trial], basestring): 
+                    if duplicate == 'Yes':
+                        keyVector[strtIndex:stopIndex] = data[key][trial]
+                    else:
+                        keyVector[strtIndex] = data[key][trial]
+                else:
+                    keyVector[strtIndex:strtIndex+dataLen] = data[key][trial]
+            except:
+                if duplicate == 'Yes':
+                    keyVector[strtIndex:stopIndex] = data[key][trial]
+                else:
+                    keyVector[strtIndex] = data[key][trial]
+            # Update the index for the next data trial indexl
+            if trial < len(data)-1:
+                strtIndex += int(trialLengths[trial])
+                stopIndex  = int(strtIndex + trialLengths[trial+1])
+                
+        # Store the new vector in the dataframe
+        dataL[key] = keyVector
+    return dataL
+
 #==============================================================================
 #  Parser
 #==============================================================================
@@ -154,6 +229,10 @@ def eyeLinkDataParser(FILENAME, **par):
     # Get px per degree settings
     pxPerDegMode = par.pop('pxMode', 'Automatic')
     pxPerDegManual = par.pop('pxPerDeg', 48)
+    
+    # Get the information about long format
+    convertToLong = par.pop('longFormat', 'No')
+    duplicateValues = par.pop('duplicateValues', 'No')
     
     #==============================================================================
     # Define keywords
@@ -399,4 +478,8 @@ def eyeLinkDataParser(FILENAME, **par):
     parsedData = pd.concat([parsedData, varDf, msgDf], axis=1)
     rawData.rename(columns=dict(zip(rawKw , newRawKw)), inplace=True)
 
-    return FILENAME, parsedData, rawData
+    # Convert data to long format
+    if convertToLong == 'Yes':
+        parsedLong = parseToLongFormat(parsedData, duplicateValues)
+        
+    return FILENAME, parsedData, rawData, parsedLong
