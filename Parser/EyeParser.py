@@ -54,7 +54,7 @@ class workerClass(QtCore.QThread):
             if self.par['saveRawFiles'] == 'Yes':
                 rawData.to_pickle(self.par['saveFileNamesRaw'][indx])
             if self.par['longFormat'] == 'Yes':
-                parsedLong.to_csv(self.par['savefileNames'][indx][:-2]+'Long.csv', index = False)
+                parsedLong.to_csv(self.par['savefileNames'][indx][:-2]+'Long.csv', index = False, na_rep = '#N/A')
             # Send progress
             self.emit(QtCore.SIGNAL('PROGRESS'), 1)
 
@@ -859,7 +859,7 @@ class Window(QtGui.QMainWindow):
         if self.par['saveRawFiles'] == 'Yes':
             results[2].to_pickle(saveFileNamesRaw)
         if self.par['longFormat'] == 'Yes':
-            results[3].to_csv(saveFileNamesRaw[:-2]+'Long.csv', index = False)
+            results[3].to_csv(saveFileNamesRaw[:-2]+'Long.csv', index = False, na_rep = '#N/A')
         self.updateProgress(1)
 
     def parse(self):
