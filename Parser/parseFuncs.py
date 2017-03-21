@@ -224,7 +224,7 @@ def eyeLinkDataParser(FILENAME, **par):
     if par.pop('regExpMsgNew', False) == True:
         regMsg = par.pop('regExpMsg')
     else:
-        regMsg = 'MSG\\t(\d+)\s+(?!'+var+'|'+startTrial+'|'+stopTrial+')(.+)[\s+]?.*\\n'
+        regMsg = 'MSG\\t(\d+)\s+(?!'+var+'|'+startTrial+'|'+stopTrial+')(.+).*\\n'
 
     # Get px per degree settings
     pxPerDegMode = par.pop('pxMode', 'Automatic')
@@ -364,8 +364,12 @@ def eyeLinkDataParser(FILENAME, **par):
 
     # Determine pixels per degree (using amplitude)
     if pxPerDegMode == 'Automatic':
-        dist                = np.sqrt( (saccData[saccKw[3]].values-saccData[saccKw[5]].values)**2 + (saccData[saccKw[4]].values - saccData[saccKw[6]].values)**2 )
-        pixPerDegree        = np.median(dist/saccData[saccKw[7]].values)
+        dist = np.sqrt( (saccData[saccKw[3]].values-saccData[saccKw[5]].values)**2 + (saccData[saccKw[4]].values - saccData[saccKw[6]].values)**2 )
+        saccAmp = saccData[saccKw[7]].values
+        dist = dist[saccAmp != 0]
+        saccAmp = saccAmp[saccAmp != 0]
+        pixPerDegree        = np.median(dist/saccAmp)
+        
     elif pxPerDegMode == 'Manual':
         pixPerDegree = float(pxPerDegManual)
         
@@ -481,5 +485,7 @@ def eyeLinkDataParser(FILENAME, **par):
     # Convert data to long format
     if convertToLong == 'Yes':
         parsedLong = parseToLongFormat(parsedData, duplicateValues)
+    else:
+        parsedLong = False
         
     return FILENAME, parsedData, rawData, parsedLong

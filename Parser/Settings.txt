@@ -18,8 +18,8 @@ regExpStartNew:False
 regExpStopNew:False
 regExpVarNew:False
 regExpMsgNew:False
-runParallel:Yes
-nrCores:64
+runParallel:No
+nrCores:7
 pxPerDeg:48
 pxMode:Automatic
 longFormat:No
