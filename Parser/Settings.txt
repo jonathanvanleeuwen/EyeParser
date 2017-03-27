@@ -22,7 +22,7 @@ runParallel:No
 nrCores:7
 pxPerDeg:48
 pxMode:Automatic
-longFormat:No
+longFormat:Yes
 duplicateValues:No
 DFsaveRawFiles:No
 DFsaveExtension:Parsed

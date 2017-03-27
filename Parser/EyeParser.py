@@ -105,7 +105,7 @@ class Window(QtGui.QMainWindow):
         self.setGeometry(50, 50, 1000, 950)
         self.setWindowTitle("Eyelink 1000 parser")
         self.setWindowIcon(QtGui.QIcon('eye.png'))
-
+        
         # Set background color
         palette = QtGui.QPalette()
         palette.setColor(QtGui.QPalette.Background,QtCore.Qt.white)
@@ -201,7 +201,8 @@ class Window(QtGui.QMainWindow):
         self.textbox.move(675, 65)
         self.textbox.resize(300,600)
         self.textbox.setEnabled(False) # Toggle the window
-
+        
+        
         #======================================================================
         # Initiate Settings section for regular rexpressions
         #======================================================================
@@ -373,9 +374,6 @@ class Window(QtGui.QMainWindow):
         else:
             self.saveRawbtn.setCurrentIndex(1)
             
-#==============================================================================
-# Work in progress
-#==============================================================================
         # Save longformat yes/no
         # Save long format button
         longL = QtGui.QLabel("Save longformat", self)
@@ -406,9 +404,7 @@ class Window(QtGui.QMainWindow):
             self.duplicLongbtn.setCurrentIndex(0)
         else:
             self.duplicLongbtn.setCurrentIndex(1)
-#==============================================================================
-# Work in progress
-#==============================================================================
+
         # Parallel processing
         paralellL = QtGui.QLabel("Parallel processing", self)
         paralellL.move(50,770)

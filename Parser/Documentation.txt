@@ -455,6 +455,8 @@ DK_fixTraceX = list of lists of all X positions during all fixations (list of li
 DK_fixTraceY = list of lists of all Y positions during all fixations (list of list of floats)
 DK_fixTracePup = list of lists of all pupil sizes during fixations (list of list of floats)
 DK_fixTraceTime = list of lists of all sample times during all fixations (list of list of floats)
+DK_saccAngle = List of saccade angles, between -180 and 180
+DK_includedTrial= Bool - Defaults to all values as True, Use this for filtering data later (integrated with plotter)
 
 ###
 # Variables writen to data file
