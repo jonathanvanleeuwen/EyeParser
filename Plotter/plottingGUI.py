@@ -192,7 +192,7 @@ def plotTrial(timeStamp, xPos, yPos, ssacc, durSacc, euclidDist, **par):
         dataY = np.floor(dataY)
 
         # initiate map and gauskernel
-        gazeMap = np.zeros([(xMax-xMin)/dataScaling,(yMax-yMin)/dataScaling])
+        gazeMap = np.zeros([(xMax-xMin)/dataScaling,(yMax-yMin)/dataScaling])+0.001
         gausKernel = eval('krn.'+kernel)(kernelPar)
         
         # Rescale the position vectors (if xmin or ymin != 0)
