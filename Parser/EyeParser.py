@@ -445,9 +445,9 @@ class Window(QtGui.QMainWindow):
             self.pixMode.setCurrentIndex(1)
 
         #Number of pixels per degree
-        nrCoresL = QtGui.QLabel("Px per deg (manual)", self)
-        nrCoresL.move(175,830)
-        nrCoresL.resize(nrCoresL.minimumSizeHint())
+        pixPerDegL = QtGui.QLabel("Px per deg (manual)", self)
+        pixPerDegL.move(175,830)
+        pixPerDegL.resize(nrCoresL.minimumSizeHint())
         self.pixPerDeg = QtGui.QTextEdit(self)
         self.pixPerDeg.move(175, 850)
         self.pixPerDeg.resize(100,25)
