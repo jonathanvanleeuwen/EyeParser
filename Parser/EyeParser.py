@@ -18,7 +18,7 @@ import psutil
 import multiprocessing
 from parseFuncs import parseWrapper
 import time
-
+from eyeParserBuilder import Ui_MainWindow
 #==============================================================================
 # Functions used by the parser
 #==============================================================================
@@ -85,7 +85,7 @@ class Window(QtGui.QMainWindow):
     #==============================================================================
     # Build GUI
     #==============================================================================
-    def __init__(self):
+    def __init__(self, parent=None):
         #======================================================================
         # Set constants and flags
         #======================================================================
@@ -100,10 +100,10 @@ class Window(QtGui.QMainWindow):
         #======================================================================
         # Initiate main features of the GUI
         #======================================================================
-        super(Window, self).__init__()
+        super(QtGui.QMainWindow, self).__init__()
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-        self.setGeometry(50, 50, 1000, 950)
-        self.setWindowTitle("Eyelink 1000 parser")
         self.setWindowIcon(QtGui.QIcon('eye.png'))
         
         # Set background color
@@ -111,430 +111,140 @@ class Window(QtGui.QMainWindow):
         palette.setColor(QtGui.QPalette.Background,QtCore.Qt.white)
         self.setPalette(palette)
 
-        # Select single file for parsing
-        openFile = QtGui.QAction("&Select file(s)", self)
-        openFile.setStatusTip('Select file(s)')
-        openFile.triggered.connect(self.selectFile)
-
+        #======================================================================
+        # Set the menu bar triggers
+        #======================================================================
+        # Select file(s) for parsing
+        self.ui.openFile.triggered.connect(self.selectFile)
         # Exit parser
-        quitParser = QtGui.QAction("&Exit", self)
-        quitParser.setShortcut("Ctrl+Q")
-        quitParser.setStatusTip('Exit parser')
-        quitParser.triggered.connect(self.close_application)
-
-        # Settings
-        self.unlockSettingsM = QtGui.QAction("&Unlock settings", self)
-        self.unlockSettingsM.setStatusTip('Unlock settings')
-        self.unlockSettingsM.triggered.connect(self.unlockSettings)
-        self.lockSettingsM = QtGui.QAction("&Lock settings", self)
-        self.lockSettingsM.setStatusTip('Lock settings')
-        self.lockSettingsM.triggered.connect(self.lockSettings)
-        self.lockSettingsM.setEnabled(False)
-
+        self.ui.quitParser.triggered.connect(self.close_application)
+        # Settings (lock unlock)
+        self.ui.unlockSettingsM.triggered.connect(self.unlockSettings)
+        self.ui.lockSettingsM.triggered.connect(self.lockSettings)
         # Default settings
-        defSett = QtGui.QAction("&Load default settings", self)
-        defSett.setStatusTip('Load default setings')
-        defSett.triggered.connect(self.loadDefaultSettings)
-
+        self.ui.defSett.triggered.connect(self.loadDefaultSettings)
         # Documentation
-        openDoc = QtGui.QAction("&Documentation", self)
-        openDoc.setStatusTip('Open documentation')
-        openDoc.triggered.connect(self.documentation)
-
-        # Initiate menu bar and status
-        self.statusBar()
-        mainMenu = self.menuBar()
-
-        # File menu bar
-        fileMenu = mainMenu.addMenu('&File')
-        fileMenu.addAction(openFile)
-        fileMenu.addAction(quitParser)
-
-        # Settings menu bar
-        settingsMenu = mainMenu.addMenu('&Settings')
-        settingsMenu.addAction(self.unlockSettingsM)
-        settingsMenu.addAction(self.lockSettingsM)
-        settingsMenu.addAction(defSett)
-        settingsMenu.addAction(openDoc)
+        self.ui.openDoc.triggered.connect(self.documentation)
 
         #======================================================================
-        # Initiate Main Windows and buttons
+        # Initiate main parser button triggers
         #======================================================================
-        # Textbox and label containing the start, stop and variable trial keys
-        startKeyL = QtGui.QLabel("Start trial key", self)
-        startKeyL.move(50,45)
-        startKeyL.resize(startKeyL.minimumSizeHint())
-        self.startKey = QtGui.QTextEdit(self)
-        self.startKey.move(50, 65)
-        self.startKey.resize(100,25)
-        self.startKey.setText(self.par['startTrialKey'])
-
-        stopKeyL = QtGui.QLabel("Stop trial key", self)
-        stopKeyL.move(175,45)
-        stopKeyL.resize(stopKeyL.minimumSizeHint())
-        self.stopKey = QtGui.QTextEdit(self)
-        self.stopKey.move(175, 65)
-        self.stopKey.resize(100,25)
-        self.stopKey.setText(self.par['stopTrialKey'])
-
-        varKeyL = QtGui.QLabel("Variable prefix", self)
-        varKeyL.move(300,45)
-        varKeyL.resize(varKeyL.minimumSizeHint())
-        self.varKey = QtGui.QTextEdit(self)
-        self.varKey.move(300, 65)
-        self.varKey.resize(100,25)
-        self.varKey.setText(self.par['variableKey'])
-
+        # Start key
+        self.ui.startKey.setText(self.par['startTrialKey'])
+        # Stop key
+        self.ui.stopKey.setText(self.par['stopTrialKey'])
+        # Variable key
+        self.ui.varKey.setText(self.par['variableKey'])
         # Parse button
-        self.Parsebtn = QtGui.QPushButton("Parse", self)
-        self.Parsebtn.clicked.connect(self.setValues)
-        self.Parsebtn.resize(100,25)
-        self.Parsebtn.move(425, 65)
-        self.Parsebtn.setEnabled(False)
-
+        self.ui.Parsebtn.clicked.connect(self.setValues)
         # textbox displaying the selected files
-        filetbn = QtGui.QPushButton("Select file(s)", self)
-        filetbn.clicked.connect(self.selectFile)
-        filetbn.resize(filetbn.minimumSizeHint())
-        filetbn.move(675, 40)
-        self.textbox = QtGui.QTextEdit(self)
-        self.textbox.move(675, 65)
-        self.textbox.resize(300,600)
-        self.textbox.setEnabled(False) # Toggle the window
-        
+        self.ui.filebtn.clicked.connect(self.selectFile)
         
         #======================================================================
         # Initiate Settings section for regular rexpressions
         #======================================================================
-        # Sepperator line
-        settingsL = QtGui.QLabel("Settings", self)
-        settingsL.setFont(QtGui.QFont("Times", 15, QtGui.QFont.Bold))
-        settingsL.move(50,125)
-        settingsL.resize(settingsL.minimumSizeHint())
-        settingsLine = QtGui.QFrame(self)
-        settingsLine.setFrameStyle(QtGui.QFrame.HLine)
-        settingsLine.setFrameShadow(QtGui.QFrame.Sunken)
-        settingsLine.resize(600,5)
-        settingsLine.move(50,150)
-        settingsLine.setLineWidth(5)
-
-        # Regular expressions for raw data extracting
-        regL = QtGui.QLabel("Regular expressions for data extraction", self)
-        regL.move(50,170)
-        regL.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
-        regL.resize(regL.minimumSizeHint())
-
         #regSamples
-        regSampL = QtGui.QLabel("Samples", self)
-        regSampL.move(50,200)
-        regSampL.resize(regSampL.minimumSizeHint())
-        self.regSamp = QtGui.QTextEdit(self)
-        self.regSamp.move(50, 220)
-        self.regSamp.resize(600,25)
-        self.regSamp.setText(self.par['regExpSamp'])
-        self.regSamp.setEnabled(False)
-
+        self.ui.regSamp.setText(self.par['regExpSamp'])
         #regEfix
-        regEfixL = QtGui.QLabel("End fixation", self)
-        regEfixL.move(50,260)
-        regEfixL.resize(regEfixL.minimumSizeHint())
-        self.regEfix = QtGui.QTextEdit(self)
-        self.regEfix.move(50, 280)
-        self.regEfix.resize(600,25)
-        self.regEfix.setText(self.par['regExpEfix'])
-        self.regEfix.setEnabled(False)
-
+        self.ui.regEfix.setText(self.par['regExpEfix'])
         #regEsacc
-        regEsaccL = QtGui.QLabel("End saccade", self)
-        regEsaccL.move(50,320)
-        regEsaccL.resize(regEsaccL.minimumSizeHint())
-        self.regEsacc = QtGui.QTextEdit(self)
-        self.regEsacc.move(50, 340)
-        self.regEsacc.resize(600,25)
-        self.regEsacc.setText(self.par['regExpEsacc'])
-        self.regEsacc.setEnabled(False)
-
+        self.ui.regEsacc.setText(self.par['regExpEsacc'])
         #regEblink
-        regEblinkL = QtGui.QLabel("End blink", self)
-        regEblinkL.move(50,380)
-        regEblinkL.resize(regEsaccL.minimumSizeHint())
-        self.regEblink = QtGui.QTextEdit(self)
-        self.regEblink.move(50, 400)
-        self.regEblink.resize(600,25)
-        self.regEblink.setText(self.par['regExpEblink'])
-        self.regEblink.setEnabled(False)
-
+        self.ui.regEblink.setText(self.par['regExpEblink'])
         #regStart
-        regStartL = QtGui.QLabel("Start trial", self)
-        regStartL.move(50,440)
-        regStartL.resize(regStartL.minimumSizeHint())
-        self.regStart = QtGui.QTextEdit(self)
-        self.regStart.move(50, 460)
-        self.regStart.resize(600,25)
-        self.regStart.setText(self.par['regExpStart'])
-        self.regStart.setEnabled(False)
-
+        self.ui.regStart.setText(self.par['regExpStart'])
         #regStop
-        regStopL = QtGui.QLabel("Stop trial", self)
-        regStopL.move(50,500)
-        regStopL.resize(regStopL.minimumSizeHint())
-        self.regStop = QtGui.QTextEdit(self)
-        self.regStop.move(50, 520)
-        self.regStop.resize(600,25)
-        self.regStop.setText(self.par['regExpStop'])
-        self.regStop.setEnabled(False)
-
+        self.ui.regStop.setText(self.par['regExpStop'])
         #regVar
-        regVarL = QtGui.QLabel("Variables", self)
-        regVarL.move(50,560)
-        regVarL.resize(regVarL.minimumSizeHint())
-        self.regVar = QtGui.QTextEdit(self)
-        self.regVar.move(50, 580)
-        self.regVar.resize(600,25)
-        self.regVar.setText(self.par['regExpVar'])
-        self.regVar.setEnabled(False)
-
+        self.ui.regVar.setText(self.par['regExpVar'])
         #regMsg
-        regMsgL = QtGui.QLabel("Other messages", self)
-        regMsgL.move(50,620)
-        regMsgL.resize(regMsgL.minimumSizeHint())
-        self.regMsg = QtGui.QTextEdit(self)
-        self.regMsg.move(50, 640)
-        self.regMsg.resize(600,25)
-        self.regMsg.setText(self.par['regExpMsg'])
-        self.regMsg.setEnabled(False)
+        self.ui.regMsg.setText(self.par['regExpMsg'])
 
         #======================================================================
         # Initiate section for various settings
         #======================================================================
-        # Various settings
-        variousL = QtGui.QLabel("Various settings", self)
-        variousL.move(50,680)
-        variousL.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
-        variousL.resize(variousL.minimumSizeHint())
-
         #Parsed name
-        parsedNameL = QtGui.QLabel("Parsed name", self)
-        parsedNameL.move(50,710)
-        parsedNameL.resize(parsedNameL.minimumSizeHint())
-        self.parsedName = QtGui.QTextEdit(self)
-        self.parsedName.move(50, 730)
-        self.parsedName.resize(100,25)
-        self.parsedName.setText(self.par['saveExtension'])
-        self.parsedName.setEnabled(False)
-
+        self.ui.parsedName.setText(self.par['saveExtension'])
         #Parsed name
-        rawNameL = QtGui.QLabel("Raw name", self)
-        rawNameL.move(175,710)
-        rawNameL.resize(rawNameL.minimumSizeHint())
-        self.rawName = QtGui.QTextEdit(self)
-        self.rawName.move(175, 730)
-        self.rawName.resize(100,25)
-        self.rawName.setText(self.par['saveRawExtension'])
-        self.rawName.setEnabled(False)
-
+        self.ui.rawName.setText(self.par['saveRawExtension'])
         #Merged name
-        mergedNameL = QtGui.QLabel("Merged name", self)
-        mergedNameL.move(300,710)
-        mergedNameL.resize(mergedNameL.minimumSizeHint())
-        self.mergedName = QtGui.QTextEdit(self)
-        self.mergedName.move(300, 730)
-        self.mergedName.resize(100,25)
-        self.mergedName.setText(self.par['mergedFileNames'])
-        self.mergedName.setEnabled(False)
-
+        self.ui.mergedName.setText(self.par['mergedFileNames'])
         # Merged yes/no
         # Save Merged files button
-        mergeL = QtGui.QLabel("Merge files", self)
-        mergeL.move(425,710)
-        mergeL.resize(mergeL.minimumSizeHint())
-        self.mergebtn = QtGui.QComboBox(self)
-        self.mergebtn.addItem("No")
-        self.mergebtn.addItem("Yes")
-        self.mergebtn.resize(100,25)
-        self.mergebtn.move(425, 730)
-        self.mergebtn.setEnabled(False)
+        self.ui.mergebtn.addItem("No")
+        self.ui.mergebtn.addItem("Yes")
         if self.par['saveMergedFiles'] == 'No':
-            self.mergebtn.setCurrentIndex(0)
+            self.ui.mergebtn.setCurrentIndex(0)
         else:
-            self.mergebtn.setCurrentIndex(1)
-
+            self.ui.mergebtn.setCurrentIndex(1)
         # Save raw button 
-        saveRawL = QtGui.QLabel("Save raw file", self)
-        saveRawL.move(550,710)
-        saveRawL.resize(saveRawL.minimumSizeHint())
-        self.saveRawbtn = QtGui.QComboBox(self)
-        self.saveRawbtn.addItem("No")
-        self.saveRawbtn.addItem("Yes")
-        self.saveRawbtn.resize(100,25)
-        self.saveRawbtn.move(550, 730)
-        self.saveRawbtn.setEnabled(False)
+        self.ui.saveRawbtn.addItem("No")
+        self.ui.saveRawbtn.addItem("Yes")
         if self.par['saveRawFiles'] == 'No':
-            self.saveRawbtn.setCurrentIndex(0)
+            self.ui.saveRawbtn.setCurrentIndex(0)
         else:
-            self.saveRawbtn.setCurrentIndex(1)
-            
+            self.ui.saveRawbtn.setCurrentIndex(1)
         # Save longformat yes/no
         # Save long format button
-        longL = QtGui.QLabel("Save longformat", self)
-        longL.move(425,770)
-        longL.resize(longL.minimumSizeHint())
-        self.longbtn = QtGui.QComboBox(self)
-        self.longbtn.addItem("No")
-        self.longbtn.addItem("Yes")
-        self.longbtn.resize(100,25)
-        self.longbtn.move(425, 790)
-        self.longbtn.setEnabled(False)
+        self.ui.longbtn.addItem("No")
+        self.ui.longbtn.addItem("Yes")
         if self.par['longFormat'] == 'No':
-            self.longbtn.setCurrentIndex(0)
+            self.ui.longbtn.setCurrentIndex(0)
         else:
-            self.longbtn.setCurrentIndex(1)
-
-        # Save raw button 
-        duplicLongL = QtGui.QLabel("Duplicate values Long", self)
-        duplicLongL.move(550,770)
-        duplicLongL.resize(duplicLongL.minimumSizeHint())
-        self.duplicLongbtn = QtGui.QComboBox(self)
-        self.duplicLongbtn.addItem("No")
-        self.duplicLongbtn.addItem("Yes")
-        self.duplicLongbtn.resize(100,25)
-        self.duplicLongbtn.move(550, 790)
-        self.duplicLongbtn.setEnabled(False)
+            self.ui.longbtn.setCurrentIndex(1)
+        # Duplicate values for long format 
+        self.ui.duplicLongbtn.addItem("No")
+        self.ui.duplicLongbtn.addItem("Yes")
         if self.par['duplicateValues'] == 'No':
-            self.duplicLongbtn.setCurrentIndex(0)
+            self.ui.duplicLongbtn.setCurrentIndex(0)
         else:
-            self.duplicLongbtn.setCurrentIndex(1)
-
+            self.ui.duplicLongbtn.setCurrentIndex(1)
         # Parallel processing
-        paralellL = QtGui.QLabel("Parallel processing", self)
-        paralellL.move(50,770)
-        paralellL.resize(paralellL.minimumSizeHint())
-        self.paralell = QtGui.QComboBox(self)
-        self.paralell.addItem("Yes")
-        self.paralell.addItem("No")
-        self.paralell.resize(100,25)
-        self.paralell.move(50, 790)
-        self.paralell.setEnabled(False)
-
+        self.ui.paralell.addItem("Yes")
+        self.ui.paralell.addItem("No")
         #Number of cores
-        nrCoresL = QtGui.QLabel("CPU cores", self)
-        nrCoresL.move(50,830)
-        nrCoresL.resize(nrCoresL.minimumSizeHint())
-        self.nrCores = QtGui.QTextEdit(self)
-        self.nrCores.move(50, 850)
-        self.nrCores.resize(100,25)
         maxCores = psutil.cpu_count()
         if int(self.par['nrCores']) > maxCores-1:
             self.par['nrCores'] = str(maxCores-1)
-        self.nrCores.setText(self.par['nrCores'])
-        self.nrCores.setEnabled(False)
-
+        self.ui.nrCores.setText(self.par['nrCores'])
         # Pixels per degree
-        pixDegL = QtGui.QLabel("Pixels per degree", self)
-        pixDegL.move(175,770)
-        pixDegL.resize(pixDegL.minimumSizeHint())
-        self.pixMode = QtGui.QComboBox(self)
-        self.pixMode.addItem("Automatic")
-        self.pixMode.addItem("Manual")
-        self.pixMode.resize(100,25)
-        self.pixMode.move(175, 790)
-        self.pixMode.setEnabled(False)
+        self.ui.pixMode.addItem("Automatic")
+        self.ui.pixMode.addItem("Manual")
         if self.par['pxMode'] == 'Automatic':
-            self.pixMode.setCurrentIndex(0)
+            self.ui.pixMode.setCurrentIndex(0)
         else:
-            self.pixMode.setCurrentIndex(1)
-
+            self.ui.pixMode.setCurrentIndex(1)
         #Number of pixels per degree
-        pixPerDegL = QtGui.QLabel("Px per deg (manual)", self)
-        pixPerDegL.move(175,830)
-        pixPerDegL.resize(nrCoresL.minimumSizeHint())
-        self.pixPerDeg = QtGui.QTextEdit(self)
-        self.pixPerDeg.move(175, 850)
-        self.pixPerDeg.resize(100,25)
-        self.pixPerDeg.setText(self.par['pxPerDeg'])
-        self.pixPerDeg.setEnabled(False)
-        
+        self.ui.pixPerDeg.setText(self.par['pxPerDeg'])
+        # Close button
+        self.ui.closebtn.clicked.connect(self.close_application)
         #======================================================================
-        # Bussy text and run GUI with progressbars
+        # Status labels
         #======================================================================
-        self.parL = QtGui.QLabel("Multi core processing!", self)
-        self.parL.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
-        self.parL.move(350, 860)
-        self.parL.resize(self.parL.minimumSizeHint())
-        self.parL.hide()
+        self.ui.statusL.hide()
+        self.MCPL = "Parallel processing!" 
+        self.SCPL = "Single core processing!"
+        self.DONEL = "Finished!"
+        self.MCERRORL = "Multi core error, using single core!"
+        self.ERRORL = "ERROR!! Try again!"
 
-        self.singleL = QtGui.QLabel("Single core processing!", self)
-        self.singleL.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
-        self.singleL.move(350, 860)
-        self.singleL.resize(self.singleL.minimumSizeHint())
-        self.singleL.hide()
-
-        self.doneL = QtGui.QLabel("Finished!", self)
-        self.doneL.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
-        self.doneL.move(400, 860)
-        self.doneL.resize(self.doneL.minimumSizeHint())
-        self.doneL.hide()
-
-        self.ErrL = QtGui.QLabel("Multi core error, using single core!", self)
-        self.ErrL.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Bold))
-        self.ErrL.move(325, 860)
-        self.ErrL.resize(self.ErrL.minimumSizeHint())
-        self.ErrL.hide()
-
-        self.Err2L = QtGui.QLabel("ERROR!! Try again!", self)
-        self.Err2L.setFont(QtGui.QFont("Times", 35, QtGui.QFont.Bold))
-        self.Err2L.move(350,200)
-        self.Err2L.resize(self.Err2L.minimumSizeHint())
-        self.Err2L.hide()
-
+        #======================================================================
+        # Progress bars
+        #======================================================================
         # Bussy bar
-        self.bussyBar = QtGui.QProgressBar(self)
-        self.bussyBar.setRange(0,1)
-        self.bussyBar.resize(300,25)
-        self.bussyBar.move(675, 725)
-        self.bussyBar.setRange(0,100)
-        
+        self.ui.bussyBar.setRange(0,100)
         # Progress bar
-        self.progressBarL = QtGui.QLabel("% of files finished", self)
-        self.progressBarL.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
-        self.progressBarL.move(750, 755)
-        self.progressBarL.resize(self.progressBarL.minimumSizeHint())
-        self.progressBar = QtGui.QProgressBar(self)
-        self.progressBar.setRange(0,1)
-        self.progressBar.resize(300,25)
-        self.progressBar.move(675, 775)
-        self.progressBar.setRange(0,100)
-
+        self.ui.progressBar.setRange(0,100)
         # Cpu bar
-        self.cpuBarL = QtGui.QLabel("CPU usage", self)
-        self.cpuBarL.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
-        self.cpuBarL.move(675, 820)
-        self.cpuBarL.resize(self.cpuBarL.minimumSizeHint())
-        self.cpuBar = QtGui.QProgressBar(self)
-        self.cpuBar.setRange(0,1)
-        self.cpuBar.resize(300,15)
-        self.cpuBar.move(675, 840)
-        self.cpuBar.setRange(0,100)
-        self.cpuBar.setValue(getSys()[0])
-
+        self.ui.cpuBar.setRange(0,100)
+        self.ui.cpuBar.setValue(getSys()[0])
         #Memory bar
-        self.memBarL = QtGui.QLabel('Memory usage',self)
-        self.memBarL.setFont(QtGui.QFont("Times", 10, QtGui.QFont.Bold))
-        self.memBarL.move(675, 870)
-        self.memBarL.resize(self.memBarL.minimumSizeHint())
-        self.memBar = QtGui.QProgressBar(self)
-        self.memBar.setRange(0,1)
-        self.memBar.resize(300,15)
-        self.memBar.move(675, 890)
-        self.memBar.setRange(0,100)
-        self.memBar.setValue(getSys()[1])
+        self.ui.memBar.setRange(0,100)
+        self.ui.memBar.setValue(getSys()[1])
 
-        # Close
-        self.closebtn = QtGui.QPushButton("Close", self)
-        self.closebtn.clicked.connect(self.close_application)
-        self.closebtn.resize(100,25)
-        self.closebtn.move(375, 900)
-
+        #======================================================================
+        # Finishing touches
+        #======================================================================
         # Start threading System resources
         self.threadclass = ThreadClass()
         self.threadclass.start()
@@ -596,75 +306,73 @@ class Window(QtGui.QMainWindow):
             self.loadSettings()
             
             # Sets the default textbox settings 
-            self.startKey.setText(self.par['startTrialKey'])
-            self.stopKey.setText(self.par['stopTrialKey'])
-            self.varKey.setText(self.par['variableKey'])
-            self.textbox.setText('')
-            self.regSamp.setText(self.par['regExpSamp'])
-            self.regEfix.setText(self.par['regExpEfix'])
-            self.regEsacc.setText(self.par['regExpEsacc']) 
-            self.regEblink.setText(self.par['regExpEblink'])
-            self.regStart.setText(self.par['regExpStart'])
-            self.regStop.setText(self.par['regExpStop'])
-            self.regVar.setText(self.par['regExpVar'])
-            self.regMsg.setText(self.par['regExpMsg'])
-            self.parsedName.setText(self.par['saveExtension'])
-            self.rawName.setText(self.par['saveRawExtension'])
-            self.mergedName.setText(self.par['mergedFileNames'])
-            self.pixPerDeg.setText(self.par['pxPerDeg'])
+            self.ui.startKey.setText(self.par['startTrialKey'])
+            self.ui.stopKey.setText(self.par['stopTrialKey'])
+            self.ui.varKey.setText(self.par['variableKey'])
+            self.ui.textbox.setText('')
+            self.ui.regSamp.setText(self.par['regExpSamp'])
+            self.ui.regEfix.setText(self.par['regExpEfix'])
+            self.ui.regEsacc.setText(self.par['regExpEsacc']) 
+            self.ui.regEblink.setText(self.par['regExpEblink'])
+            self.ui.regStart.setText(self.par['regExpStart'])
+            self.ui.regStop.setText(self.par['regExpStop'])
+            self.ui.regVar.setText(self.par['regExpVar'])
+            self.ui.regMsg.setText(self.par['regExpMsg'])
+            self.ui.parsedName.setText(self.par['saveExtension'])
+            self.ui.rawName.setText(self.par['saveRawExtension'])
+            self.ui.mergedName.setText(self.par['mergedFileNames'])
+            self.ui.pixPerDeg.setText(self.par['pxPerDeg'])
             maxCores = psutil.cpu_count()
             if int(self.par['nrCores']) > maxCores-1:
                 self.par['nrCores'] = str(maxCores-1)
-            self.nrCores.setText(self.par['nrCores'])
+            self.ui.nrCores.setText(self.par['nrCores'])
 
             
             # Set button defaults
             # Parallel button is not set, sets depending on file number
             if self.par['saveMergedFiles'] == 'No':
-                self.mergebtn.setCurrentIndex(0)
+                self.ui.mergebtn.setCurrentIndex(0)
             else:
-                self.mergebtn.setCurrentIndex(1)
+                self.ui.mergebtn.setCurrentIndex(1)
             if self.par['saveRawFiles'] == 'No':
-                self.saveRawbtn.setCurrentIndex(0)
+                self.ui.saveRawbtn.setCurrentIndex(0)
             else:
-                self.saveRawbtn.setCurrentIndex(1)
+                self.ui.saveRawbtn.setCurrentIndex(1)
             if self.par['pxMode'] == 'Automatic':
-                self.pixMode.setCurrentIndex(0)
+                self.ui.pixMode.setCurrentIndex(0)
             else:
-                self.pixMode.setCurrentIndex(1)
+                self.ui.pixMode.setCurrentIndex(1)
             if self.par['longFormat'] == 'No':
-                self.longbtn.setCurrentIndex(0)
+                self.ui.longbtn.setCurrentIndex(0)
             else:
-                self.longbtn.setCurrentIndex(1)
+                self.ui.longbtn.setCurrentIndex(1)
             if self.par['duplicateValues'] == 'No':
-                self.duplicLongbtn.setCurrentIndex(0)
+                self.ui.duplicLongbtn.setCurrentIndex(0)
             else:
-                self.duplicLongbtn.setCurrentIndex(1)
+                self.ui.duplicLongbtn.setCurrentIndex(1)
         else:
             pass
 
     def updateSystemBars(self, sysval):
-        self.cpuBar.setValue(sysval[0])
-        self.memBar.setValue(sysval[1])
-        if self.progressValue == len(self.files) and len(self.files) > 0 and self.doneL.isHidden() == True:
-            self.parL.hide()
-            self.singleL.hide()
-            self.ErrL.hide()
+        self.ui.cpuBar.setValue(sysval[0])
+        self.ui.memBar.setValue(sysval[1])
+        if self.progressValue == len(self.files) and len(self.files) > 0:
             self.stopBussyBar()
-            self.doneL.show()
+            self.ui.statusL.setText(self.DONEL)
+            self.ui.statusL.show()
 
     def updateProgress(self, value):
         self.progressValue += value
         if self.progressValue == len(self.files):
-            if self.mergebtn.currentText() == 'Yes':
+            if self.ui.mergebtn.currentText() == 'Yes':
                 self.savedMergedFiles()
-        self.progressBar.setValue(self.progressValue)
+        self.ui.progressBar.setValue(self.progressValue)
 
     def startBussyBar(self):
-        self.bussyBar.setRange(0,0)
+        self.ui.bussyBar.setRange(0,0)
 
     def stopBussyBar(self):
-        self.bussyBar.setRange(0,1)
+        self.ui.bussyBar.setRange(0,1)
 
     def savedMergedFiles(self):
         fName = os.path.commonprefix(self.par['savefileNames']) + self.mergedName.toPlainText() + '.p'
@@ -693,72 +401,72 @@ class Window(QtGui.QMainWindow):
             self.files = tempFiles
         if len(self.files) > 0:
             fileNames = [os.path.basename(f) for f in self.files]
-            self.textbox.setText('\n'.join(fileNames))
+            self.ui.textbox.setText('\n'.join(fileNames))
 
             # Activate the parsing button
-            self.Parsebtn.setEnabled(True)
+            self.ui.Parsebtn.setEnabled(True)
 
             # Set parallel processing
             if len(self.files) < 2:
-                self.paralell.setCurrentIndex(1)
+                self.ui.paralell.setCurrentIndex(1)
             else:
-                self.paralell.setCurrentIndex(0)
+                self.ui.paralell.setCurrentIndex(0)
 
     def unlockSettings(self):
         # Enable all settings
-        self.regSamp.setEnabled(True)
-        self.regEfix.setEnabled(True)
-        self.regEsacc.setEnabled(True)
-        self.regEblink.setEnabled(True)
-        self.regStart.setEnabled(True)
-        self.regStop.setEnabled(True)
-        self.regVar.setEnabled(True)
-        self.regMsg.setEnabled(True)
-        self.parsedName.setEnabled(True)
-        self.rawName.setEnabled(True)
-        self.mergedName.setEnabled(True)
-        self.mergebtn.setEnabled(True)
-        self.nrCores.setEnabled(True)
-        self.paralell.setEnabled(True)
-        self.saveRawbtn.setEnabled(True)
-        self.pixMode.setEnabled(True)
-        self.pixPerDeg.setEnabled(True)
-        self.longbtn.setEnabled(True)
-        self.duplicLongbtn.setEnabled(True)
+        self.ui.regSamp.setEnabled(True)
+        self.ui.regEfix.setEnabled(True)
+        self.ui.regEsacc.setEnabled(True)
+        self.ui.regEblink.setEnabled(True)
+        self.ui.regStart.setEnabled(True)
+        self.ui.regStop.setEnabled(True)
+        self.ui.regVar.setEnabled(True)
+        self.ui.regMsg.setEnabled(True)
+        self.ui.parsedName.setEnabled(True)
+        self.ui.rawName.setEnabled(True)
+        self.ui.mergedName.setEnabled(True)
+        self.ui.mergebtn.setEnabled(True)
+        self.ui.nrCores.setEnabled(True)
+        self.ui.paralell.setEnabled(True)
+        self.ui.saveRawbtn.setEnabled(True)
+        self.ui.pixMode.setEnabled(True)
+        self.ui.pixPerDeg.setEnabled(True)
+        self.ui.longbtn.setEnabled(True)
+        self.ui.duplicLongbtn.setEnabled(True)
 
         # Enable lock button
-        self.lockSettingsM.setEnabled(True)
+        self.ui.lockSettingsM.setEnabled(True)
         # Disable unlock button
-        self.unlockSettingsM.setEnabled(False)
+        self.ui.unlockSettingsM.setEnabled(False)
 
     def lockSettings(self):
-        self.regSamp.setEnabled(False)
-        self.regEfix.setEnabled(False)
-        self.regEsacc.setEnabled(False)
-        self.regEblink.setEnabled(False)
-        self.regStart.setEnabled(False)
-        self.regStop.setEnabled(False)
-        self.regVar.setEnabled(False)
-        self.regMsg.setEnabled(False)
-        self.parsedName.setEnabled(False)
-        self.rawName.setEnabled(False)
-        self.mergedName.setEnabled(False)
-        self.mergebtn.setEnabled(False)
-        self.nrCores.setEnabled(False)
-        self.paralell.setEnabled(False)
-        self.saveRawbtn.setEnabled(False)
-        self.pixMode.setEnabled(False)
-        self.pixPerDeg.setEnabled(False)
-        self.longbtn.setEnabled(False)
-        self.duplicLongbtn.setEnabled(False)
+        self.ui.regSamp.setEnabled(False)
+        self.ui.regEfix.setEnabled(False)
+        self.ui.regEsacc.setEnabled(False)
+        self.ui.regEblink.setEnabled(False)
+        self.ui.regStart.setEnabled(False)
+        self.ui.regStop.setEnabled(False)
+        self.ui.regVar.setEnabled(False)
+        self.ui.regMsg.setEnabled(False)
+        self.ui.parsedName.setEnabled(False)
+        self.ui.rawName.setEnabled(False)
+        self.ui.mergedName.setEnabled(False)
+        self.ui.mergebtn.setEnabled(False)
+        self.ui.nrCores.setEnabled(False)
+        self.ui.paralell.setEnabled(False)
+        self.ui.saveRawbtn.setEnabled(False)
+        self.ui.pixMode.setEnabled(False)
+        self.ui.pixPerDeg.setEnabled(False)
+        self.ui.longbtn.setEnabled(False)
+        self.ui.duplicLongbtn.setEnabled(False)
 
         # disable lock button
-        self.lockSettingsM.setEnabled(False)
+        self.ui.lockSettingsM.setEnabled(False)
         # Enable unlock button
-        self.unlockSettingsM.setEnabled(True)
+        self.ui.unlockSettingsM.setEnabled(True)
         # Enable parse button
         if len(self.files) > 0:
-            self.Parsebtn.setEnabled(True)
+            self.ui.Parsebtn.setEnabled(True)
 
     def documentation(self):
         text=open(self.docLoc).read()
@@ -775,67 +483,67 @@ class Window(QtGui.QMainWindow):
 
     def setValues(self):
         # Initiate bussy label
-        self.progressBar.setRange(0,len(self.files))
-        self.progressBar.setValue(0)
+        self.ui.progressBar.setRange(0,len(self.files))
+        self.ui.progressBar.setValue(0)
         self.progressValue = 0
         self.lockSettings()
-        self.doneL.hide()
+        self.ui.statusL.hide()
         self.repaint()
 
         #======================================================================
         # Get settings for parsing
         #======================================================================
         # File name handling
-        self.par['saveExtension'] = self.parsedName.toPlainText()
-        self.par['saveRawExtension'] = self.rawName.toPlainText()
+        self.par['saveExtension'] = self.ui.parsedName.toPlainText()
+        self.par['saveRawExtension'] = self.ui.rawName.toPlainText()
         self.par['savefileNames'] = [f[:-4] + self.par['saveExtension']+'.p' for f in self.files]
         self.par['saveFileNamesRaw'] = [f[:-4] + self.par['saveExtension'] + self.par['saveRawExtension']+'.p' for f in self.files]
 
         # Get regular expression info
-        self.par['startTrialKey'] = self.startKey.toPlainText().strip()
-        self.par['stopTrialKey'] = self.stopKey.toPlainText().strip()
-        self.par['variableKey'] = self.varKey.toPlainText().strip()
-        self.par['regExpSamp'] = self.regSamp.toPlainText()
-        self.par['regExpEfix'] = self.regEfix.toPlainText()
-        self.par['regExpEsacc'] = self.regEsacc.toPlainText()
-        self.par['regExpEblink'] = self.regEblink.toPlainText()
+        self.par['startTrialKey'] = self.ui.startKey.toPlainText().strip()
+        self.par['stopTrialKey'] = self.ui.stopKey.toPlainText().strip()
+        self.par['variableKey'] = self.ui.varKey.toPlainText().strip()
+        self.par['regExpSamp'] = self.ui.regSamp.toPlainText()
+        self.par['regExpEfix'] = self.ui.regEfix.toPlainText()
+        self.par['regExpEsacc'] = self.ui.regEsacc.toPlainText()
+        self.par['regExpEblink'] = self.ui.regEblink.toPlainText()
         # Set regular expressions for start/stop/var/msg
-        if self.par['DFregExpStart'] != self.regStart.toPlainText():
-            self.par['regExpStart'] = self.regStart.toPlainText()
+        if self.par['DFregExpStart'] != self.ui.regStart.toPlainText():
+            self.par['regExpStart'] = self.ui.regStart.toPlainText()
             self.par['regExpStartNew'] = True
         else:
             self.par['regExpStartNew'] = False
-        if self.par['DFregExpStop'] != self.regStop.toPlainText():
-            self.par['regExpStop'] = self.regStop.toPlainText()
+        if self.par['DFregExpStop'] != self.ui.regStop.toPlainText():
+            self.par['regExpStop'] = self.ui.regStop.toPlainText()
             self.par['regExpStopNew'] = True
         else:
             self.par['regExpStopNew'] = False
-        if self.par['DFregExpVar'] != self.regVar.toPlainText():
-            self.par['regExpVar'] = self.regVar.toPlainText()
+        if self.par['DFregExpVar'] != self.ui.regVar.toPlainText():
+            self.par['regExpVar'] = self.ui.regVar.toPlainText()
             self.par['regExpVarNew'] = True
         else:
             self.par['regExpVarNew'] = False
-        if self.par['DFregExpMsg'] != self.regMsg.toPlainText():
-            self.par['regExpMsg'] = self.regMsg.toPlainText()
+        if self.par['DFregExpMsg'] != self.ui.regMsg.toPlainText():
+            self.par['regExpMsg'] = self.ui.regMsg.toPlainText()
             self.par['regExpMsgNew'] = True
         else:
             self.par['regExpMsgNew'] = False
 
         # Processing info
-        self.par['saveMergedFiles'] = self.mergebtn.currentText()
-        self.par['saveRawFiles'] = self.saveRawbtn.currentText()
-        self.par['runParallel'] = self.paralell.currentText()
-        self.par['nrCores'] = self.nrCores.toPlainText()
-        self.par['pxMode'] = self.pixMode.currentText()
-        self.par['pxPerDeg'] = self.pixPerDeg.toPlainText()
-        self.par['longFormat'] = self.longbtn.currentText()
-        self.par['duplicateValues'] = self.duplicLongbtn.currentText()
+        self.par['saveMergedFiles'] = self.ui.mergebtn.currentText()
+        self.par['saveRawFiles'] = self.ui.saveRawbtn.currentText()
+        self.par['runParallel'] = self.ui.paralell.currentText()
+        self.par['nrCores'] = self.ui.nrCores.toPlainText()
+        self.par['pxMode'] = self.ui.pixMode.currentText()
+        self.par['pxPerDeg'] = self.ui.pixPerDeg.toPlainText()
+        self.par['longFormat'] = self.ui.longbtn.currentText()
+        self.par['duplicateValues'] = self.ui.duplicLongbtn.currentText()
         
         # Number of available cores
         maxCores = psutil.cpu_count()
         if int(self.par['nrCores']) > maxCores:
             self.par['nrCores'] = str(maxCores)
-        self.nrCores.setText(self.par['nrCores'])
+        self.ui.nrCores.setText(self.par['nrCores'])
         self.pool = multiprocessing.Pool(processes=int(self.par['nrCores']))
 
         #======================================================================
@@ -862,7 +570,8 @@ class Window(QtGui.QMainWindow):
         self.startBussyBar()
         if self.par['runParallel'] == 'Yes':
             try:
-                self.parL.show()
+                self.ui.statusL.setText(self.MCPL)
+                self.ui.statusL.show()
                 self.repaint()
                 # Start threading System resources
                 for sub in self.files:
@@ -870,19 +579,18 @@ class Window(QtGui.QMainWindow):
                                                args = (sub, self.par),
                                                callback=self.callbackParser)
             except:
-                self.ErrL.show()
-                self.parL.hide()
+                self.ui.statusL.setText(self.MCERRORL)
+                self.ui.statusL.show()
                 self.parseSingleCore()
 
         else:
-            self.parL.hide()
             self.parseSingleCore()
 
     def parseSingleCore(self):
         try:
             # Start threading System resources
-            if self.ErrL.isHidden() == True:
-                self.singleL.show()
+            self.ui.statusL.setText(self.SCPL)
+            self.ui.statusL.show()
             self.repaint()
             self.worker = workerClass()
             self.worker.par = self.par
@@ -890,7 +598,8 @@ class Window(QtGui.QMainWindow):
             self.worker.start()
             self.connect(self.worker, QtCore.SIGNAL('PROGRESS'), self.updateProgress)
         except:
-            self.Err2L.show()
+            self.ui.statusL.setText(self.ERRORL)
+            self.ui.statusL.show()
             self.repaint()
             time.sleep(5)
             sys.exit()

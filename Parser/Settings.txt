@@ -18,11 +18,11 @@ regExpStartNew:False
 regExpStopNew:False
 regExpVarNew:False
 regExpMsgNew:False
-runParallel:Yes
+runParallel:No
 nrCores:7
 pxPerDeg:48
 pxMode:Automatic
-longFormat:Yes
+longFormat:No
 duplicateValues:No
 DFsaveRawFiles:No
 DFsaveExtension:Parsed
