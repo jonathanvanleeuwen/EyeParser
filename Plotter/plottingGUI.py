@@ -161,6 +161,8 @@ def plotTrial(timeStamp, xPos, yPos, ssacc, durSacc, euclidDist, **par):
                                        abs(ax.get_ylim()[1] - ax.get_ylim()[0]),
                                        fill=True, alpha = 0.3))
 
+    # Lets get make a timeseries to plot over time.
+    timeCol = np.linspace(1,0,len(xPos))
     # Lets plot the gaze position during trial
     plt.subplot(1,2,2)
     plt.title('Gaze position')
@@ -172,8 +174,8 @@ def plotTrial(timeStamp, xPos, yPos, ssacc, durSacc, euclidDist, **par):
         if pltBg == True:
             bgIm = plt.imread(bgImLoc)
             plt.imshow(bgIm, aspect=bgAspect)
-            plt.scatter(xPos, yPos, marker = 'p', s = 5, color = 'r')
-        plt.scatter(xPos, yPos, marker = 'p', s = 1)
+            plt.scatter(xPos, yPos, c = timeCol, edgecolors = 'face', marker = 'p', s = 5, color = 'r', cmap = 'hot')
+        plt.scatter(xPos, yPos,c = timeCol, edgecolors = 'face', marker = 'p', s = 5, cmap='hot')
         ax.set(aspect = bgAspect)
     elif pltType == 'heat' :
         #======================================================================
