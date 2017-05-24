@@ -367,6 +367,8 @@ class Window(QtGui.QMainWindow):
             if self.ui.mergebtn.currentText() == 'Yes':
                 self.savedMergedFiles()
         self.ui.progressBar.setValue(self.progressValue)
+        
+        print time.time() - self.STARTTIME
 
     def startBussyBar(self):
         self.ui.bussyBar.setRange(0,0)
@@ -567,6 +569,7 @@ class Window(QtGui.QMainWindow):
         self.updateProgress(1)
 
     def parse(self):
+        self.STARTTIME = time.time()
         self.startBussyBar()
         if self.par['runParallel'] == 'Yes':
             try:

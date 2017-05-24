@@ -13,16 +13,19 @@ import numpy as np
 import pandas as pd
 from collections import deque
 from itertools import izip
+from numba import jit
 
 #==============================================================================
 # Functions
 #==============================================================================
+@jit
 def distBetweenPointsInArray(point1X, point1Y, point2X, point2Y):
 	'''
 	'''
 	dist = np.sqrt( (point1X-point2X)**2 + (point1Y - point2Y)**2 )
 	return dist
 
+@jit
 def distBetweenPoints(point1, point2):
 	'''
 	'''
