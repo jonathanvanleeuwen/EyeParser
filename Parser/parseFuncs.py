@@ -8,38 +8,27 @@ Created on Mon Jan 30 10:09:12 2017
 # Imports
 #==============================================================================
 import re
-import math
 import numpy as np
 import pandas as pd
 from collections import deque
 from itertools import izip
-from numba import jit
 
 #==============================================================================
 # Functions
 #==============================================================================
-@jit
 def distBetweenPointsInArray(point1X, point1Y, point2X, point2Y):
 	'''
 	'''
 	dist = np.sqrt( (point1X-point2X)**2 + (point1Y - point2Y)**2 )
 	return dist
 
-@jit
-def distBetweenPoints(point1, point2):
-	'''
-	'''
-	dist = np.sqrt( (point1[0]-point2[0])**2 + (point1[1] - point2[1])**2 )
-	return dist
+def determineAngleArr(point,arr):
+    normXY = arr - point
+    narcdeg = np.arctan2(normXY[:,1], normXY[:,0])
+    return (narcdeg * 180)/np.pi
 
-def determineAngle(p1, p2):
-	'''
-	'''
-	normx = ((p2[0] - p1[0]))
-	normy = ((p2[1] - p1[1]))
-	narcdeg = math.atan2(normy, normx)
-	sdegree = ((narcdeg * 180)/math.pi)
-	return sdegree
+def distBetweenPointAndArray(point,arr):
+    return np.sqrt(np.sum((arr - point)**2, axis = 1))
 
 def calculateSaccadeCurvature(xSacc, ySacc, pixPerDegree, ignoreDist = 0.5, flipY = False):
     ''' Calculates the saccade curvature.\n
@@ -81,37 +70,43 @@ def calculateSaccadeCurvature(xSacc, ySacc, pixPerDegree, ignoreDist = 0.5, flip
             saccY           = [i*-1 for i in ySacc[sacc]]
         else:
             saccY           = ySacc[sacc]
-        startPos        = (saccX[0], saccY[0])
-        endPos          = (saccX[-1], saccY[-1])
-        saccadeAngle    = determineAngle(startPos,endPos) *-1
-
-        # we calculate point angle for all points except the last point (also exclude first point)
-        pointAngles     = np.zeros(len(saccX)-2)
-        for pointNr in range(0,len(saccX)-2):
-            point                   = (saccX[pointNr+1], saccY[pointNr+1])
-            startDist               = distBetweenPoints(startPos, point) / pixPerDegree
-            endDist                 = distBetweenPoints(endPos, point) / pixPerDegree
-            # check if the sample is far enough away from start and end position
-            # We have the problem with overshoots, the overshoot is sometimes more than ignoreDist
-            # this causes the cuvature analysis to be done for then stopped, started and stopped again
-            # [0,0,0,0,1,1,1,1,0,0,0,1,1,1,0,0,0,] Where 1 has calculated curvature and 0 is to close
-            if min([startDist, endDist]) < ignoreDist:
-                pointAngles[pointNr] = 9999
-            else:
-                pointCurv = (determineAngle(startPos,point) *-1) - saccadeAngle
-                if pointCurv > 180:
-                    pointCurv -=360
-                elif pointCurv < -180:
-                    pointCurv +=360
-                pointAngles[pointNr] = pointCurv
-        pointAngles = pointAngles[pointAngles < 9999]
-        curveData.append(pointAngles)
+        startPos        = np.array([saccX[0], saccY[0]])
+        endPos          = np.array([saccX[-1], saccY[-1]])
+       
+        # Put the saccade data into an array and get distance from start and 
+        # end for all points
+        saccArr = np.vstack((saccX, saccY)).transpose()
+        startDist = distBetweenPointAndArray(startPos, saccArr) / pixPerDegree
+        endDist = distBetweenPointAndArray(endPos, saccArr) / pixPerDegree
+                                          
+         # Get point angles and the angle of the saccade      
+        pointAngles = (determineAngleArr(startPos, saccArr)*-1)
+        saccadeAngle = pointAngles[-1]
+        
+        # Subtract the angle of the saccade from all the points
+        pointAngles -= saccadeAngle
+        
+        # Filter out data to close to the start and end
+        inclSamp = np.logical_and(startDist>ignoreDist, endDist>ignoreDist)
+        pointAngles = pointAngles[inclSamp]
+        
+        # Make sure they go between -180 and 180
+        pointAngles[pointAngles > 180] -= 360
+        pointAngles[pointAngles < -180] += 360  
+        
+        # Store the point angles in list
+        if len(pointAngles) > 1:
+            curveData.append(pointAngles)
+        else:
+            curveData.append(9999)
+        
         # Append saccadeAngles
         if saccadeAngle > 180:
             saccadeAngle -=360
         elif saccadeAngle < -180:
             saccadeAngle +=360
         saccAngles.append(saccadeAngle)
+        
     return curveData, saccAngles
 
 def parseToLongFormat(data, duplicate = 'No'):
