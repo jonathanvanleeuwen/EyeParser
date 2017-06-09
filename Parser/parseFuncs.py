@@ -95,7 +95,7 @@ def calculateSaccadeCurvature(xSacc, ySacc, pixPerDegree, ignoreDist = 0.5, flip
         pointAngles[pointAngles < -180] += 360  
         
         # Store the point angles in list
-        if len(pointAngles) > 1:
+        if len(pointAngles) > 0:
             curveData.append(pointAngles)
         else:
             curveData.append(9999)
