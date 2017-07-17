@@ -366,7 +366,7 @@ def eyeLinkDataParser(FILENAME, **par):
         saccAmp = saccData[saccKw[7]].values
         dist = dist[saccAmp != 0]
         saccAmp = saccAmp[saccAmp != 0]
-        pixPerDegree        = np.median(dist/saccAmp)
+        pixPerDegree = np.median(dist/saccAmp)
         
     elif pxPerDegMode == 'Manual':
         pixPerDegree = float(pxPerDegManual)
@@ -474,6 +474,7 @@ def eyeLinkDataParser(FILENAME, **par):
     parsedData[keyPrefix+'curvature'] = saccCurvature
     parsedData[keyPrefix+'saccAngle'] = saccAngles
     parsedData[keyPrefix+'includedTrial'] = True
+     parsedData[keyPrefix+'pixPerDegree'] = pixPerDegree
     
     varDf   = pd.DataFrame(varDict)
     msgDf   = pd.DataFrame(msgDict)
