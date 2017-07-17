@@ -474,7 +474,7 @@ def eyeLinkDataParser(FILENAME, **par):
     parsedData[keyPrefix+'curvature'] = saccCurvature
     parsedData[keyPrefix+'saccAngle'] = saccAngles
     parsedData[keyPrefix+'includedTrial'] = True
-     parsedData[keyPrefix+'pixPerDegree'] = pixPerDegree
+    parsedData[keyPrefix+'pixPerDegree'] = pixPerDegree
     
     varDf   = pd.DataFrame(varDict)
     msgDf   = pd.DataFrame(msgDict)
