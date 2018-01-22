@@ -1,0 +1,20 @@
+# Force pull and overwrite 
+git fetch --all
+git reset --hard origin/master
+git pull origin master
+
+
+
+# Before changing code
+ - open Git
+ - cd to correct directory 
+ - "git pull" - or force pull
+ - "git status" - check status
+
+
+# After changing code
+ - open Git
+ - cd to correct directory
+ - "git add --all" - stages all changes to be commited
+ - "git commit --all -m 'The description of changes'" - this commits all the changes
+ - "git push" - This uploads everything 
