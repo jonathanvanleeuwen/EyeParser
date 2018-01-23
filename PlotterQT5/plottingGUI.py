@@ -87,6 +87,12 @@ import matplotlib.patches as patches
 #saccDur = data.DK_durSacc[trNr]
 #euclidDist = data.DK_euclidDist[trNr]
 
+def uniqueRows(x):
+    y = np.ascontiguousarray(x).view(np.dtype((np.void, x.dtype.itemsize * x.shape[1])))
+    _, idx, counts = np.unique(y, return_index=True, return_counts = True)     
+    uniques = x[idx]
+    return uniques, idx, counts
+
 def plotTrial(timeStamp, xPos, yPos, ssacc, durSacc, euclidDist, **par):
     # Get constants
     pltType = par.pop('pltType','gaze') # options: 'gaze', 'heat'
@@ -201,16 +207,13 @@ def plotTrial(timeStamp, xPos, yPos, ssacc, durSacc, euclidDist, **par):
         dataX -= xMin
         dataY -= yMin
         
-        # populate map
-        maxXMap = int(gazeMap.shape[0])
-        maxYMap = int(gazeMap.shape[1])
-        for x,y in izip(dataX, dataY):
-            # make sure the indexes fit the map
-            if x >= maxXMap:
-                x = maxXMap-1
-            if y >= maxYMap:
-                y = maxYMap-1
-            gazeMap[int(x), int(y)] += 1
+        # Now extract all the unique positions and number of samples
+        xy = np.vstack((dataX, dataY)).T
+        uniqueXY, idx, counts = uniqueRows(xy)       
+        uniqueXY = uniqueXY.astype(int)
+        # populate the gazeMap 
+        gazeMap[uniqueXY[:,0], uniqueXY[:,1]] = counts
+                    
         # Convolve the gaze with the gauskernel
         if dataScaling == 1:
             heatMap = np.transpose(krn.convolve_fft(gazeMap,gausKernel))
