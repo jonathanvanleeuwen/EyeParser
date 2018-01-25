@@ -186,6 +186,15 @@ def parseToLongFormat(data, duplicate = 'No'):
         dataL[key] = keyVector
     return dataL
 
+def filterDF(df, deleteKeys):
+    keys = df.keys()   
+    for key in keys:
+        for delKey in deleteKeys:
+            if delKey in key:
+                del df[key]
+    return df
+
+
 #==============================================================================
 #  Parser
 #==============================================================================
@@ -267,6 +276,9 @@ def eyeLinkDataParser(FILENAME, **par):
     newSaccTraceKw = [keyPrefix + k for k in newSaccTraceKw]
     prsKw = [keyPrefix + k for k in prsKw]
 
+    # columns to delete from parsed dataframe
+    deleteColumns = ['VALIDATE','!CAL','!MODE','ELCL','RECCFG','GAZE_COORDS',\
+                 'DISPLAY_COORDS','THRESHOLDS', 'DRIFTCORRECT']
     #==============================================================================
     # Load data ASCII data to memory
     #==============================================================================
@@ -482,6 +494,9 @@ def eyeLinkDataParser(FILENAME, **par):
     parsedData = pd.concat([parsedData, varDf, msgDf], axis=1)
     rawData.rename(columns=dict(zip(rawKw , newRawKw)), inplace=True)
 
+    # Filter the columns we dont want
+    parsedData = filterDF(parsedData, deleteColumns)
+    
     # Convert data to long format
     if convertToLong == 'Yes':
         parsedLong = parseToLongFormat(parsedData, duplicateValues)
