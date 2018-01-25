@@ -106,7 +106,7 @@ def plotTrial(timeStamp, xPos, yPos, ssacc, durSacc, euclidDist, **par):
     kernelCM = par.pop('kernelCM', 'hot')
     kernelCMInverse = par.pop('kernelCMInverse', False)
     kernelThreshold = par.pop('kernelThreshold', 0.3)
-    kernelAlpha = par.pop('kernelAlpha', 0.75)
+    kernelAlpha = par.pop('kernelAlpha', 0.50)
     xMax = par.pop('xMax', 1680)
     xMin = par.pop('xMin', 0)
     yMax = par.pop('yMax', 1050)
@@ -179,9 +179,10 @@ def plotTrial(timeStamp, xPos, yPos, ssacc, durSacc, euclidDist, **par):
     if pltType == 'gaze':
         if pltBg == True:
             bgIm = plt.imread(bgImLoc)
-            plt.imshow(bgIm, aspect=bgAspect)
-            plt.scatter(xPos, yPos, c = timeCol, edgecolors = 'face', marker = 'p', s = 5, color = 'r', cmap = 'hot')
-        plt.scatter(xPos, yPos,c = timeCol, edgecolors = 'face', marker = 'p', s = 5, cmap='hot')
+            ax.imshow(np.flipud(bgIm), aspect=bgAspect, extent = [xMin, xMax, yMin, yMax])
+            ax.scatter(xPos, yPos, c = timeCol, edgecolors = 'face', marker = 'p', s = 5, color = 'r', cmap = 'hot')
+        else:
+            plt.scatter(xPos, yPos,c = timeCol, edgecolors = 'face', marker = 'p', s = 5, cmap='hot')
         ax.set(aspect = bgAspect)
     elif pltType == 'heat' :
         #======================================================================
@@ -189,7 +190,7 @@ def plotTrial(timeStamp, xPos, yPos, ssacc, durSacc, euclidDist, **par):
         #======================================================================
         if pltBg == True:
             bgIm = plt.imread(bgImLoc)
-            plt.imshow(bgIm, aspect=bgAspect)
+            plt.imshow(np.flipud(bgIm), aspect=bgAspect, extent = [xMin, xMax, yMin, yMax])
         kernelPar = kernelPar/float(dataScaling)
         xlim = np.logical_and(xPos < xMax, xPos > xMin)
         ylim = np.logical_and(yPos < yMax, yPos > yMin)

@@ -291,7 +291,9 @@ class Ui_Eyelinkplotter(object):
 
         self.retranslateUi(Eyelinkplotter)
         self.heatmapTab.setCurrentIndex(0)
+        self.unLockSettings.toggled['bool'].connect(self.heatmapTab.setVisible)
         self.unLockSettings.toggled['bool'].connect(self.heatmapTab.setEnabled)
+        self.unLockSettings.toggled['bool'].connect(self.settingsLabel.setVisible)
         QtCore.QMetaObject.connectSlotsByName(Eyelinkplotter)
         Eyelinkplotter.setTabOrder(self.selectFile, self.selectedFile)
         Eyelinkplotter.setTabOrder(self.selectedFile, self.unLockSettings)
@@ -339,7 +341,7 @@ class Ui_Eyelinkplotter(object):
 #         # From here its my own code
 #==============================================================================        
         Eyelinkplotter.setWindowTitle(_translate("Eyelinkplotter", "Eyelink data plotter", None))
-        Eyelinkplotter.setWindowIcon(QtGui.QIcon('eye.png'))
+        Eyelinkplotter.setWindowIcon(QtGui.QIcon("eye.png"))
         self.imDir = None
         self.populateLists()
         # Run button press initiation
@@ -352,6 +354,8 @@ class Ui_Eyelinkplotter(object):
         
         # Set tab color 
         self.heatmapTab.setStyleSheet('QTabBar::tab {color: rgb(0,0,0)}')
+        self.heatmapTab.setVisible(False)
+        self.settingsLabel.setVisible(False)
         
     def populateLists(self):
         # Set plot type options
@@ -430,7 +434,7 @@ class Ui_Eyelinkplotter(object):
         self.kernelParameter.setValue(20)
         self.kernelScale.setValue(1)
         self.kernelThreshold.setValue(0.00)
-        self.kernelAlpha.setValue(0.75)
+        self.kernelAlpha.setValue(0.50)
         
     def selectDataFile(self):
         self.fileName = QtWidgets.QFileDialog.getOpenFileName(None, 'Select file')[0]
@@ -466,8 +470,8 @@ class Ui_Eyelinkplotter(object):
         self.data.to_pickle(self.fileName)
             
     def selectImDir(self):
-        self.imDir = QtWidgets.QFileDialog.getExistingDirectory(None, 'Select image folder')[0]
-        self.imDir +='\\'
+        self.imDir = QtWidgets.QFileDialog.getExistingDirectory(None, 'Select image folder')
+        self.imDir +='/'
         
     def setCounters(self):
         # Set counters
@@ -590,7 +594,6 @@ class Ui_Eyelinkplotter(object):
             pltBg = False
         elif pltBg == True:
             bgImage = self.imDir + os.path.basename(self.data[self.bgImageVariable.currentText()][self.trialIndex])
-            
         # Check kernel inverse color
         inverseKernel = self.kernelCMInverse.currentText()
         if inverseKernel == 'True':
@@ -623,10 +626,13 @@ class Ui_Eyelinkplotter(object):
 
 if __name__ == "__main__":
     import sys
+    import ctypes
+    myappid = 'mycompany.myproduct.subproduct.version' # arbitrary string
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+    
     app = QtWidgets.QApplication(sys.argv)
     Eyelinkplotter = QtWidgets.QMainWindow()
     ui = Ui_Eyelinkplotter()
     ui.setupUi(Eyelinkplotter)
     Eyelinkplotter.show()
     sys.exit(app.exec_())
-

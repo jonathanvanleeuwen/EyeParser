@@ -223,8 +223,56 @@ class Window(QtWidgets.QMainWindow):
             self.ui.pixMode.setCurrentIndex(1)
         #Number of pixels per degree
         self.ui.pixPerDeg.setText(self.par['pxPerDeg'])
-        # Close button
-        self.ui.closebtn.clicked.connect(self.close_application)
+       
+        # =====================================================================
+        # Put all settings in a list
+        # =====================================================================
+        self.hideOptionsList = [\
+                        self.ui.settingsLine,\
+                        self.ui.regSamp,\
+                        self.ui.regEfix,\
+                        self.ui.regEsacc,\
+                        self.ui.regEblink,\
+                        self.ui.regStart,\
+                        self.ui.regStop,\
+                        self.ui.regVar,\
+                        self.ui.regMsg,\
+                        self.ui.parsedName,\
+                        self.ui.rawName,\
+                        self.ui.mergedName,\
+                        self.ui.mergebtn,\
+                        self.ui.nrCores,\
+                        self.ui.paralell,\
+                        self.ui.saveRawbtn,\
+                        self.ui.pixMode,\
+                        self.ui.pixPerDeg,\
+                        self.ui.longbtn,\
+                        self.ui.duplicLongbtn]
+        
+        self.hideOptionsTextList = [\
+                        self.ui.settingsL,\
+                        self.ui.regL,\
+                        self.ui.variousL,\
+                        self.ui.regSampL,\
+                        self.ui.regEfixL,\
+                        self.ui.regEsaccL,\
+                        self.ui.regEblinkL,\
+                        self.ui.regStartL,\
+                        self.ui.regStopL,\
+                        self.ui.regVarL,\
+                        self.ui.regMsgL,\
+                        self.ui.parsedNameL,\
+                        self.ui.rawNameL,\
+                        self.ui.mergedNameL,\
+                        self.ui.mergeL,\
+                        self.ui.nrCoresL,\
+                        self.ui.paralellL,\
+                        self.ui.saveRawL,\
+                        self.ui.pixPerDegL,\
+                        self.ui.pixDegL,\
+                        self.ui.longL,\
+                        self.ui.duplicLongL]
+
         #======================================================================
         # Status labels
         #======================================================================
@@ -261,6 +309,7 @@ class Window(QtWidgets.QMainWindow):
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowStaysOnTopHint)
         self.show()
         self.activateWindow()
+        self.lockSettings()
         
     #==============================================================================
     # Define button actions
@@ -420,26 +469,33 @@ class Window(QtWidgets.QMainWindow):
                 self.ui.paralell.setCurrentIndex(0)
 
     def unlockSettings(self):
+        for item in self.hideOptionsList:
+            item.setEnabled(True)
+            item.show()
+        
+        for item in self.hideOptionsTextList:
+            item.show()
+
         # Enable all settings
-        self.ui.regSamp.setEnabled(True)
-        self.ui.regEfix.setEnabled(True)
-        self.ui.regEsacc.setEnabled(True)
-        self.ui.regEblink.setEnabled(True)
-        self.ui.regStart.setEnabled(True)
-        self.ui.regStop.setEnabled(True)
-        self.ui.regVar.setEnabled(True)
-        self.ui.regMsg.setEnabled(True)
-        self.ui.parsedName.setEnabled(True)
-        self.ui.rawName.setEnabled(True)
-        self.ui.mergedName.setEnabled(True)
-        self.ui.mergebtn.setEnabled(True)
-        self.ui.nrCores.setEnabled(True)
-        self.ui.paralell.setEnabled(True)
-        self.ui.saveRawbtn.setEnabled(True)
-        self.ui.pixMode.setEnabled(True)
-        self.ui.pixPerDeg.setEnabled(True)
-        self.ui.longbtn.setEnabled(True)
-        self.ui.duplicLongbtn.setEnabled(True)
+#        self.ui.regSamp.setEnabled(True)
+#        self.ui.regEfix.setEnabled(True)
+#        self.ui.regEsacc.setEnabled(True)
+#        self.ui.regEblink.setEnabled(True)
+#        self.ui.regStart.setEnabled(True)
+#        self.ui.regStop.setEnabled(True)
+#        self.ui.regVar.setEnabled(True)
+#        self.ui.regMsg.setEnabled(True)
+#        self.ui.parsedName.setEnabled(True)
+#        self.ui.rawName.setEnabled(True)
+#        self.ui.mergedName.setEnabled(True)
+#        self.ui.mergebtn.setEnabled(True)
+#        self.ui.nrCores.setEnabled(True)
+#        self.ui.paralell.setEnabled(True)
+#        self.ui.saveRawbtn.setEnabled(True)
+#        self.ui.pixMode.setEnabled(True)
+#        self.ui.pixPerDeg.setEnabled(True)
+#        self.ui.longbtn.setEnabled(True)
+#        self.ui.duplicLongbtn.setEnabled(True)
 
         # Enable lock button
         self.ui.lockSettingsM.setEnabled(True)
@@ -447,25 +503,32 @@ class Window(QtWidgets.QMainWindow):
         self.ui.unlockSettingsM.setEnabled(False)
 
     def lockSettings(self):
-        self.ui.regSamp.setEnabled(False)
-        self.ui.regEfix.setEnabled(False)
-        self.ui.regEsacc.setEnabled(False)
-        self.ui.regEblink.setEnabled(False)
-        self.ui.regStart.setEnabled(False)
-        self.ui.regStop.setEnabled(False)
-        self.ui.regVar.setEnabled(False)
-        self.ui.regMsg.setEnabled(False)
-        self.ui.parsedName.setEnabled(False)
-        self.ui.rawName.setEnabled(False)
-        self.ui.mergedName.setEnabled(False)
-        self.ui.mergebtn.setEnabled(False)
-        self.ui.nrCores.setEnabled(False)
-        self.ui.paralell.setEnabled(False)
-        self.ui.saveRawbtn.setEnabled(False)
-        self.ui.pixMode.setEnabled(False)
-        self.ui.pixPerDeg.setEnabled(False)
-        self.ui.longbtn.setEnabled(False)
-        self.ui.duplicLongbtn.setEnabled(False)
+        for item in self.hideOptionsList:
+            item.setEnabled(False)
+            item.hide()
+            
+        for item in self.hideOptionsTextList:
+            item.hide()
+            
+#        self.ui.regSamp.setEnabled(False)
+#        self.ui.regEfix.setEnabled(False)
+#        self.ui.regEsacc.setEnabled(False)
+#        self.ui.regEblink.setEnabled(False)
+#        self.ui.regStart.setEnabled(False)
+#        self.ui.regStop.setEnabled(False)
+#        self.ui.regVar.setEnabled(False)
+#        self.ui.regMsg.setEnabled(False)
+#        self.ui.parsedName.setEnabled(False)
+#        self.ui.rawName.setEnabled(False)
+#        self.ui.mergedName.setEnabled(False)
+#        self.ui.mergebtn.setEnabled(False)
+#        self.ui.nrCores.setEnabled(False)
+#        self.ui.paralell.setEnabled(False)
+#        self.ui.saveRawbtn.setEnabled(False)
+#        self.ui.pixMode.setEnabled(False)
+#        self.ui.pixPerDeg.setEnabled(False)
+#        self.ui.longbtn.setEnabled(False)
+#        self.ui.duplicLongbtn.setEnabled(False)
 
         # disable lock button
         self.ui.lockSettingsM.setEnabled(False)
@@ -623,11 +686,14 @@ class Window(QtWidgets.QMainWindow):
         else:
             pass
 
+
 def run():
     if __name__ == "__main__":
         import sys
+        import ctypes
+        myappid = 'mycompany.myproduct.subproduct.version' # arbitrary string
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
         app = QtWidgets.QApplication(sys.argv)
         ui = Window()
         sys.exit(app.exec_())
-
 run()
