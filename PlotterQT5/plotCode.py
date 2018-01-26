@@ -93,7 +93,7 @@ def uniqueRows(x):
     uniques = x[idx]
     return uniques, idx, counts
 
-def plotTrial(timeStamp, xPos, yPos, ssacc, durSacc, euclidDist, **par):
+def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
     # Get constants
     pltType = par.pop('pltType','gaze') # options: 'gaze', 'heat'
     pltBg = par.pop('pltBg', False)
@@ -112,7 +112,18 @@ def plotTrial(timeStamp, xPos, yPos, ssacc, durSacc, euclidDist, **par):
     yMax = par.pop('yMax', 1050)
     yMin = par.pop('yMin', 0)
     included = par.pop('included', 'True')
-    
+    highlight = par.pop('highlight', 'None')
+
+    if highlight == 'Saccade':
+        sHighL = par.pop('ssacc')
+        durHighL = par.pop('saccDur')
+    elif highlight == 'Fixation':
+        sHighL = par.pop('sFix')
+        durHighL = par.pop('fixDur')
+    elif highlight == 'None':
+        sHighL = par.pop('sFix', [])
+        durHighL = par.pop('fixDur', [])
+        
     #==========================================================================
     # Plotting
     #==========================================================================
@@ -130,12 +141,13 @@ def plotTrial(timeStamp, xPos, yPos, ssacc, durSacc, euclidDist, **par):
     plt.scatter(normTime, xPos,marker = 'p', s = 1)
     plt.xlim([normTime[0], normTime[-1]])
     ax = plt.gca()
-    # Add rectangles for Saccades
-    for i in range(0,len(ssacc)):
-        ax.add_patch(patches.Rectangle((ssacc[i] - trialStart, ax.get_ylim()[0]),
-                                       durSacc[i],
-                                       abs(ax.get_ylim()[1] - ax.get_ylim()[0]),
-                                       fill=True, alpha = 0.3))
+    if highlight != 'None':
+        # Add rectangles for Saccades
+        for i in range(0,len(sHighL)):
+            ax.add_patch(patches.Rectangle((sHighL[i] - trialStart, ax.get_ylim()[0]),
+                                           durHighL[i],
+                                           abs(ax.get_ylim()[1] - ax.get_ylim()[0]),
+                                           fill=True, alpha = 0.3))
 
     # lets plot y position over time
     plt.subplot(3,2,3)
@@ -145,12 +157,13 @@ def plotTrial(timeStamp, xPos, yPos, ssacc, durSacc, euclidDist, **par):
     plt.scatter(normTime, yPos, marker = 'p', s = 1)
     plt.xlim([normTime[0], normTime[-1]])
     ax = plt.gca()
-    # Add rectangles for Saccades
-    for i in range(0,len(ssacc)):
-        ax.add_patch(patches.Rectangle((ssacc[i] - trialStart, ax.get_ylim()[0]),
-                                       durSacc[i],
-                                       abs(ax.get_ylim()[1] - ax.get_ylim()[0]),
-                                       fill=True, alpha = 0.3))
+    if highlight != 'None':
+        # Add rectangles for Saccades
+        for i in range(0,len(sHighL)):
+            ax.add_patch(patches.Rectangle((sHighL[i] - trialStart, ax.get_ylim()[0]),
+                                           durHighL[i],
+                                           abs(ax.get_ylim()[1] - ax.get_ylim()[0]),
+                                           fill=True, alpha = 0.3))
 
     # Lets plot speed over time (distance between points)
     plt.subplot(3,2,5)
@@ -161,12 +174,13 @@ def plotTrial(timeStamp, xPos, yPos, ssacc, durSacc, euclidDist, **par):
     plt.xlim([normTime[0], normTime[-1]])
     plt.ylim([0,np.max(euclidDist)])
     ax = plt.gca()
-    # Add rectangles for Saccades
-    for i in range(0,len(ssacc)):
-        ax.add_patch(patches.Rectangle((ssacc[i] - trialStart, ax.get_ylim()[0]),
-                                       durSacc[i],
-                                       abs(ax.get_ylim()[1] - ax.get_ylim()[0]),
-                                       fill=True, alpha = 0.3))
+    if highlight != 'None':
+        # Add rectangles for Saccades
+        for i in range(0,len(sHighL)):
+            ax.add_patch(patches.Rectangle((sHighL[i] - trialStart, ax.get_ylim()[0]),
+                                           durHighL[i],
+                                           abs(ax.get_ylim()[1] - ax.get_ylim()[0]),
+                                           fill=True, alpha = 0.3))
 
     # Lets get make a timeseries to plot over time.
     timeCol = np.linspace(1,0,len(xPos))
@@ -185,6 +199,7 @@ def plotTrial(timeStamp, xPos, yPos, ssacc, durSacc, euclidDist, **par):
         else:
             plt.scatter(xPos, yPos,c = timeCol, edgecolors = 'face', marker = 'p', s = 5, cmap='hot')
         ax.set(aspect = bgAspect)
+
     elif pltType == 'heat' :
         #======================================================================
         # Make gaussian image

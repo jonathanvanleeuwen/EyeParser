@@ -10,7 +10,7 @@ import os
 import pandas as pd
 import numpy as np
 from plotCode import plotTrial
-from GUICode import Ui_Eyelinkplotter
+from plotterGUICode import Ui_Eyelinkplotter
 
 class Window(QtWidgets.QMainWindow):
     #==============================================================================
@@ -280,8 +280,6 @@ class Window(QtWidgets.QMainWindow):
         self.time = self.data.DK_rawTime[self.trialIndex]
         self.x = self.data.DK_rawX[self.trialIndex]
         self.y = self.data.DK_rawY[self.trialIndex]
-        self.ssacc = self.data.DK_ssacc[self.trialIndex]
-        self.saccDur = self.data.DK_durSacc[self.trialIndex] 
         self.euclidDist = self.data.DK_euclidDist[self.trialIndex]
         
         # Do some sanity checks on settings
@@ -322,11 +320,15 @@ class Window(QtWidgets.QMainWindow):
             'xMin': self.ui.xMinValue.value(),\
             'yMax': self.ui.yMaxValue.value(),\
             'yMin': self.ui.yMinValue.value(),\
-            'included': str(self.data.DK_includedTrial[self.trialIndex])}
+            'included': str(self.data.DK_includedTrial[self.trialIndex]),\
+            'highlight': str(self.ui.highlightEvent.currentText()),\
+            'ssacc': self.data.DK_ssacc[self.trialIndex],\
+            'saccDur': self.data.DK_durSacc[self.trialIndex],\
+            'sFix':self.data.DK_sFix[self.trialIndex],\
+            'fixDur':self.data.DK_durFix[self.trialIndex]}
             
         # Plot the trial 
-        plotTrial(self.time, self.x, self.y, self.ssacc, self.saccDur, 
-                  self.euclidDist, **self.par)
+        plotTrial(self.time, self.x, self.y, self.euclidDist, **self.par)
    
 
 def run():
