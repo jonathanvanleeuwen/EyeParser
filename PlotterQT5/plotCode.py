@@ -111,7 +111,8 @@ def plotTrial(timeStamp, xPos, yPos, ssacc, durSacc, euclidDist, **par):
     xMin = par.pop('xMin', 0)
     yMax = par.pop('yMax', 1050)
     yMin = par.pop('yMin', 0)
-
+    included = par.pop('included', 'True')
+    
     #==========================================================================
     # Plotting
     #==========================================================================
@@ -234,7 +235,7 @@ def plotTrial(timeStamp, xPos, yPos, ssacc, durSacc, euclidDist, **par):
         plt.imshow(newHeatmap, cmap=cmap, extent=[xMin,xMax,yMin,yMax], alpha = kernelAlpha, aspect=bgAspect)
     # invert Axis
     ax.invert_yaxis()
-    plt.suptitle('Plotting trial: ' + str(trial+1) + ', index number: ' + str(trial))
+    plt.suptitle('Plotting trial: ' + str(trial+1) + ', index number: ' + str(trial)+'\nIncluded: '+included)
     plt.draw()
 
 #plotTrial(time, x, y, ssacc, saccDur, euclidDist, **par)
