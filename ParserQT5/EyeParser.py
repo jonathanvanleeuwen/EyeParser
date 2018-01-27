@@ -26,6 +26,16 @@ from eyeParserBuilder import Ui_MainWindow
 def getSys():
     return psutil.cpu_percent(1), psutil.virtual_memory()[2]
 
+def saveResults(data, name, dType):
+    if dType == '.p':
+        data.to_pickle(name+dType)
+    elif dType == '.hdf':
+        data.to_hdf(name+dType, 'w')
+    elif dType == '.json':
+        data.to_json(name+dType)
+    elif dType == '.csv':
+        data.to_csv(name+dType, index = False, na_rep = '#N/A')
+                    
 #==============================================================================
 #==============================================================================
 # #  GUI code
@@ -55,14 +65,13 @@ class workerClass(QtCore.QThread):
         for indx, FILENAME in enumerate(self.files):
             FILENAME, parsedData, rawData, parsedLong = parseWrapper(self.files[indx], self.par)
             # Save data
-            parsedData.to_pickle(self.par['savefileNames'][indx])
+            saveResults(parsedData, self.par['savefileNames'][indx], self.par['formatType'])
             if self.par['saveRawFiles'] == 'Yes':
-                rawData.to_pickle(self.par['saveFileNamesRaw'][indx])
+                saveResults(rawData, self.par['saveFileNamesRaw'][indx], self.par['rawFormatType'])
             if self.par['longFormat'] == 'Yes':
-                parsedLong.to_csv(self.par['savefileNames'][indx][:-2]+'Long.csv', index = False, na_rep = '#N/A')
+                saveResults(parsedLong, self.par['saveFileNamesLong'][indx], self.par['longFormatType'])
             # Send progress
             self.prog.emit(1)
-
 
 class MyMessageBox(QtWidgets.QMessageBox):
     def __init__(self):
@@ -100,7 +109,6 @@ class Window(QtWidgets.QMainWindow):
         self.docLoc = 'Documentation.txt'
         self.settingsLoc = 'Settings.txt'
         self.progressValue = 0
-
         # Load settings
         self.loadSettings()
 
@@ -118,6 +126,9 @@ class Window(QtWidgets.QMainWindow):
         palette.setColor(QtGui.QPalette.Background,QtCore.Qt.white)
         self.setPalette(palette)
 
+        # Hide tabs
+        self.ui.optionsTab.setVisible(False)
+        
         #======================================================================
         # Set the menu bar triggers
         #======================================================================
@@ -125,9 +136,6 @@ class Window(QtWidgets.QMainWindow):
         self.ui.openFile.triggered.connect(self.selectFile)
         # Exit parser
         self.ui.quitParser.triggered.connect(self.close_application)
-        # Settings (lock unlock)
-        self.ui.unlockSettingsM.triggered.connect(self.unlockSettings)
-        self.ui.lockSettingsM.triggered.connect(self.lockSettings)
         # Default settings
         self.ui.defSett.triggered.connect(self.loadDefaultSettings)
         # Documentation
@@ -148,42 +156,38 @@ class Window(QtWidgets.QMainWindow):
         self.ui.filebtn.clicked.connect(self.selectFile)
         
         #======================================================================
-        # Initiate Settings section for regular rexpressions
+        # Initiate options tab
         #======================================================================
-        #regSamples
-        self.ui.regSamp.setText(self.par['regExpSamp'])
-        #regEfix
-        self.ui.regEfix.setText(self.par['regExpEfix'])
-        #regEsacc
-        self.ui.regEsacc.setText(self.par['regExpEsacc'])
-        #regEblink
-        self.ui.regEblink.setText(self.par['regExpEblink'])
-        #regStart
-        self.ui.regStart.setText(self.par['regExpStart'])
-        #regStop
-        self.ui.regStop.setText(self.par['regExpStop'])
-        #regVar
-        self.ui.regVar.setText(self.par['regExpVar'])
-        #regMsg
-        self.ui.regMsg.setText(self.par['regExpMsg'])
-
+        # Parallel processing
+        self.ui.paralell.addItem("Yes")
+        self.ui.paralell.addItem("No")
+        idx = self.ui.paralell.findText(self.par['runParallel'])
+        if idx != -1:
+            self.ui.paralell.setCurrentIndex(idx)
+        #Number of cores
+        maxCores = psutil.cpu_count()
+        if int(self.par['nrCores']) > maxCores-1:
+            self.par['nrCores'] = str(maxCores-1)
+        self.ui.nrCores.setText(self.par['nrCores'])
+        # Pixels per degree
+        self.ui.pixMode.addItem("Automatic")
+        self.ui.pixMode.addItem("Manual")
+        if self.par['pxMode'] == 'Automatic':
+            self.ui.pixMode.setCurrentIndex(0)
+        else:
+            self.ui.pixMode.setCurrentIndex(1)
+        #Number of pixels per degree
+        self.ui.pixPerDeg.setText(self.par['pxPerDeg'])
+        
         #======================================================================
-        # Initiate section for various settings
+        # Initiate Save options tab
         #======================================================================
         #Parsed name
         self.ui.parsedName.setText(self.par['saveExtension'])
-        #Parsed name
+        #Parsed Raw name
         self.ui.rawName.setText(self.par['saveRawExtension'])
-        #Merged name
-        self.ui.mergedName.setText(self.par['mergedFileNames'])
-        # Merged yes/no
-        # Save Merged files button
-        self.ui.mergebtn.addItem("No")
-        self.ui.mergebtn.addItem("Yes")
-        if self.par['saveMergedFiles'] == 'No':
-            self.ui.mergebtn.setCurrentIndex(0)
-        else:
-            self.ui.mergebtn.setCurrentIndex(1)
+        # Longformat name 
+        self.ui.longName.setText(self.par['DFsaveLongExtension'])
         # Save raw button 
         self.ui.saveRawbtn.addItem("No")
         self.ui.saveRawbtn.addItem("Yes")
@@ -206,73 +210,37 @@ class Window(QtWidgets.QMainWindow):
             self.ui.duplicLongbtn.setCurrentIndex(0)
         else:
             self.ui.duplicLongbtn.setCurrentIndex(1)
-        # Parallel processing
-        self.ui.paralell.addItem("Yes")
-        self.ui.paralell.addItem("No")
-        #Number of cores
-        maxCores = psutil.cpu_count()
-        if int(self.par['nrCores']) > maxCores-1:
-            self.par['nrCores'] = str(maxCores-1)
-        self.ui.nrCores.setText(self.par['nrCores'])
-        # Pixels per degree
-        self.ui.pixMode.addItem("Automatic")
-        self.ui.pixMode.addItem("Manual")
-        if self.par['pxMode'] == 'Automatic':
-            self.ui.pixMode.setCurrentIndex(0)
-        else:
-            self.ui.pixMode.setCurrentIndex(1)
-        #Number of pixels per degree
-        self.ui.pixPerDeg.setText(self.par['pxPerDeg'])
-       
-        # =====================================================================
-        # Put all settings in a list
-        # =====================================================================
-        self.hideOptionsList = [\
-                        self.ui.settingsLine,\
-                        self.ui.regSamp,\
-                        self.ui.regEfix,\
-                        self.ui.regEsacc,\
-                        self.ui.regEblink,\
-                        self.ui.regStart,\
-                        self.ui.regStop,\
-                        self.ui.regVar,\
-                        self.ui.regMsg,\
-                        self.ui.parsedName,\
-                        self.ui.rawName,\
-                        self.ui.mergedName,\
-                        self.ui.mergebtn,\
-                        self.ui.nrCores,\
-                        self.ui.paralell,\
-                        self.ui.saveRawbtn,\
-                        self.ui.pixMode,\
-                        self.ui.pixPerDeg,\
-                        self.ui.longbtn,\
-                        self.ui.duplicLongbtn]
+        # Save as dropDowns
+        idx = self.ui.fileTypeBtn.findText(self.par['defaultSaveAs'])
+        if idx != -1:
+            self.ui.fileTypeBtn.setCurrentIndex(idx)
+        idx = self.ui.fileTypeRawBtn.findText(self.par['rawSaveAs'])
+        if idx != -1:
+            self.ui.fileTypeRawBtn.setCurrentIndex(idx)
+        idx = self.ui.fileTypeLongBtn.findText(self.par['longSaveAs'])
+        if idx != -1:
+            self.ui.fileTypeLongBtn.setCurrentIndex(idx)
         
-        self.hideOptionsTextList = [\
-                        self.ui.settingsL,\
-                        self.ui.regL,\
-                        self.ui.variousL,\
-                        self.ui.regSampL,\
-                        self.ui.regEfixL,\
-                        self.ui.regEsaccL,\
-                        self.ui.regEblinkL,\
-                        self.ui.regStartL,\
-                        self.ui.regStopL,\
-                        self.ui.regVarL,\
-                        self.ui.regMsgL,\
-                        self.ui.parsedNameL,\
-                        self.ui.rawNameL,\
-                        self.ui.mergedNameL,\
-                        self.ui.mergeL,\
-                        self.ui.nrCoresL,\
-                        self.ui.paralellL,\
-                        self.ui.saveRawL,\
-                        self.ui.pixPerDegL,\
-                        self.ui.pixDegL,\
-                        self.ui.longL,\
-                        self.ui.duplicLongL]
-
+        #======================================================================
+        # Initiate regular rexpressions tab
+        #======================================================================
+        #regSamples
+        self.ui.regSamp.setText(self.par['regExpSamp'])
+        #regEfix
+        self.ui.regEfix.setText(self.par['regExpEfix'])
+        #regEsacc
+        self.ui.regEsacc.setText(self.par['regExpEsacc'])
+        #regEblink
+        self.ui.regEblink.setText(self.par['regExpEblink'])
+        #regStart
+        self.ui.regStart.setText(self.par['regExpStart'])
+        #regStop
+        self.ui.regStop.setText(self.par['regExpStop'])
+        #regVar
+        self.ui.regVar.setText(self.par['regExpVar'])
+        #regMsg
+        self.ui.regMsg.setText(self.par['regExpMsg'])
+       
         #======================================================================
         # Status labels
         #======================================================================
@@ -309,7 +277,6 @@ class Window(QtWidgets.QMainWindow):
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowStaysOnTopHint)
         self.show()
         self.activateWindow()
-        self.lockSettings()
         
     #==============================================================================
     # Define button actions
@@ -376,7 +343,6 @@ class Window(QtWidgets.QMainWindow):
             self.ui.regMsg.setText(self.par['regExpMsg'])
             self.ui.parsedName.setText(self.par['saveExtension'])
             self.ui.rawName.setText(self.par['saveRawExtension'])
-            self.ui.mergedName.setText(self.par['mergedFileNames'])
             self.ui.pixPerDeg.setText(self.par['pxPerDeg'])
             maxCores = psutil.cpu_count()
             if int(self.par['nrCores']) > maxCores-1:
@@ -386,10 +352,6 @@ class Window(QtWidgets.QMainWindow):
             
             # Set button defaults
             # Parallel button is not set, sets depending on file number
-            if self.par['saveMergedFiles'] == 'No':
-                self.ui.mergebtn.setCurrentIndex(0)
-            else:
-                self.ui.mergebtn.setCurrentIndex(1)
             if self.par['saveRawFiles'] == 'No':
                 self.ui.saveRawbtn.setCurrentIndex(0)
             else:
@@ -406,6 +368,19 @@ class Window(QtWidgets.QMainWindow):
                 self.ui.duplicLongbtn.setCurrentIndex(0)
             else:
                 self.ui.duplicLongbtn.setCurrentIndex(1)
+            # Save as dropDowns
+            idx = self.ui.fileTypeBtn.findText(self.par['defaultSaveAs'])
+            if idx != -1:
+                self.ui.fileTypeBtn.setCurrentIndex(idx)
+            idx = self.ui.fileTypeRawBtn.findText(self.par['rawSaveAs'])
+            if idx != -1:
+                self.ui.fileTypeRawBtn.setCurrentIndex(idx)
+            idx = self.ui.fileTypeLongBtn.findText(self.par['longSaveAs'])
+            if idx != -1:
+                self.ui.fileTypeLongBtn.setCurrentIndex(idx)
+            idx = self.ui.paralell.findText(self.par['runParallel'])
+            if idx != -1:
+                self.ui.paralell.setCurrentIndex(idx)
         else:
             pass
 
@@ -419,9 +394,6 @@ class Window(QtWidgets.QMainWindow):
 
     def updateProgress(self, value):
         self.progressValue += value
-        if self.progressValue == len(self.files):
-            if self.ui.mergebtn.currentText() == 'Yes':
-                self.savedMergedFiles()
         self.ui.progressBar.setValue(self.progressValue)
 
     def startBussyBar(self):
@@ -430,28 +402,7 @@ class Window(QtWidgets.QMainWindow):
     def stopBussyBar(self):
         self.ui.bussyBar.setRange(0,1)
 
-    def savedMergedFiles(self):
-        fName = os.path.commonprefix(self.par['savefileNames']) + self.mergedName.toPlainText() + '.p'
-        fNameRaw = fName[:-2] + self.rawName.toPlainText() +'.p'
-        if self.files > 1:
-            # Merge and save regular data
-            data = pd.read_pickle(self.par['savefileNames'][0])
-            for f in self.par['savefileNames'][1:]:
-                data = pd.concat([data, pd.read_pickle(f)])
-            data = data.reset_index()
-            data.to_pickle(fName)
-            del data
-            # Merge and save raw data
-            if self.par['saveRawFiles'] == 'Yes':
-                dataRaw = pd.read_pickle(self.par['saveFileNamesRaw'][0])
-                for f in self.par['saveFileNamesRaw'][1:]:
-                    dataRaw = pd.concat([dataRaw, pd.read_pickle(f)])
-                dataRaw = dataRaw.reset_index()
-                dataRaw.to_pickle(fNameRaw)
-                del dataRaw
-
     def selectFile(self):
-        self.lockSettings()
         tempFiles = QtWidgets.QFileDialog.getOpenFileNames(self, 'Select file(s)')[0]
         if len(tempFiles) > 0:
             self.files = tempFiles
@@ -467,76 +418,6 @@ class Window(QtWidgets.QMainWindow):
                 self.ui.paralell.setCurrentIndex(1)
             else:
                 self.ui.paralell.setCurrentIndex(0)
-
-    def unlockSettings(self):
-        for item in self.hideOptionsList:
-            item.setEnabled(True)
-            item.show()
-        
-        for item in self.hideOptionsTextList:
-            item.show()
-
-        # Enable all settings
-#        self.ui.regSamp.setEnabled(True)
-#        self.ui.regEfix.setEnabled(True)
-#        self.ui.regEsacc.setEnabled(True)
-#        self.ui.regEblink.setEnabled(True)
-#        self.ui.regStart.setEnabled(True)
-#        self.ui.regStop.setEnabled(True)
-#        self.ui.regVar.setEnabled(True)
-#        self.ui.regMsg.setEnabled(True)
-#        self.ui.parsedName.setEnabled(True)
-#        self.ui.rawName.setEnabled(True)
-#        self.ui.mergedName.setEnabled(True)
-#        self.ui.mergebtn.setEnabled(True)
-#        self.ui.nrCores.setEnabled(True)
-#        self.ui.paralell.setEnabled(True)
-#        self.ui.saveRawbtn.setEnabled(True)
-#        self.ui.pixMode.setEnabled(True)
-#        self.ui.pixPerDeg.setEnabled(True)
-#        self.ui.longbtn.setEnabled(True)
-#        self.ui.duplicLongbtn.setEnabled(True)
-
-        # Enable lock button
-        self.ui.lockSettingsM.setEnabled(True)
-        # Disable unlock button
-        self.ui.unlockSettingsM.setEnabled(False)
-
-    def lockSettings(self):
-        for item in self.hideOptionsList:
-            item.setEnabled(False)
-            item.hide()
-            
-        for item in self.hideOptionsTextList:
-            item.hide()
-            
-#        self.ui.regSamp.setEnabled(False)
-#        self.ui.regEfix.setEnabled(False)
-#        self.ui.regEsacc.setEnabled(False)
-#        self.ui.regEblink.setEnabled(False)
-#        self.ui.regStart.setEnabled(False)
-#        self.ui.regStop.setEnabled(False)
-#        self.ui.regVar.setEnabled(False)
-#        self.ui.regMsg.setEnabled(False)
-#        self.ui.parsedName.setEnabled(False)
-#        self.ui.rawName.setEnabled(False)
-#        self.ui.mergedName.setEnabled(False)
-#        self.ui.mergebtn.setEnabled(False)
-#        self.ui.nrCores.setEnabled(False)
-#        self.ui.paralell.setEnabled(False)
-#        self.ui.saveRawbtn.setEnabled(False)
-#        self.ui.pixMode.setEnabled(False)
-#        self.ui.pixPerDeg.setEnabled(False)
-#        self.ui.longbtn.setEnabled(False)
-#        self.ui.duplicLongbtn.setEnabled(False)
-
-        # disable lock button
-        self.ui.lockSettingsM.setEnabled(False)
-        # Enable unlock button
-        self.ui.unlockSettingsM.setEnabled(True)
-        # Enable parse button
-        if len(self.files) > 0:
-            self.ui.Parsebtn.setEnabled(True)
 
     def documentation(self):
         text=open(self.docLoc).read()
@@ -554,18 +435,44 @@ class Window(QtWidgets.QMainWindow):
         self.ui.progressBar.setRange(0,len(self.files))
         self.ui.progressBar.setValue(0)
         self.progressValue = 0
-        self.lockSettings()
         self.ui.statusL.hide()
         self.repaint()
 
         #======================================================================
         # Get settings for parsing
         #======================================================================
+        # Get file type 
+        fileType = self.ui.fileTypeBtn.currentText()
+        if fileType == 'pickle':
+            self.par['formatType'] = '.p'
+        elif fileType == 'HDF':
+            self.par['formatType'] = '.hdf'
+        elif fileType == 'json':
+            self.par['formatType'] = '.json'
+        fileType = self.ui.fileTypeRawBtn.currentText()
+        if fileType == 'pickle':
+            self.par['rawFormatType'] = '.p'
+        elif fileType == 'HDF':
+            self.par['rawFormatType'] = '.hdf'
+        elif fileType == 'json':
+            self.par['rawFormatType'] = '.json'
+        fileType= self.ui.fileTypeLongBtn.currentText()
+        if fileType == 'pickle':
+            self.par['longFormatType'] = '.p'
+        elif fileType == 'HDF':
+            self.par['longFormatType'] = '.hdf'
+        elif fileType == 'json':
+            self.par['longFormatType'] = '.json'
+        elif fileType == 'CSV':
+            self.par['longFormatType'] = '.csv'
+        
         # File name handling
         self.par['saveExtension'] = self.ui.parsedName.toPlainText()
         self.par['saveRawExtension'] = self.ui.rawName.toPlainText()
-        self.par['savefileNames'] = [f[:-4] + self.par['saveExtension']+'.p' for f in self.files]
-        self.par['saveFileNamesRaw'] = [f[:-4] + self.par['saveExtension'] + self.par['saveRawExtension']+'.p' for f in self.files]
+        self.par['saveLongExtension'] = self.ui.longName.toPlainText()
+        self.par['savefileNames'] = [f[:-4] + self.par['saveExtension'] for f in self.files]
+        self.par['saveFileNamesRaw'] = [f[:-4] + self.par['saveExtension'] + self.par['saveRawExtension'] for f in self.files]
+        self.par['saveFileNamesLong'] = [f[:-4] + self.par['saveExtension'] + self.par['saveLongExtension'] for f in self.files]
 
         # Get regular expression info
         self.par['startTrialKey'] = self.ui.startKey.toPlainText().strip()
@@ -598,7 +505,6 @@ class Window(QtWidgets.QMainWindow):
             self.par['regExpMsgNew'] = False
 
         # Processing info
-        self.par['saveMergedFiles'] = self.ui.mergebtn.currentText()
         self.par['saveRawFiles'] = self.ui.saveRawbtn.currentText()
         self.par['runParallel'] = self.ui.paralell.currentText()
         self.par['nrCores'] = self.ui.nrCores.toPlainText()
@@ -625,13 +531,17 @@ class Window(QtWidgets.QMainWindow):
         self.parse()
 
     def callbackParser(self, results):
-        savefileName = results[0][:-4] + self.par['saveExtension'] + '.p'
-        saveFileNamesRaw = results[0][:-4] + self.par['saveExtension'] + self.par['saveRawExtension'] + '.p'
-        results[1].to_pickle(savefileName)
+        # Set save names
+        savefileName = results[0][:-4] + self.par['saveExtension']
+        saveFileNamesRaw = results[0][:-4] + self.par['saveExtension'] + self.par['saveRawExtension']
+        saveFileNameslong = results[0][:-4] + self.par['saveExtension'] + self.par['saveLongExtension']
+        
+        # Save data 
+        saveResults(results[1], savefileName, self.par['formatType'])
         if self.par['saveRawFiles'] == 'Yes':
-            results[2].to_pickle(saveFileNamesRaw)
+            saveResults(results[2], saveFileNamesRaw, self.par['rawFormatType'])
         if self.par['longFormat'] == 'Yes':
-            results[3].to_csv(saveFileNamesRaw[:-2]+'Long.csv', index = False, na_rep = '#N/A')
+            saveResults(results[3], saveFileNameslong, self.par['longFormatType'])
         self.updateProgress(1)
 
     def parse(self):
@@ -685,7 +595,6 @@ class Window(QtWidgets.QMainWindow):
             sys.exit()
         else:
             pass
-
 
 def run():
     if __name__ == "__main__":
