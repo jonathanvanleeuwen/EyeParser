@@ -184,7 +184,16 @@ class Window(QtWidgets.QMainWindow):
             self.ui.saveFile.setEnabled(True)
         
     def saveDataFile(self):
-        self.data.to_pickle(self.fileName)
+        dType = os.path.splitext(self.fileName)[1]
+        if dType == '.p':
+            self.data.to_pickle(self.fileName)
+        elif dType == '.hdf':
+            self.data.to_hdf(self.fileName, 'w')
+        elif dType == '.json':
+            self.data.to_json(self.fileName)
+        elif dType == '.csv':
+            self.data.to_csv(self.fileName, index = False, na_rep = '#N/A')
+
             
     def selectImDir(self):
         self.imDir = QtWidgets.QFileDialog.getExistingDirectory(None, 'Select image folder')
