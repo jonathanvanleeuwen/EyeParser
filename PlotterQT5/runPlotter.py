@@ -138,12 +138,27 @@ class Window(QtWidgets.QMainWindow):
         self.ui.kernelThreshold.setValue(0.00)
         self.ui.kernelAlpha.setValue(0.50)
         
+    def readFile(self, fName):
+        dType = os.path.splitext(fName)[1]
+        if dType == '.p':
+            data = pd.read_pickle(fName)
+        elif dType == '.hdf':
+            data = pd.read_hdf(fName)
+        elif dType == '.json':
+            data = pd.read_json(fName)   
+            # Reformat lists to np.array
+            ls = ['rawX', 'rawY', 'rawTime', 'euclidDist']
+            for i in ls:
+                data['DK_'+i] = [np.array(x) for x in data['DK_'+i].values]
+
+        return data
+    
     def selectDataFile(self):
         self.fileName = QtWidgets.QFileDialog.getOpenFileName(None, 'Select file')[0]
         if self.fileName:
             fileBase = os.path.basename(self.fileName)
-            self.ui.selectedFile.setText(fileBase[:-2])
-            self.data = pd.read_pickle(self.fileName)
+            self.ui.selectedFile.setText(os.path.splitext(fileBase)[0])
+            self.data = self.readFile(self.fileName)
             self.allowedIndexes = self.data.index.get_values()
             
             # Trial counters
@@ -164,7 +179,7 @@ class Window(QtWidgets.QMainWindow):
             # Initiate counters
             self.setCounters()
             self.plotData()
-            
+            self.updateButtonClick()
             # Initiate save file button
             self.ui.saveFile.setEnabled(True)
         
