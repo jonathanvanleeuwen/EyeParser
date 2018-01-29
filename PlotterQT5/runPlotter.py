@@ -11,7 +11,56 @@ import pandas as pd
 import numpy as np
 from plotCode import plotTrial
 from plotterGUICode import Ui_Eyelinkplotter
+import scipy
 
+
+#==============================================================================
+# Functions for reading mat files
+#==============================================================================
+def loadmat(filename):
+    '''
+    this function should be called instead of direct spio.loadmat
+    as it cures the problem of not properly recovering python dictionaries
+    from mat files. It calls the function check keys to cure all entries
+    which are still mat-objects
+    
+    from: `StackOverflow <http://stackoverflow.com/questions/7008608/scipy-io-loadmat-nested-structures-i-e-dictionaries>`_
+    '''
+    data = scipy.io.loadmat(filename, struct_as_record=False, squeeze_me=True)
+    print 'loaded Data'
+    return _check_keys(data)
+
+def _check_keys(dict):
+    '''
+    checks if entries in dictionary are mat-objects. If yes
+    todict is called to change them to nested dictionaries
+    '''
+    for key in dict:
+        if isinstance(dict[key], scipy.io.matlab.mio5_params.mat_struct):
+            dict[key] = _todict(dict[key])
+    return dict        
+
+def _todict(matobj):
+    '''
+    A recursive function which constructs from matobjects nested dictionaries
+    '''
+    dict = {}
+    for strg in matobj._fieldnames:
+        elem = matobj.__dict__[strg]
+        if isinstance(elem, scipy.io.matlab.mio5_params.mat_struct):
+            dict[strg] = _todict(elem)
+        else:
+            dict[strg] = elem
+    return dict
+
+def saveToMat(df, fn):
+    import scipy
+    a_dict = {col_name : df[col_name].values for col_name in df.columns.values}  
+    scipy.io.savemat(fn, {'data':a_dict})
+
+#==============================================================================
+# Build the GUI
+#==============================================================================
 class Window(QtWidgets.QMainWindow):
     #==============================================================================
     # Build GUI
@@ -150,7 +199,11 @@ class Window(QtWidgets.QMainWindow):
             ls = ['rawX', 'rawY', 'rawTime', 'euclidDist']
             for i in ls:
                 data['DK_'+i] = [np.array(x) for x in data['DK_'+i].values]
-
+        elif dType == '.mat':
+            print '???'
+            print fName
+            data = loadmat(fName)
+            data = pd.DataFrame(data['data'])
         return data
     
     def selectDataFile(self):
@@ -193,7 +246,8 @@ class Window(QtWidgets.QMainWindow):
             self.data.to_json(self.fileName)
         elif dType == '.csv':
             self.data.to_csv(self.fileName, index = False, na_rep = '#N/A')
-
+        elif dType == '.mat':
+            saveToMat(self.data, self.fileName)
             
     def selectImDir(self):
         self.imDir = QtWidgets.QFileDialog.getExistingDirectory(None, 'Select image folder')

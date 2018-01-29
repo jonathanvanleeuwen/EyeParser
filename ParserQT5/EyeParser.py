@@ -26,6 +26,11 @@ from eyeParserBuilder import Ui_MainWindow
 def getSys():
     return psutil.cpu_percent(1), psutil.virtual_memory()[2]
 
+def saveToMat(df, fn):
+    import scipy
+    a_dict = {col_name : df[col_name].values for col_name in df.columns.values}  
+    scipy.io.savemat(fn, {'data':a_dict})
+
 def saveResults(data, name, dType):
     if dType == '.p':
         data.to_pickle(name+dType)
@@ -35,7 +40,9 @@ def saveResults(data, name, dType):
         data.to_json(name+dType)
     elif dType == '.csv':
         data.to_csv(name+dType, index = False, na_rep = '#N/A')
-                    
+    elif dType == '.mat':
+        saveToMat(data, name)
+        
 #==============================================================================
 #==============================================================================
 # #  GUI code
@@ -51,7 +58,6 @@ class ThreadClass(QtCore.QThread):
         while 1:
             sysval = getSys()
             self.sysVals.emit(sysval)
-
 
 class workerClass(QtCore.QThread):
     prog = QtCore.pyqtSignal(int)
@@ -449,6 +455,8 @@ class Window(QtWidgets.QMainWindow):
             self.par['formatType'] = '.hdf'
         elif fileType == 'json':
             self.par['formatType'] = '.json'
+        elif fileType == 'MAT':
+            self.par['formatType'] = '.mat'
         fileType = self.ui.fileTypeRawBtn.currentText()
         if fileType == 'pickle':
             self.par['rawFormatType'] = '.p'
@@ -456,6 +464,8 @@ class Window(QtWidgets.QMainWindow):
             self.par['rawFormatType'] = '.hdf'
         elif fileType == 'json':
             self.par['rawFormatType'] = '.json'
+        elif fileType == 'MAT':
+            self.par['rawFormatType'] = '.mat'
         fileType= self.ui.fileTypeLongBtn.currentText()
         if fileType == 'pickle':
             self.par['longFormatType'] = '.p'
@@ -465,6 +475,8 @@ class Window(QtWidgets.QMainWindow):
             self.par['longFormatType'] = '.json'
         elif fileType == 'CSV':
             self.par['longFormatType'] = '.csv'
+        elif fileType == 'MAT':
+            self.par['longFormatType'] = '.mat'
         
         # File name handling
         self.par['saveExtension'] = self.ui.parsedName.toPlainText()
