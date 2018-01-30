@@ -56,6 +56,7 @@ class ThreadClass(QtCore.QThread):
         
     def run(self):
         while 1:
+            time.sleep(1)
             sysval = getSys()
             self.sysVals.emit(sysval)
 
@@ -69,13 +70,22 @@ class workerClass(QtCore.QThread):
     def run(self):
         #Do the analysis single core
         for indx, FILENAME in enumerate(self.files):
-            FILENAME, parsedData, rawData, parsedLong = parseWrapper(self.files[indx], self.par)
-            # Save data
-            saveResults(parsedData, self.par['savefileNames'][indx], self.par['formatType'])
-            if self.par['saveRawFiles'] == 'Yes':
-                saveResults(rawData, self.par['saveFileNamesRaw'][indx], self.par['rawFormatType'])
-            if self.par['longFormat'] == 'Yes':
-                saveResults(parsedLong, self.par['saveFileNamesLong'][indx], self.par['longFormatType'])
+            FILENAME, parsedData, rawData, parsedLong, error = parseWrapper(self.files[indx], self.par)
+            if error == False:
+                # Save data
+                saveResults(parsedData, self.par['savefileNames'][indx], self.par['formatType'])
+                if self.par['saveRawFiles'] == 'Yes':
+                    saveResults(rawData, self.par['saveFileNamesRaw'][indx], self.par['rawFormatType'])
+                if self.par['longFormat'] == 'Yes':
+                    saveResults(parsedLong, self.par['saveFileNamesLong'][indx], self.par['longFormatType'])
+            else:
+                print "\n\nUnfortunatly an Error occured!"
+                print os.path.basename(FILENAME), "Was not saved"
+                print "Please try to parse this file again"
+                print "Error Message:"
+                print error
+                print '\n'
+                
             # Send progress
             self.prog.emit(1)
 
@@ -274,6 +284,9 @@ class Window(QtWidgets.QMainWindow):
         #======================================================================
         # Finishing touches
         #======================================================================
+        # Set start time of parser
+        self.finished = False
+        
         # Start threading System resources       
         self.threadclass = ThreadClass()
         self.threadclass.sysVals.connect(self.updateSystemBars)
@@ -393,14 +406,18 @@ class Window(QtWidgets.QMainWindow):
     def updateSystemBars(self, sysval):
         self.ui.cpuBar.setValue(sysval[0])
         self.ui.memBar.setValue(sysval[1])
+        self.ui.progressBar.setValue(self.progressValue)
         if self.progressValue == len(self.files) and len(self.files) > 0:
             self.stopBussyBar()
             self.ui.statusL.setText(self.DONEL)
             self.ui.statusL.show()
-
-    def updateProgress(self, value):
-        self.progressValue += value
-        self.ui.progressBar.setValue(self.progressValue)
+            if self.finished == False:
+                dur = time.time() - self.parseStartTime
+                timem = int(dur/60)
+                times = dur%60
+                print "Finished!"
+                print "Duration: %d minutes, %d seconds" %(timem, times)
+                self.finished = True
 
     def startBussyBar(self):
         self.ui.bussyBar.setRange(0,0)
@@ -542,22 +559,36 @@ class Window(QtWidgets.QMainWindow):
         #======================================================================
         self.parse()
 
+    def updateProgress(self, value):
+        self.progressValue += value
+
     def callbackParser(self, results):
         # Set save names
         savefileName = results[0][:-4] + self.par['saveExtension']
         saveFileNamesRaw = results[0][:-4] + self.par['saveExtension'] + self.par['saveRawExtension']
         saveFileNameslong = results[0][:-4] + self.par['saveExtension'] + self.par['saveLongExtension']
         
-        # Save data 
-        saveResults(results[1], savefileName, self.par['formatType'])
-        if self.par['saveRawFiles'] == 'Yes':
-            saveResults(results[2], saveFileNamesRaw, self.par['rawFormatType'])
-        if self.par['longFormat'] == 'Yes':
-            saveResults(results[3], saveFileNameslong, self.par['longFormatType'])
-        self.updateProgress(1)
-
+        if results[-1] == False:
+            # Save data 
+            saveResults(results[1], savefileName, self.par['formatType'])
+            if self.par['saveRawFiles'] == 'Yes':
+                saveResults(results[2], saveFileNamesRaw, self.par['rawFormatType'])
+            if self.par['longFormat'] == 'Yes':
+                saveResults(results[3], saveFileNameslong, self.par['longFormatType'])
+        else:
+            print "\n\nUnfortunatly an Error occured!"
+            print os.path.basename(savefileName), "Was not saved"
+            print "Please try to parse this file again"
+            print "Error Message:"
+            print results[-1]
+            print '\n'
+            
+        # Update progresbar       
+        self.progressValue += 1
+            
     def parse(self):
         self.startBussyBar()        
+        self.parseStartTime = time.time()
         if self.par['runParallel'] == 'Yes':
             try:
                 self.ui.statusL.setText(self.MCPL)
@@ -614,7 +645,11 @@ def run():
         import ctypes
         myappid = 'mycompany.myproduct.subproduct.version' # arbitrary string
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
-        app = QtWidgets.QApplication(sys.argv)
-        ui = Window()
-        sys.exit(app.exec_())
+        
+        if not QtWidgets.QApplication.instance():
+            app = QtWidgets.QApplication(sys.argv)
+        else:
+            app = QtWidgets.QApplication.instance() 
+            ui = Window()
+            sys.exit(app.exec_())
 run()
