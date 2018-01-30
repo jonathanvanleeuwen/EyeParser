@@ -96,6 +96,7 @@ def uniqueRows(x):
 def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
     # Get constants
     pltType = par.pop('pltType','gaze') # options: 'gaze', 'heat'
+    pltStyle = par.pop('pltStyle', 'scatter') # scatter or line
     pltBg = par.pop('pltBg', False)
     bgImLoc = par.pop('bgImage' , False)
     bgAspect = par.pop('bgAspect', 'equal') # 'auto','equal'
@@ -138,7 +139,10 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
     plt.title('Xgaze(time)')
     plt.ylabel('Pixel position')
     plt.ylim([xMin,xMax])
-    plt.scatter(normTime, xPos,marker = 'p', s = 1)
+    if pltStyle == 'line':
+        plt.plot(normTime, xPos)
+    elif pltStyle == 'scatter':
+        plt.scatter(normTime, xPos,marker = 'p', s = 1)
     plt.xlim([normTime[0], normTime[-1]])
     ax = plt.gca()
     if highlight != 'None':
@@ -154,7 +158,10 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
     plt.title('Ygaze(time)')
     plt.ylabel('Pixel position')
     plt.ylim([yMin,yMax])
-    plt.scatter(normTime, yPos, marker = 'p', s = 1)
+    if pltStyle == 'line':
+        plt.plot(normTime, yPos)
+    elif pltStyle == 'scatter':
+        plt.scatter(normTime, yPos, marker = 'p', s = 1)
     plt.xlim([normTime[0], normTime[-1]])
     ax = plt.gca()
     if highlight != 'None':
@@ -170,7 +177,10 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
     plt.title('Speed(time)')
     plt.xlabel('Time (ms)')
     plt.ylabel('Distance between samples (pixels)')
-    plt.scatter(normTime, euclidDist, marker = 'p', s = 1)
+    if pltStyle == 'line':
+        plt.plot(normTime, euclidDist)
+    elif pltStyle == 'scatter':        
+        plt.scatter(normTime, euclidDist, marker = 'p', s = 1)
     plt.xlim([normTime[0], normTime[-1]])
     plt.ylim([0,np.max(euclidDist)])
     ax = plt.gca()
@@ -195,9 +205,15 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
         if pltBg == True:
             bgIm = plt.imread(bgImLoc)
             ax.imshow(np.flipud(bgIm), aspect=bgAspect, extent = [xMin, xMax, yMin, yMax])
-            ax.scatter(xPos, yPos, c = timeCol, edgecolors = 'face', marker = 'p', s = 5, color = 'r', cmap = 'hot')
+            if pltStyle == 'line':
+                    ax.plot(xPos, yPos)
+            elif pltStyle == 'scatter':
+                ax.scatter(xPos, yPos, c = timeCol, edgecolors = 'face', marker = 'p', s = 5, color = 'r', cmap = 'hot')
         else:
-            plt.scatter(xPos, yPos,c = timeCol, edgecolors = 'face', marker = 'p', s = 5, cmap='hot')
+            if pltStyle == 'line':
+                plt.plot(xPos, yPos)
+            elif pltStyle == 'scatter':
+                plt.scatter(xPos, yPos,c = timeCol, edgecolors = 'face', marker = 'p', s = 5, cmap='hot')            
         ax.set(aspect = bgAspect)
 
     elif pltType == 'heat' :

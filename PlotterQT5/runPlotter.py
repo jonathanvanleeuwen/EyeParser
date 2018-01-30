@@ -422,7 +422,4 @@ def run():
             app = QtWidgets.QApplication.instance() 
             ui = Window()
             sys.exit(app.exec_())
-#        app = QtWidgets.QApplication(sys.argv)
-#        ui = Window()
-#        sys.exit(app.exec_())
 run()
