@@ -229,6 +229,19 @@ class Window(QtWidgets.QMainWindow):
             self.ui.trialScroll.setMinimum(1)
             self.ui.trialScroll.setMaximum(self.maxTrialNr)
             
+            # Set variables for additional info
+            self.ui.addInfo.addItems(['False']+keys)
+            
+            # Set plot data
+            self.ui.time.addItems(keys)
+            self.ui.time.setCurrentIndex(keys.index("DK_rawTime"))
+            self.ui.xCoords.addItems(keys)
+            self.ui.xCoords.setCurrentIndex(keys.index("DK_rawX"))
+            self.ui.yCoords.addItems(keys)
+            self.ui.yCoords.setCurrentIndex(keys.index("DK_rawY"))
+            self.ui.speed.addItems(keys)
+            self.ui.speed.setCurrentIndex(keys.index("DK_euclidDist"))
+                    
             # Initiate counters
             self.setCounters()
             self.plotData()
@@ -355,11 +368,11 @@ class Window(QtWidgets.QMainWindow):
                 
     def plotData(self):
         self.trialIndex = self.currTrial-1
-        self.time = self.data.DK_rawTime[self.trialIndex]
-        self.x = self.data.DK_rawX[self.trialIndex]
-        self.y = self.data.DK_rawY[self.trialIndex]
-        self.euclidDist = self.data.DK_euclidDist[self.trialIndex]
-        
+        self.time = self.data[self.ui.time.currentText().split()[0]][self.trialIndex]
+        self.x = self.data[self.ui.xCoords.currentText().split()[0]][self.trialIndex]
+        self.y = self.data[self.ui.yCoords.currentText().split()[0]][self.trialIndex]
+        self.speed = self.data[self.ui.speed.currentText().split()[0]][self.trialIndex]
+                
         # Do some sanity checks on settings
         pltBg = self.ui.plotBackground.currentText()
         if pltBg == 'True':
@@ -383,6 +396,7 @@ class Window(QtWidgets.QMainWindow):
         # Build the final parameter dict
         self.par ={\
             'pltType': self.ui.plotType.currentText().split()[0],\
+            'pltStyle': self.ui.plotStyle.currentText().split()[0],\
             'pltBg': pltBg,\
             'bgImage': bgImage,\
             'bgAspect': self.ui.aspectRatio.currentText().split()[0],\
@@ -403,10 +417,16 @@ class Window(QtWidgets.QMainWindow):
             'ssacc': self.data.DK_ssacc[self.trialIndex],\
             'saccDur': self.data.DK_durSacc[self.trialIndex],\
             'sFix':self.data.DK_sFix[self.trialIndex],\
-            'fixDur':self.data.DK_durFix[self.trialIndex]}
+            'fixDur':self.data.DK_durFix[self.trialIndex],\
+            'xLabel': self.ui.xCoords.currentText().split()[0],\
+            'yLabel': self.ui.yCoords.currentText().split()[0],\
+            'speedLabel': self.ui.speed.currentText().split()[0]}         
             
+        self.par['addLabel'] = self.ui.addInfo.currentText().split()[0]
+        if self.par['addLabel'] != 'False': 
+            self.par['addInfo'] = self.data[self.par['addLabel']][self.trialIndex]
         # Plot the trial 
-        plotTrial(self.time, self.x, self.y, self.euclidDist, **self.par)
+        plotTrial(self.time, self.x, self.y, self.speed, **self.par)
    
 
 def run():
