@@ -114,7 +114,8 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
     yMin = par.pop('yMin', 0)
     included = par.pop('included', 'True')
     highlight = par.pop('highlight', 'None')
-
+    exclReas = par.pop('ExcludeReason', 'NA')
+    
     if highlight == 'Saccade':
         sHighL = par.pop('ssacc')
         durHighL = par.pop('saccDur')
@@ -266,7 +267,7 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
         plt.imshow(newHeatmap, cmap=cmap, extent=[xMin,xMax,yMin,yMax], alpha = kernelAlpha, aspect=bgAspect)
     # invert Axis
     ax.invert_yaxis()
-    plt.suptitle('Plotting trial: ' + str(trial+1) + ', index number: ' + str(trial)+'\nIncluded: '+included)
+    plt.suptitle('Plotting trial: ' + str(trial+1) + ', index number: ' + str(trial)+'\nIncluded: '+included + ', Excluded reason:'+str(exclReas))
     plt.draw()
 
 #plotTrial(time, x, y, ssacc, saccDur, euclidDist, **par)
