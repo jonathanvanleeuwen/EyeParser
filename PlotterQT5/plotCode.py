@@ -31,6 +31,7 @@ import numpy as np
 import astropy.convolution as krn
 from matplotlib import cm
 import matplotlib.patches as patches
+import traceback
 
 def uniqueRows(x):
     y = np.ascontiguousarray(x).view(np.dtype((np.void, x.dtype.itemsize * x.shape[1])))
@@ -82,6 +83,10 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
         #recalculateTime to zero for each trial
         trialStart = timeStamp[0]
         normTime = timeStamp - trialStart
+        if len(normTime) == len(xPos):
+            xTime = normTime
+        else:
+            xTime = np.arange(len(xPos))
         plt.figure(2)
         plt.clf()
         plt.title('Raw trial Data')
@@ -91,10 +96,10 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
         plt.ylabel(xLabel)
         plt.ylim([xMin,xMax])
         if pltStyle == 'Line':
-            plt.plot(normTime, xPos)
+            plt.plot(xTime, xPos)
         elif pltStyle == 'Scatter':
-            plt.scatter(normTime, xPos,marker = 'p', s = 1)
-        plt.xlim([normTime[0], normTime[-1]])
+            plt.scatter(xTime, xPos,marker = 'p', s = 1)
+        plt.xlim([xTime[0], xTime[-1]])
         ax = plt.gca()
         if highlight != 'None':
             # Add rectangles for Saccades
@@ -105,15 +110,19 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
                                                fill=True, alpha = 0.3))
     
         # lets plot y position over time
+        if len(normTime) == len(yPos):
+            yTime = normTime
+        else:
+            yTime = np.arange(len(yPos))
         plt.subplot(3,2,3)
         plt.title('Ygaze(time)')
         plt.ylabel(ylabel)
         plt.ylim([yMin,yMax])
         if pltStyle == 'Line':
-            plt.plot(normTime, yPos)
+            plt.plot(yTime, yPos)
         elif pltStyle == 'Scatter':
-            plt.scatter(normTime, yPos, marker = 'p', s = 1)
-        plt.xlim([normTime[0], normTime[-1]])
+            plt.scatter(yTime, yPos, marker = 'p', s = 1)
+        plt.xlim([yTime[0], yTime[-1]])
         ax = plt.gca()
         if highlight != 'None':
             # Add rectangles for Saccades
@@ -124,15 +133,19 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
                                                fill=True, alpha = 0.3))
     
         # Lets plot speed over time (distance between points)
+        if len(normTime) == len(euclidDist):
+            speedTime = normTime
+        else:
+            speedTime = np.arange(len(euclidDist))
         plt.subplot(3,2,5)
         plt.title('Speed(time)')
         plt.xlabel('Time (ms)')
         plt.ylabel(speedLabel)
         if pltStyle == 'Line':
-            plt.plot(normTime, euclidDist)
+            plt.plot(speedTime, euclidDist)
         elif pltStyle == 'Scatter':        
-            plt.scatter(normTime, euclidDist, marker = 'p', s = 1)
-        plt.xlim([normTime[0], normTime[-1]])
+            plt.scatter(speedTime, euclidDist, marker = 'p', s = 1)
+        plt.xlim([speedTime[0], speedTime[-1]])
         plt.ylim([np.min(euclidDist)-20,np.max(euclidDist)+20])
         ax = plt.gca()
         if highlight != 'None':
@@ -227,6 +240,7 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
         plt.figure(2)
         plt.clf()
         plt.title('Error, try different settings!')
+        print traceback.format_exc()
 #plotTrial(time, x, y, ssacc, saccDur, euclidDist, **par)
 #s = time.time()
 #plotTrial(**par)
