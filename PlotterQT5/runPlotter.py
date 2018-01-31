@@ -27,7 +27,6 @@ def loadmat(filename):
     from: `StackOverflow <http://stackoverflow.com/questions/7008608/scipy-io-loadmat-nested-structures-i-e-dictionaries>`_
     '''
     data = scipy.io.loadmat(filename, struct_as_record=False, squeeze_me=True)
-    print 'loaded Data'
     return _check_keys(data)
 
 def _check_keys(dict):
@@ -79,7 +78,9 @@ class Window(QtWidgets.QMainWindow):
         self.setWindowTitle(_translate("Eyelinkplotter", "Eyelink data plotter", None))
         
         self.imDir = None
+        self.data = []
         self.populateLists()
+        
         # Run button press initiation
         self.defineButtonPresses()
         
@@ -156,6 +157,24 @@ class Window(QtWidgets.QMainWindow):
         # Initiate variables
         self.varInitiation()
         
+        # plot style
+        self.ui.plotStyle.setCurrentIndex(0)
+        self.ui.highlightEvent.setCurrentIndex(0)
+        self.ui.plotBackground.setCurrentIndex(0)
+        # Add extra settings if data has been loaded 
+        if len(self.data) > 2:
+            keys = [key for key in self.data.keys() if key[:3] == 'DK_' or key[:3] == 'DV_']
+            keys = [key for key in keys if len(key.split()) == 1]
+            # Clear variables first
+            # Set variables for additional info
+            self.ui.addInfo.setCurrentIndex(0)
+            # Set plot data
+            self.ui.time.setCurrentIndex(keys.index("DK_rawTime"))
+            self.ui.xCoords.setCurrentIndex(keys.index("DK_rawX"))
+            self.ui.yCoords.setCurrentIndex(keys.index("DK_rawY"))
+            self.ui.speed.setCurrentIndex(keys.index("DK_euclidDist"))
+            
+        
     def defineButtonPresses(self):
         self.ui.selectFile.clicked.connect(self.selectDataFile)
         self.ui.saveFile.clicked.connect(self.saveDataFile)
@@ -200,8 +219,6 @@ class Window(QtWidgets.QMainWindow):
             for i in ls:
                 data['DK_'+i] = [np.array(x) for x in data['DK_'+i].values]
         elif dType == '.mat':
-            print '???'
-            print fName
             data = loadmat(fName)
             data = pd.DataFrame(data['data'])
         return data
@@ -222,7 +239,6 @@ class Window(QtWidgets.QMainWindow):
             self.trialIndex = self.currTrial - 1
             
             # Set background variable options
-            self.data.keys()
             keys = [key for key in self.data.keys() if key[:3] == 'DK_' or key[:3] == 'DV_']
             keys = [key for key in keys if len(key.split()) == 1]
             self.ui.bgImageVariable.addItems(keys)

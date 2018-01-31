@@ -223,6 +223,7 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
         plt.suptitle(pltTitle)
         plt.draw()
     except:
+        plt.close('all')
         plt.figure(2)
         plt.clf()
         plt.title('Error, try different settings!')
