@@ -311,6 +311,7 @@ def eyeLinkDataParser(FILENAME, **par):
         trialNrs            = np.arange(1,len(startTimes)+1)
         # Get variables
         varData             = re.findall(regVar, raw)
+        varData.append(('000000', 'var', 'parserDummyVar dummy')) 
         varData             = np.array(varData)
         varTimes            = np.array(varData[:,0], dtype = float)
         varKey              = np.array(varData[:,1], dtype = str)
