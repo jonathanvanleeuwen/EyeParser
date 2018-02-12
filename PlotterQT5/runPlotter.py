@@ -12,7 +12,7 @@ import numpy as np
 from plotCode import plotTrial
 from plotterGUICode import Ui_Eyelinkplotter
 import scipy
-
+import scipy.io
 
 #==============================================================================
 # Functions for reading mat files
