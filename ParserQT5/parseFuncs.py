@@ -280,7 +280,8 @@ def eyeLinkDataParser(FILENAME, **par):
     
         # columns to delete from parsed dataframe
         deleteColumns = ['VALIDATE','!CAL','!MODE','ELCL','RECCFG','GAZE_COORDS',\
-                     'DISPLAY_COORDS','THRESHOLDS', 'DRIFTCORRECT']
+                     'DISPLAY_COORDS','THRESHOLDS', 'DRIFTCORRECT', 'parserDummyVar']
+        
         #==============================================================================
         # Load data ASCII data to memory
         #==============================================================================
@@ -326,6 +327,28 @@ def eyeLinkDataParser(FILENAME, **par):
         # Del raw data for speed and memory handeling
         del raw
     
+        # =============================================================================
+        # Extract all messages that have the shape of variables (var value) pairs
+        # and append them to the variabe dataframe
+        # =============================================================================
+        msgVars = deque([])
+        msgVarTimes = deque([])
+        delIdx = np.ones(len(msg), dtype = bool)
+        for i, ms in enumerate(msg):
+            msLis = ms.split()
+            if len(msLis) == 2:
+                msgVars.append(ms)
+                msgVarTimes.append(msgTimes[i])
+                delIdx[i] = False
+
+        # Append the msgVars and msgVarTimes to the variable array
+        varMsg = np.hstack((varMsg, np.array(msgVars)))
+        varTimes = np.hstack((varTimes, np.array(msgVarTimes)))
+        
+        # Delete the excess data
+        msg = msg[delIdx]
+        msgTimes = msgTimes[delIdx]
+        
         #==============================================================================
         # Put data into pandas dataframes for easy data extraction
         #==============================================================================
