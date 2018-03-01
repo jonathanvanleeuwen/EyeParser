@@ -28,6 +28,7 @@ def getSys():
 
 def saveToMat(df, fn):
     import scipy
+    import scipy.io
     a_dict = {col_name : df[col_name].values for col_name in df.columns.values}  
     scipy.io.savemat(fn, {'data':a_dict})
 
