@@ -17,4 +17,11 @@ git pull origin master
  - cd to correct directory
  - "git add --all" - stages all changes to be commited
  - "git commit -a -m 'The description of changes'" - this commits all the changes
- - "git push" - This uploads everything 
+ - "git push" - This uploads everything
+
+
+# Clone a new repository
+ - open Git
+ - cd to correct directory
+ - "git clone 'URL'"
+ - e.g. "git clone https://github.com/jonathanvanleeuwen/psychoLink.git "
