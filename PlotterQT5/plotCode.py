@@ -172,7 +172,7 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
                 if pltStyle == 'Line':
                         ax.plot(xPos, yPos)
                 elif pltStyle == 'Scatter':
-                    ax.scatter(xPos, yPos, c = timeCol, edgecolors = 'face', marker = 'p', s = 5, color = 'r', cmap = 'hot')
+                    ax.scatter(xPos, yPos, c = timeCol, edgecolors = 'face', marker = 'p', s = 5, cmap = 'hot')
             else:
                 if pltStyle == 'Line':
                     plt.plot(xPos, yPos)
