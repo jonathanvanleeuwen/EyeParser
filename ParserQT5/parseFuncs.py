@@ -296,12 +296,18 @@ def eyeLinkDataParser(FILENAME, **par):
         # Get fixation info
         efixData            = re.findall(regEfix, raw)
         efixData            = np.array(efixData, dtype = float)
+        if len(efixData) == 0:
+            efixData = np.array([[0 for i in range(len(fixKw))]])
         # Get saccade info
         esaccData           = re.findall(regEsacc, raw)
         esaccData           = np.array(esaccData, dtype = float)
+        if len(esaccData) == 0:
+            esaccData = np.array([[0 for i in range(len(saccKw))]])
         # Get blink info
         blinkData           = re.findall(regEblink, raw)
         blinkData           = np.array(blinkData, dtype = float)
+        if len(blinkData) == 0:
+            blinkData = np.array([[0 for i in range(len(blinkKw))]])
         # Get start and stop messages
         startData           = re.findall(regStart, raw)
         startTimes          = np.array(startData)[:,0].astype(float)
