@@ -482,6 +482,8 @@ class Window(QtWidgets.QMainWindow):
             self.line3, = ax3.plot([0,0], [np.min(self.speed)-20,np.max(self.speed)+20], lw=2, c='k')
             self.ax4.axis([xMin, xMax, yMin, yMax])
             self.ax4.set(aspect = self.par['bgAspect'])
+            self.dot = self.ax4.scatter(0,0, c= 'k', s=50)
+            self.dot2 = self.ax4.scatter(0,0, c= 'r', s=20)
             
             if self.par['pltBg'] == True:
                 bgIm = plt.imread(self.par['bgImage'])
@@ -491,9 +493,9 @@ class Window(QtWidgets.QMainWindow):
                 del self.anim
                 self.animationOn = False
              
+            self.animationOn = True
             self.anim = animation.FuncAnimation(fig, self.animate, init_func=self.init,
                                frames=len(self.x), interval=1, blit=True)
-            self.animationOn = True
             
     #==========================================================================
     # Functions for running animations
@@ -510,13 +512,24 @@ class Window(QtWidgets.QMainWindow):
         self.line1.set_data([i,i], [self.par['xMin'], self.par['xMax']])
         self.line2.set_data([i,i], [self.par['yMin'], self.par['yMax']])
         self.line3.set_data([i,i], [np.min(self.speed)-20,np.max(self.speed)+20])
-        # Draw moving dot
-        dot = self.ax4.scatter(self.x[i],self.y[i], c= 'k', s=50)
-        dot2 = self.ax4.scatter(self.x[i],self.y[i], c= 'r', s=20)
         
+        # Remove the two dots
+        self.dot.remove()
+        self.dot2.remove()
+        
+        # Draw moving dot
+        self.dot = self.ax4.scatter(self.x[i],self.y[i], c= 'k', s=50)
+        self.dot2 = self.ax4.scatter(self.x[i],self.y[i], c= 'r', s=20)
+        
+        return self.line1, self.line2, self.line3, self.dot, self.dot2
     
-        return self.line1, self.line2, self.line3, dot, dot2
-    
+    def saveAnimation(self):
+        if self.animationOn == True:
+            dir_path = os.path.dirname(self.fileName)
+            trialNr = str(self.par['trial'])
+            fName = dir_path+'\\Trial'+trialNr+'.mp4'
+            self.anim.save(fName, fps=15, extra_args=['-vcodec', 'libx264'])
+
 def run():
     if __name__ == "__main__":
         import sys
