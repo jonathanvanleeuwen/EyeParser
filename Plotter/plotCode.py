@@ -24,8 +24,8 @@ Created on Tue Feb 21 18:02:49 2017
 #
 # Bug fix:
 # The scalling when using differetnt x/y values in imshow(gauss)
-
 # Import modules
+
 import matplotlib.pyplot as plt
 import numpy as np
 import astropy.convolution as krn
@@ -87,11 +87,11 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
             xTime = normTime
         else:
             xTime = np.arange(len(xPos))
-        plt.figure(2)
+        fig = plt.figure(2)
         plt.clf()
         plt.title('Raw trial Data')
         # lets plot x position over time
-        plt.subplot(3,2,1)
+        ax1 = plt.subplot(3,2,1)
         plt.title('Xgaze(time)')
         plt.ylabel(xLabel)
         plt.ylim([xMin,xMax])
@@ -114,7 +114,7 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
             yTime = normTime
         else:
             yTime = np.arange(len(yPos))
-        plt.subplot(3,2,3)
+        ax2 = plt.subplot(3,2,3)
         plt.title('Ygaze(time)')
         plt.ylabel(ylabel)
         plt.ylim([yMin,yMax])
@@ -137,7 +137,7 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
             speedTime = normTime
         else:
             speedTime = np.arange(len(euclidDist))
-        plt.subplot(3,2,5)
+        ax3 = plt.subplot(3,2,5)
         plt.title('Speed(time)')
         plt.xlabel('Time (ms)')
         plt.ylabel(speedLabel)
@@ -159,7 +159,7 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
         # Lets get make a timeseries to plot over time.
         timeCol = np.linspace(1,0,len(xPos))
         # Lets plot the gaze position during trial
-        plt.subplot(1,2,2)
+        ax4 = plt.subplot(1,2,2)
         plt.title('Gaze position')
         plt.xlabel('X position (px)')
         plt.ylabel('Y position (px)')
@@ -235,14 +235,75 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
             pltTitle += '\n'+addLabel+': '+addInfo
         plt.suptitle(pltTitle)
         plt.draw()
+        return fig, ax1, ax2, ax3, ax4
     except:
         plt.close('all')
-        plt.figure(2)
+        fig = plt.figure(2)
         plt.clf()
         plt.title('Error, try different settings!')
         print traceback.format_exc()
-#plotTrial(time, x, y, ssacc, saccDur, euclidDist, **par)
-#s = time.time()
-#plotTrial(**par)
-#print 'Time:', time.time() - s
+        return fig
+        
+#import pandas as pd
+#from matplotlib import animation
 #
+#
+#plt.close('all')
+#data = pd.read_pickle('C:/Work/PhD Vu/Conferences/Dep PsychoLink -2018/images/exampleFile.p')
+#timeStamp = data.DK_rawTime[10]
+#xPos = data.DK_rawX[10]
+#yPos = data.DK_rawY[10] 
+#euclidDist = data.DK_euclidDist[10]
+#par = {}
+#
+#figAx = plotTrial(timeStamp, xPos, yPos, euclidDist, **par)
+#
+#if len(figAx) == 5:
+#    fig,ax1,ax2,ax3,ax4 = figAx
+#    xMin, xMax = ax4.get_xlim()
+#    yMin, yMax = ax4.get_ylim()
+#    speedMin, speedMax = ax3.get_ylim()
+#    
+#    ax4.clear()
+#    plt.title('Gaze position')
+#    plt.xlabel('X position (px)')
+#    plt.ylabel('Y position (px)')
+#    line1, = ax1.plot([0,0], [xMin, xMax], lw=2, c='k')
+#    line2, = ax2.plot([0,0], [yMin, yMax], lw=2, c='k')
+#    line3, = ax3.plot([0,0], [speedMin, speedMax], lw=2, c='k')
+#    #dot = ax4.scatter([],[], marker = 'p')
+#    ax4.axis([xMin, xMax, yMin, yMax])
+#    ax4.set(aspect = 'equal')
+#    
+##def init():
+##    line1.set_data([0,0], [xMin, xMax])
+##    line2.set_data([0,0], [yMin, yMax])
+##    line3.set_data([0,0], [speedMin, speedMax])
+##    return line1, line2, line3,
+#
+#def init():
+#    line1.set_data([],[])
+#    line2.set_data([],[])
+#    line3.set_data([],[])
+#    return line1, line2, line3,
+#
+## animation function. This is called sequentially
+#def animate(i):    
+#    # Draw moving line
+#    line1.set_data([i,i], [xMin, xMax])
+#    line2.set_data([i,i], [yMin, yMax])
+#    line3.set_data([i,i], [speedMin, speedMax])
+#    # Draw moving dot
+#    dot = ax4.scatter(xPos[i],yPos[i], c= 'k')
+#
+#    return line1, line2, line3, dot
+#anim = animation.FuncAnimation(fig, animate, init_func=init,
+#                               frames=len(xPos), interval=1, blit=True)
+##anim.save('trajectories.mp4', fps=15, extra_args=['-vcodec', 'libx264'])
+##anim.save('trajectories.mp4', fps=200, extra_args=['-vcodec', 'libx264'])
+#
+#plt.show()
+## Stop animation
+##anim.event_source.stop()
+
+

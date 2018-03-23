@@ -13,6 +13,8 @@ from plotCode import plotTrial
 from plotterGUICode import Ui_Eyelinkplotter
 import scipy
 import scipy.io
+import matplotlib.pyplot as plt
+from matplotlib import animation
 
 #==============================================================================
 # Functions for reading mat files
@@ -94,6 +96,8 @@ class Window(QtWidgets.QMainWindow):
         self.ui.heatmapTab.setVisible(False)
         self.ui.settingsLabel.setVisible(False)
         
+        # Set animation flag
+        self.animationOn = False
         
         # Set key bindings
         self.left = QtWidgets.QShortcut(QtGui.QKeySequence('left'), self)
@@ -188,6 +192,7 @@ class Window(QtWidgets.QMainWindow):
         self.ui.trialScroll.valueChanged.connect(self.trialScrollChange)
         self.ui.toggleIncluded.clicked.connect(self.toggleIncludedTrial)
         self.ui.trialsToPlot.activated.connect(self.toggleTrialsToPlot)
+        self.ui.animateButton.clicked.connect(self.animateButtonClick)
         
     def varInitiation(self):
         # imageDirectory
@@ -318,6 +323,14 @@ class Window(QtWidgets.QMainWindow):
             self.previousTrial = self.currTrial-1
         self.setCounters()
         self.plotData()
+
+    def animateButtonClick(self):
+        if self.currTrial-1 not in self.allowedIndexes:
+            self.currTrial = self.allowedIndexes.flat[np.abs(self.allowedIndexes - (self.currTrial-1)).argmin()]+1
+            self.nextTrial = self.currTrial+1
+            self.previousTrial = self.currTrial-1
+        self.setCounters()
+        self.animateData()
     
     def nextButtonClick(self):
         if self.nextTrial <= self.maxTrialNr:
@@ -441,9 +454,118 @@ class Window(QtWidgets.QMainWindow):
         self.par['addLabel'] = self.ui.addInfo.currentText().split()[0]
         if self.par['addLabel'] != 'False': 
             self.par['addInfo'] = self.data[self.par['addLabel']][self.trialIndex]
+        
+        # Disable animation if running
+        if self.animationOn == True:
+            self.anim.event_source.stop()
+            del self.anim
+            self.animationOn = False
+            
         # Plot the trial 
         plotTrial(self.time, self.x, self.y, self.speed, **self.par)
-   
+
+    #==========================================================================
+    # Functions for running animations
+    #==========================================================================
+    def init(self):
+        self.line1.set_data([],[])
+        self.line2.set_data([],[])
+        self.line3.set_data([],[])
+        return self.line1, self.line2, self.line3,
+    
+    # animation function. This is called sequentially
+    def animate(self,i):    
+        # Draw moving line
+        self.line1.set_data([i,i], [self.par['xMin'], self.par['xMax']])
+        self.line2.set_data([i,i], [self.par['yMin'], self.par['yMax']])
+        self.line3.set_data([i,i], [np.min(self.speed)-20,np.max(self.speed)+20])
+        # Draw moving dot
+        dot = self.ax4.scatter(self.x[i],self.y[i], c= 'k', s=50)
+        dot2 = self.ax4.scatter(self.x[i],self.y[i], c= 'r', s=20)
+        
+    
+        return self.line1, self.line2, self.line3, dot, dot2
+    
+    def animateData(self):
+        self.trialIndex = self.currTrial-1
+        self.time = self.data[self.ui.time.currentText().split()[0]][self.trialIndex]
+        self.x = self.data[self.ui.xCoords.currentText().split()[0]][self.trialIndex]
+        self.y = self.data[self.ui.yCoords.currentText().split()[0]][self.trialIndex]
+        self.speed = self.data[self.ui.speed.currentText().split()[0]][self.trialIndex]
+                
+        # Do some sanity checks on settings
+        pltBg = self.ui.plotBackground.currentText()
+        if pltBg == 'True':
+            pltBg = True
+        elif pltBg == 'False':
+            pltBg = False
+            
+        # Check where to find background image
+        bgImage = ''
+        if not self.imDir:
+            pltBg = False
+        elif pltBg == True:
+            bgImage = self.imDir + os.path.basename(self.data[self.ui.bgImageVariable.currentText()][self.trialIndex])
+        # Check kernel inverse color
+        inverseKernel = self.ui.kernelCMInverse.currentText()
+        if inverseKernel == 'True':
+            inverseKernel = True
+        elif inverseKernel == 'False':
+            inverseKernel = False
+            
+        # Build the final parameter dict
+        self.par ={\
+            'pltBg': pltBg,\
+            'bgImage': bgImage,\
+            'bgAspect': self.ui.aspectRatio.currentText().split()[0],\
+            'trial': self.trialIndex,\
+            'xMax': self.ui.xMaxValue.value(),\
+            'xMin': self.ui.xMinValue.value(),\
+            'yMax': self.ui.yMaxValue.value(),\
+            'yMin': self.ui.yMinValue.value(),\
+            'included': str(self.data.DK_includedTrial[self.trialIndex]),\
+            'highlight': str(self.ui.highlightEvent.currentText()),\
+            'ssacc': self.data.DK_ssacc[self.trialIndex],\
+            'saccDur': self.data.DK_durSacc[self.trialIndex],\
+            'sFix':self.data.DK_sFix[self.trialIndex],\
+            'fixDur':self.data.DK_durFix[self.trialIndex],\
+            'xLabel': self.ui.xCoords.currentText().split()[0],\
+            'yLabel': self.ui.yCoords.currentText().split()[0],\
+            'speedLabel': self.ui.speed.currentText().split()[0]}         
+            
+        self.par['addLabel'] = self.ui.addInfo.currentText().split()[0]
+        if self.par['addLabel'] != 'False': 
+            self.par['addInfo'] = self.data[self.par['addLabel']][self.trialIndex]
+        # Plot the trial 
+        plt.close('all')
+        figAx = plotTrial(self.time, self.x, self.y, self.speed, **self.par)
+        
+        if len(figAx) == 5:
+            fig,ax1,ax2,ax3,self.ax4 = figAx
+            xMin, xMax = self.ax4.get_xlim()
+            yMin, yMax = self.ax4.get_ylim()
+            
+            self.ax4.clear()
+            plt.title('Gaze position')
+            plt.xlabel('X position (px)')
+            plt.ylabel('Y position (px)')
+            self.line1, = ax1.plot([0,0], [self.par['xMin'], self.par['xMax']], lw=2, c='k')
+            self.line2, = ax2.plot([0,0], [self.par['yMin'], self.par['yMax']], lw=2, c='k')
+            self.line3, = ax3.plot([0,0], [np.min(self.speed)-20,np.max(self.speed)+20], lw=2, c='k')
+            self.ax4.axis([xMin, xMax, yMin, yMax])
+            self.ax4.set(aspect = self.par['bgAspect'])
+            
+            if self.par['pltBg'] == True:
+                bgIm = plt.imread(self.par['bgImage'])
+                self.ax4.imshow(bgIm, aspect=self.par['bgAspect'], extent = [xMin, xMax, yMin, yMax])
+            if self.animationOn == True:
+                self.anim.event_source.stop()
+                del self.anim
+                self.animationOn = False
+             
+            self.anim = animation.FuncAnimation(fig, self.animate, init_func=self.init,
+                               frames=len(self.x), interval=1, blit=True)
+            self.animationOn = True
 
 def run():
     if __name__ == "__main__":
