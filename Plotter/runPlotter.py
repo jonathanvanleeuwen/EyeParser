@@ -330,7 +330,7 @@ class Window(QtWidgets.QMainWindow):
             self.nextTrial = self.currTrial+1
             self.previousTrial = self.currTrial-1
         self.setCounters()
-        self.animateData()
+        self.plotData(runAnimation = True)
     
     def nextButtonClick(self):
         if self.nextTrial <= self.maxTrialNr:
@@ -395,7 +395,7 @@ class Window(QtWidgets.QMainWindow):
         if len(self.allowedIndexes) == 0:
             self.allowedIndexes = self.data.index
                 
-    def plotData(self):
+    def plotData(self, runAnimation = False):
         self.trialIndex = self.currTrial-1
         self.time = self.data[self.ui.time.currentText().split()[0]][self.trialIndex]
         self.x = self.data[self.ui.xCoords.currentText().split()[0]][self.trialIndex]
@@ -462,85 +462,13 @@ class Window(QtWidgets.QMainWindow):
             self.animationOn = False
             
         # Plot the trial 
-        plotTrial(self.time, self.x, self.y, self.speed, **self.par)
-
-    #==========================================================================
-    # Functions for running animations
-    #==========================================================================
-    def init(self):
-        self.line1.set_data([],[])
-        self.line2.set_data([],[])
-        self.line3.set_data([],[])
-        return self.line1, self.line2, self.line3,
-    
-    # animation function. This is called sequentially
-    def animate(self,i):    
-        # Draw moving line
-        self.line1.set_data([i,i], [self.par['xMin'], self.par['xMax']])
-        self.line2.set_data([i,i], [self.par['yMin'], self.par['yMax']])
-        self.line3.set_data([i,i], [np.min(self.speed)-20,np.max(self.speed)+20])
-        # Draw moving dot
-        dot = self.ax4.scatter(self.x[i],self.y[i], c= 'k', s=50)
-        dot2 = self.ax4.scatter(self.x[i],self.y[i], c= 'r', s=20)
-        
-    
-        return self.line1, self.line2, self.line3, dot, dot2
-    
-    def animateData(self):
-        self.trialIndex = self.currTrial-1
-        self.time = self.data[self.ui.time.currentText().split()[0]][self.trialIndex]
-        self.x = self.data[self.ui.xCoords.currentText().split()[0]][self.trialIndex]
-        self.y = self.data[self.ui.yCoords.currentText().split()[0]][self.trialIndex]
-        self.speed = self.data[self.ui.speed.currentText().split()[0]][self.trialIndex]
-                
-        # Do some sanity checks on settings
-        pltBg = self.ui.plotBackground.currentText()
-        if pltBg == 'True':
-            pltBg = True
-        elif pltBg == 'False':
-            pltBg = False
+        if runAnimation == True:
+            plt.close('all')
             
-        # Check where to find background image
-        bgImage = ''
-        if not self.imDir:
-            pltBg = False
-        elif pltBg == True:
-            bgImage = self.imDir + os.path.basename(self.data[self.ui.bgImageVariable.currentText()][self.trialIndex])
-        # Check kernel inverse color
-        inverseKernel = self.ui.kernelCMInverse.currentText()
-        if inverseKernel == 'True':
-            inverseKernel = True
-        elif inverseKernel == 'False':
-            inverseKernel = False
-            
-        # Build the final parameter dict
-        self.par ={\
-            'pltBg': pltBg,\
-            'bgImage': bgImage,\
-            'bgAspect': self.ui.aspectRatio.currentText().split()[0],\
-            'trial': self.trialIndex,\
-            'xMax': self.ui.xMaxValue.value(),\
-            'xMin': self.ui.xMinValue.value(),\
-            'yMax': self.ui.yMaxValue.value(),\
-            'yMin': self.ui.yMinValue.value(),\
-            'included': str(self.data.DK_includedTrial[self.trialIndex]),\
-            'highlight': str(self.ui.highlightEvent.currentText()),\
-            'ssacc': self.data.DK_ssacc[self.trialIndex],\
-            'saccDur': self.data.DK_durSacc[self.trialIndex],\
-            'sFix':self.data.DK_sFix[self.trialIndex],\
-            'fixDur':self.data.DK_durFix[self.trialIndex],\
-            'xLabel': self.ui.xCoords.currentText().split()[0],\
-            'yLabel': self.ui.yCoords.currentText().split()[0],\
-            'speedLabel': self.ui.speed.currentText().split()[0]}         
-            
-        self.par['addLabel'] = self.ui.addInfo.currentText().split()[0]
-        if self.par['addLabel'] != 'False': 
-            self.par['addInfo'] = self.data[self.par['addLabel']][self.trialIndex]
-        # Plot the trial 
-        plt.close('all')
         figAx = plotTrial(self.time, self.x, self.y, self.speed, **self.par)
         
-        if len(figAx) == 5:
+        # Run animation
+        if len(figAx) == 5 and runAnimation == True:
             fig,ax1,ax2,ax3,self.ax4 = figAx
             xMin, xMax = self.ax4.get_xlim()
             yMin, yMax = self.ax4.get_ylim()
@@ -566,7 +494,29 @@ class Window(QtWidgets.QMainWindow):
             self.anim = animation.FuncAnimation(fig, self.animate, init_func=self.init,
                                frames=len(self.x), interval=1, blit=True)
             self.animationOn = True
-
+            
+    #==========================================================================
+    # Functions for running animations
+    #==========================================================================
+    def init(self):
+        self.line1.set_data([],[])
+        self.line2.set_data([],[])
+        self.line3.set_data([],[])
+        return self.line1, self.line2, self.line3,
+    
+    # animation function. This is called sequentially
+    def animate(self,i):    
+        # Draw moving line
+        self.line1.set_data([i,i], [self.par['xMin'], self.par['xMax']])
+        self.line2.set_data([i,i], [self.par['yMin'], self.par['yMax']])
+        self.line3.set_data([i,i], [np.min(self.speed)-20,np.max(self.speed)+20])
+        # Draw moving dot
+        dot = self.ax4.scatter(self.x[i],self.y[i], c= 'k', s=50)
+        dot2 = self.ax4.scatter(self.x[i],self.y[i], c= 'r', s=20)
+        
+    
+        return self.line1, self.line2, self.line3, dot, dot2
+    
 def run():
     if __name__ == "__main__":
         import sys
