@@ -480,6 +480,7 @@ class Window(QtWidgets.QMainWindow):
             self.line1, = ax1.plot([0,0], [self.par['xMin'], self.par['xMax']], lw=2, c='k')
             self.line2, = ax2.plot([0,0], [self.par['yMin'], self.par['yMax']], lw=2, c='k')
             self.line3, = ax3.plot([0,0], [np.min(self.speed)-20,np.max(self.speed)+20], lw=2, c='k')
+            self.line4, = self.ax4.plot([0,0], [0,0], lw=2, c='k')
             self.ax4.axis([xMin, xMax, yMin, yMax])
             self.ax4.set(aspect = self.par['bgAspect'])
             self.dot = self.ax4.scatter(0,0, c= 'k', s=50)
@@ -504,7 +505,8 @@ class Window(QtWidgets.QMainWindow):
         self.line1.set_data([],[])
         self.line2.set_data([],[])
         self.line3.set_data([],[])
-        return self.line1, self.line2, self.line3,
+        self.line4.set_data([],[])
+        return self.line1, self.line2, self.line3,self.line4,
     
     # animation function. This is called sequentially
     def animate(self,i):    
@@ -521,7 +523,15 @@ class Window(QtWidgets.QMainWindow):
         self.dot = self.ax4.scatter(self.x[i],self.y[i], c= 'k', s=50)
         self.dot2 = self.ax4.scatter(self.x[i],self.y[i], c= 'r', s=20)
         
-        return self.line1, self.line2, self.line3, self.dot, self.dot2
+        # Draw trace
+        drawTrace = False
+        if i > 1 and drawTrace == True:
+            x = [[self.x[ii], self.x[ii+1]] for ii in range(i-1)]
+            y = [[self.y[ii], self.y[ii+1]] for ii in range(i-1)]   
+            self.line4.set_data(x,y)
+            return self.line1, self.line2, self.line3, self.line4, self.dot, self.dot2, 
+        else:
+            return self.line1, self.line2, self.line3, self.dot, self.dot2,
     
     def saveAnimation(self):
         if self.animationOn == True:
