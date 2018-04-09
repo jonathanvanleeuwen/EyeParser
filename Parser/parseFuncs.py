@@ -206,16 +206,16 @@ def parseWrapper(f, kwargs):
 def eyeLinkDataParser(FILENAME, **par):
     try:
         #==========================================================================
-        # Define regular expressions for data extraction
+        # Extract parameters, set defaults if parameeter is not given
         #==========================================================================
-        regSamples          = par.pop('regExpSamp', r'(\d{3,12})\t\s+(\d+\..)\t\s+(\d+\..)\t\s+(\d+\..).+\n')
-        regEfix             = par.pop('regExpEfix', r'EFIX\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(.+)\t\s+(.+)\t\s+(\d+)\n')
-        regEsacc            = par.pop('regExpEsacc', r'ESACC\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+)\n')
-        regEblink           = par.pop('regExpEblink', r'EBLINK\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\n')
+        regSamples = par.pop('regExpSamp', r'(\d{3,12})\t\s+(\d+\..)\t\s+(\d+\..)\t\s+(\d+\..).+\n')
+        regEfix = par.pop('regExpEfix', r'EFIX\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(.+)\t\s+(.+)\t\s+(\d+)\n')
+        regEsacc = par.pop('regExpEsacc', r'ESACC\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+)\n')
+        regEblink = par.pop('regExpEblink', r'EBLINK\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\n')
         # Makes experiment specific expressions for var/start and stop
-        var                 = par.pop('variableKey', 'var')
-        startTrial          = par.pop('startTrialKey', 'start_trial')
-        stopTrial           = par.pop('stopTrialKey', 'stop_trial')
+        var = par.pop('variableKey', 'var')
+        startTrial = par.pop('startTrialKey', 'start_trial')
+        stopTrial = par.pop('stopTrialKey', 'stop_trial')
         # RegExp for start trial
         if par.pop('regExpStartNew', False) == True:
             regStart = par.pop('regExpStart')
@@ -250,32 +250,31 @@ def eyeLinkDataParser(FILENAME, **par):
         #==============================================================================
         keyPrefix = 'DK_'
         varPrefix = 'DV_'
-        rawKw = ['rawTime','rawX','rawY','rawPupSize']
-        newRawKw = ['timeStamp','xPos','yPos','pupSize']
+        rawKw = ['rawTime', 'rawX', 'rawY', 'rawPupSize']
         fixKw = ['sFix','eFix','durFix','fixX', 'fixY', 'fixPup']
-        saccKw = ['ssacc','esacc','durSacc','ssaccX', 'ssaccY', 'esaccX', 'esaccY', 'saccAmp', 'peakVelocity']
+        saccKw = ['ssacc','esacc','durSacc','ssaccX', 'ssaccY', 'esaccX', \
+                  'esaccY', 'saccAmp', 'peakVelocity']
         blinkKw = ['sBlink','eBlink','durBlink']
-        fixTraceKw = rawKw [:]
-        newFixTraceKw = ['fixTraceTime', 'fixTraceX', 'fixTraceY', 'fixTracePup']
-        saccTraceKw = rawKw [:]
-        newSaccTraceKw= ['saccTraceTime', 'saccTraceX', 'saccTraceY', 'saccTracePup']
+        FixTraceKw = ['fixTraceTime', 'fixTraceX', 'fixTraceY', 'fixTracePup']
+        SaccTraceKw= ['saccTraceTime', 'saccTraceX', 'saccTraceY', \
+                      'saccTracePup']
         prsKw = ['trialNr', 'sTrial', 'eTrial', 'sMsg', 'eMsg',\
-                    'esacc', 'ssacc', 'durSacc', 'ssaccX', 'ssaccY', 'esaccX', \
-                    'esaccY', 'saccAmp', 'peakVelocity', 'saccTraceTime', 'saccTraceX','saccTraceY',\
-                    'saccTracePup','sFix', 'eFix', 'durFix', 'fixX', \
+                    'esacc', 'ssacc', 'durSacc', 'ssaccX', 'ssaccY', \
+                    'esaccX', 'esaccY', 'saccAmp', 'peakVelocity', \
+                    'saccTraceTime', 'saccTraceX','saccTraceY',\
+                    'saccTracePup', 'fixTraceTime', 'fixTraceX', 'fixTraceY', \
+                    'fixTracePup','sFix', 'eFix', 'durFix', 'fixX', \
                     'fixY', 'fixPup', 'sBlink', 'eBlink', 'durBlink', \
-                    'rawX', 'rawY' , 'rawTime', 'rawPupSize', 'euclidDist', 'curvature', 'saccAngle']
+                    'rawX', 'rawY', 'rawTime', 'rawPupSize', 'euclidDist', \
+                    'curvature', 'saccAngle']
     
         # Add prefix to avoid double columns
         rawKw  = [keyPrefix + k for k in rawKw ]
-        newRawKw = [keyPrefix + k for k in newRawKw]
         fixKw = [keyPrefix + k for k in fixKw]
         saccKw = [keyPrefix + k for k in saccKw]
         blinkKw = [keyPrefix + k for k in blinkKw]
-        fixTraceKw = [keyPrefix + k for k in fixTraceKw]
-        newFixTraceKw = [keyPrefix + k for k in newFixTraceKw]
-        saccTraceKw = [keyPrefix + k for k in saccTraceKw]
-        newSaccTraceKw = [keyPrefix + k for k in newSaccTraceKw]
+        fixTraceKw = [keyPrefix + k for k in FixTraceKw]
+        saccTraceKw = [keyPrefix + k for k in SaccTraceKw]
         prsKw = [keyPrefix + k for k in prsKw]
     
         # columns to delete from parsed dataframe
@@ -291,52 +290,54 @@ def eyeLinkDataParser(FILENAME, **par):
         # Exract data with regular expressions then delete raw
         #==============================================================================
         # Get all samples
-        rawSamples          = re.findall(regSamples, raw)
-        rawSamples          = np.array(rawSamples, dtype = float)
+        rawSamples = re.findall(regSamples, raw)
+        rawSamples = np.array(rawSamples, dtype = float)
+        rawData = pd.DataFrame(rawSamples, columns = rawKw , dtype = 'float64')
+        
         # Get fixation info
-        efixData            = re.findall(regEfix, raw)
-        efixData            = np.array(efixData, dtype = float)
+        efixData = re.findall(regEfix, raw)
+        efixData = np.array(efixData, dtype = float)
         if len(efixData) == 0:
             efixData = np.array([[0 for i in range(len(fixKw))]])
+        fixData = pd.DataFrame(efixData, columns = fixKw, dtype = 'float64')
+        
         # Get saccade info
-        esaccData           = re.findall(regEsacc, raw)
-        esaccData           = np.array(esaccData, dtype = float)
+        esaccData = re.findall(regEsacc, raw)
+        esaccData = np.array(esaccData, dtype = float)
         if len(esaccData) == 0:
             esaccData = np.array([[0 for i in range(len(saccKw))]])
+        saccData = pd.DataFrame(esaccData, columns = saccKw, dtype = 'float64')
+        
         # Get blink info
-        blinkData           = re.findall(regEblink, raw)
-        blinkData           = np.array(blinkData, dtype = float)
+        blinkData = re.findall(regEblink, raw)
+        blinkData = np.array(blinkData, dtype = float)
         if len(blinkData) == 0:
             blinkData = np.array([[0 for i in range(len(blinkKw))]])
+        blinkData = pd.DataFrame(blinkData, columns = blinkKw, dtype = 'float64')
+            
         # Get start and stop messages
-        startData           = re.findall(regStart, raw)
-        startTimes          = np.array(startData)[:,0].astype(float)
-        startMsg            = np.array(startData)[:,1]
-        stopData            = re.findall(regStop, raw)
-        stopTimes           = np.array(stopData)[:,0].astype(float)
-        stopMsg             = np.array(stopData)[:,1]
-        trialNrs            = np.arange(1,len(startTimes)+1)
+        startData = re.findall(regStart, raw)
+        startTimes = np.array(startData)[:,0].astype(float)
+        startMsg = np.array(startData)[:,1]
+        stopData = re.findall(regStop, raw)
+        stopTimes = np.array(stopData)[:,0].astype(float)
+        stopMsg = np.array(stopData)[:,1]
+        trialNrs = np.arange(1,len(startTimes)+1)
+        
         # Get variables
-        varData             = re.findall(regVar, raw)
+        varData = re.findall(regVar, raw)
         varData.append(('000000', 'var', 'parserDummyVar dummy')) 
-        varData             = np.array(varData)
-        varTimes            = np.array(varData[:,0], dtype = float)
-        varKey              = np.array(varData[:,1], dtype = str)
+        varData = np.array(varData)
+        varTimes = np.array(varData[:,0], dtype = float)
+        varKey = np.array(varData[:,1], dtype = str)
         del varKey
-        varMsg              = np.array(varData[:,2], dtype = str)
-        # Get messages
-        msgData             = re.findall(regMsg, raw)
-        msgData             = np.array(msgData)
-        msgTimes            = np.array(msgData[:,0], dtype = float)
-        msg                 = np.array(msgData[:,1], dtype = str)
-    
-        # Del raw data for speed and memory handeling
-        del raw
-    
-        # =============================================================================
-        # Extract all messages that have the shape of variables (var value) pairs
-        # and append them to the variabe dataframe
-        # =============================================================================
+        varMsg = np.array(varData[:,2], dtype = str)
+        
+        # Handle all other messages 
+        msgData = re.findall(regMsg, raw)
+        msgData = np.array(msgData)
+        msgTimes = np.array(msgData[:,0], dtype = float)
+        msg = np.array(msgData[:,1], dtype = str)
         msgVars = deque([])
         msgVarTimes = deque([])
         delIdx = np.ones(len(msg), dtype = bool)
@@ -355,15 +356,51 @@ def eyeLinkDataParser(FILENAME, **par):
         msg = msg[delIdx]
         msgTimes = msgTimes[delIdx]
         
-        #==============================================================================
-        # Put data into pandas dataframes for easy data extraction
-        #==============================================================================
-        rawData             = pd.DataFrame(rawSamples,  columns = rawKw , dtype = 'float64')
-        fixData             = pd.DataFrame(efixData,    columns = fixKw, dtype = 'float64')
-        saccData            = pd.DataFrame(esaccData,   columns = saccKw, dtype = 'float64')
-        blinkData           = pd.DataFrame(blinkData,   columns = blinkKw, dtype = 'float64')
-        parsedData          = pd.DataFrame(index = xrange(0,len(trialNrs)),columns = prsKw)
+        # Extract all unique messages
+        unMSG = np.unique(msg)
+        uniqueMSG = []
+        for m in unMSG:
+            delete = False
+            for dc in deleteColumns:
+                if dc in m:
+                    delete = True
+            if delete == False:
+                uniqueMSG.append(m)
+        uniqueMSGHeaders = [varPrefix+h for h in uniqueMSG]
+        
+        # Del raw data for speed and memory handeling
+        del raw
     
+        # =============================================================================
+        # Prealocations and extract some info from data
+        # =============================================================================
+        # Prealocate the parsed data dataframe
+        pData = pd.DataFrame(index = range(len(trialNrs)), columns=prsKw)
+             
+        # Determine pixels per degree (using amplitude)
+        if pxPerDegMode == 'Automatic':
+            dist = distBetweenPointsInArray(saccData[saccKw[3]].values, saccData[saccKw[4]].values, saccData[saccKw[5]].values, saccData[saccKw[6]].values)
+            saccAmp = saccData[saccKw[7]].values
+            dist = dist[saccAmp != 0]
+            saccAmp = saccAmp[saccAmp != 0]
+            pixPerDegree = np.median(dist/saccAmp)
+            
+        elif pxPerDegMode == 'Manual':
+            pixPerDegree = float(pxPerDegManual)        
+        
+        # Deal with the variables
+        varMsg = np.array([i.split() for i in varMsg])
+        varHeaders = np.array([varPrefix + i[0] for i in varMsg])
+        varHeadersUnique = np.unique(varHeaders)
+
+        # Prealocate the parsed data dataframe
+        msgHeadersUniqueT = [h+'TimeStamp' for h in varHeadersUnique]
+        cols = np.hstack((prsKw, varHeadersUnique, msgHeadersUniqueT, uniqueMSGHeaders))
+        pData = pd.DataFrame(index = range(len(trialNrs)), columns=cols)
+        
+        #==============================================================================
+        # Start populating the output dataframe. 
+        #==============================================================================
         # Make sure that the number of start and stop  messages match
         # NB: This assumes that if there are unequal numbers there are more stops
         if len(startTimes) != len(stopTimes):
@@ -371,167 +408,114 @@ def eyeLinkDataParser(FILENAME, **par):
             stopMsg = stopMsg[0:len(startTimes)]
     
         # start populating the parsed Dataframe with the values defining epochs/trials
-        parsedData[prsKw[0]] = trialNrs # parsedData.trialNr
-        parsedData[prsKw[1]] = startTimes # parsedData.sTrial
-        parsedData[prsKw[2]] = stopTimes # parsedData.eTrial
-        parsedData[prsKw[3]] = startMsg # parsedData.sMsg
-        parsedData[prsKw[4]] = stopMsg # parsedData.eMsg
+        pData[prsKw[0]] = trialNrs # pData.trialNr
+        pData[prsKw[1]] = startTimes # pData.sTrial
+        pData[prsKw[2]] = stopTimes # pData.eTrial
+        pData[prsKw[3]] = startMsg # pData.sMsg
+        pData[prsKw[4]] = stopMsg # pData.eMsg
     
         #==============================================================================
-        # Extract all trial data
+        # Epoch all data for each trial
         #==============================================================================
-        # Create placeholders
-        rawDict             = {key: [] for key in rawKw}
-        fixDict             = {key: [] for key in fixKw}
-        saccDict            = {key: [] for key in saccKw}
-        blinkDict           = {key: [] for key in blinkKw}
-        fixTraceDict        = {key: [] for key in fixTraceKw}
-        saccTraceDict       = {key: [] for key in saccTraceKw}
-        euclidDistance      = deque([])
-        saccCurvature       = deque([])
-        saccAngles          = deque([])
-    
-        # Create placeholders to deal with the variables sent to the eye-tracker
-        varBools            = np.logical_and(varTimes >= startTimes[0], varTimes <= stopTimes[-1])
-        varTimes            = varTimes[varBools]
-        varMsg              = np.array([i.split() for i in varMsg[varBools]])
-        msgHeaders          = np.array([varPrefix + i[0] for i in varMsg])
-        msgHeadersUnique    = np.unique(msgHeaders)
-        varLists            = np.zeros([len(parsedData[prsKw[1]]),], dtype = bool)
-        varDict             = {key:deque(varLists) for key in msgHeadersUnique}
-        varDict.update({key+'TimeStamp':deque(varLists) for key in msgHeadersUnique})
-    
-        # Create variables to deal with the sent messages
-        msgUnique           = np.unique(msg)
-        msgLists            = np.zeros([len(parsedData[prsKw[1]]),], dtype = bool)
-        msgDict             = {varPrefix+key:deque(msgLists) for key in msgUnique}
-    
-        # Determine pixels per degree (using amplitude)
-        if pxPerDegMode == 'Automatic':
-            dist = np.sqrt( (saccData[saccKw[3]].values-saccData[saccKw[5]].values)**2 + (saccData[saccKw[4]].values - saccData[saccKw[6]].values)**2 )
-            saccAmp = saccData[saccKw[7]].values
-            dist = dist[saccAmp != 0]
-            saccAmp = saccAmp[saccAmp != 0]
-            pixPerDegree        = np.median(dist/saccAmp)
-            
-        elif pxPerDegMode == 'Manual':
-            pixPerDegree = float(pxPerDegManual)
-            
-        #==============================================================================
-        # Itterate through all trials (this is a huge time thief)
-        # Spesificaly running through all saccades and fixations geting the
-        # saccade and fixation traces take a whole lot of time
-        #==============================================================================
-        for i, (start, stop) in enumerate(izip(parsedData[prsKw[1]], parsedData[prsKw[2]])):
+        for i, (start, stop) in enumerate(zip(startTimes, stopTimes)):
             # Epoch fixations
             fixStartEpoch = np.logical_or(fixData[fixKw[0]] >= start, fixData[fixKw[1]] >= start)
             fixEndEpoch = np.logical_or(fixData[fixKw[0]] <= stop, fixData[fixKw[1]] <= stop)
-            fixEpoch    = fixData.loc[np.logical_and(fixStartEpoch, fixEndEpoch)]
-            for key in fixDict:
-                fixDict[key].append(fixEpoch[key].values)
-                
+            fixEpoch = fixData.loc[np.logical_and(fixStartEpoch, fixEndEpoch)]
+            for key in fixKw:
+                pData.set_value(i, key, fixEpoch[key].values)
+        
             # Epoch saccades  
             saccStartEpoch = np.logical_or(saccData[saccKw[0]] >= start, saccData[saccKw[1]] >= start)
             saccStopEpoch = np.logical_or(saccData[saccKw[0]] <= stop, saccData[saccKw[1]] <= stop)
             saccEpoch   = saccData.loc[np.logical_and(saccStartEpoch, saccStopEpoch)]
-            #saccEpoch   = saccData.loc[np.logical_and(saccData[saccKw[0]] >= start, saccData[saccKw[0]] <= stop)]
-            for key in saccDict:
-                saccDict[key].append(saccEpoch[key].values)
-    
+            for key in saccKw:
+                pData.set_value(i, key, saccEpoch[key].values)
+            
             # Epoch blinks
             blinkEpoch  = blinkData.loc[np.logical_and(blinkData[blinkKw[0]] >= start, blinkData[blinkKw[1]] <= stop)]
-            for key in blinkDict:
-                blinkDict[key].append(blinkEpoch[key].values)
-    
-            # First we extract the raw samples for each trial (to include all data)
+            for key in blinkKw:
+                pData.set_value(i, key, blinkEpoch[key].values)
+        
+            # Get the start and stop time for the trial (to include all data)
             if len(fixEpoch[fixKw[0]]) > 0 and len(saccEpoch[saccKw[0]]) > 0:
                 eStart = np.min([start, fixEpoch[fixKw[0]][fixEpoch.index.min()], saccEpoch[saccKw[0]][saccEpoch.index.min()]])
                 eStop = np.max([stop, fixEpoch[fixKw[1]][fixEpoch.index.max()], saccEpoch[saccKw[1]][saccEpoch.index.max()]])
             else:
                 eStart = start
                 eStop = stop
-            epochData   = rawData.loc[np.logical_and(rawData[rawKw[0]] >= eStart, rawData[rawKw[0]] <= eStop)]
-            for key in rawDict:
-                rawDict[key].append(epochData[key].values)
-                fixTraceDict[key].append(deque([]))
-                for sFix, eFix in izip(fixDict[fixKw[0]][-1], fixDict[fixKw[1]][-1]):
-                    fixTraceDict[key][-1].append(epochData[key][np.logical_and(epochData[rawKw[0]].values >= sFix, epochData[rawKw[0]].values <= eFix)].values)
-    
-                # Get saccade traces
-                saccTraceDict[key].append(deque([]))
-                for ssacc, esacc in izip(saccDict[saccKw[0]][-1], saccDict[saccKw[1]][-1]):
-                    saccTraceDict[key][-1].append(epochData[key][np.logical_and(epochData[rawKw[0]].values >= ssacc, epochData[rawKw[0]].values <= esacc)].values)
-                    # Delete empty lists
-                    if len(saccTraceDict[key][-1][-1]) == 0:
-                        del saccTraceDict[key][-1][-1]
-                                            
-            # Calculate euclidian distance between samples (if more than 4 samples)
-            if len(rawDict[rawKw[1]][-1]) > 1:
-                p1X         = np.append(rawDict[rawKw[1]][-1], 0)[:-1]
-                p1Y         = np.append(rawDict[rawKw[2]][-1], 0)[:-1]
-                p2X         = np.append(rawDict[rawKw[1]][-1][0], rawDict[rawKw[1]][-1])[:-1]
-                p2Y         = np.append(rawDict[rawKw[2]][-1][0], rawDict[rawKw[2]][-1])[:-1]
-                euclidDistance.append(distBetweenPointsInArray(p1X, p1Y, p2X, p2Y))
-            else:
-                euclidDistance.append([])
-    
-            # Add saccade curvature
-            curv, ang = calculateSaccadeCurvature(saccTraceDict[saccTraceKw[1]][-1], saccTraceDict[saccTraceKw[2]][-1], pixPerDegree, flipY = True)
-            saccCurvature.append([np.median(sacc) for sacc in curv])
-            saccAngles.append(ang)
+            epochData = rawData.loc[np.logical_and(rawData[rawKw[0]] >= eStart, rawData[rawKw[0]] <= eStop)]
             
+            # Extract the raw data
+            for key in rawKw:
+                pData.set_value(i, key, epochData[key].values)
+            
+            # Extract fixation traces
+            sFix = pData[fixKw[0]][i]
+            eFix = pData[fixKw[1]][i]
+            epTime = epochData[rawKw[0]].values
+            fixBools = [np.logical_and(epTime >= s, epTime <= e) for (s,e) in zip(sFix, eFix)]
+            for key, rKey in zip(fixTraceKw, rawKw):
+                fixTraces = [epochData[rKey][b].values for b in fixBools]
+                pData.set_value(i, key, fixTraces)
+            
+            # Extract Saccade traces
+            sSacc = pData[saccKw[0]][i]
+            eSacc = pData[saccKw[1]][i]
+            saccBools = [np.logical_and(epTime >= s, epTime <= e) for (s,e) in zip(sSacc, eSacc)]
+            for key, rKey in zip(saccTraceKw, rawKw):
+                saccTraces = [epochData[rKey][b].values for b in saccBools]
+                pData.set_value(i, key, saccTraces)
+                    
+            # Calculate euclidian distance between samples (if more than 4 samples)
+            if len(pData[rawKw[1]][i]) > 4:
+                p1X = np.append(pData[rawKw[1]][i],0)[:-1]
+                p1Y = np.append(pData[rawKw[2]][i],0)[:-1]
+                p2X = np.append(pData[rawKw[1]][i][0], pData[rawKw[1]][i])[:-1]
+                p2Y = np.append(pData[rawKw[2]][i][0], pData[rawKw[2]][i])[:-1]
+                pData.set_value(i, keyPrefix+'euclidDist', distBetweenPointsInArray(p1X, p1Y, p2X, p2Y))
+            else:
+                pData.set_value(i, keyPrefix+'euclidDist', [])
+                
+            # Add saccade curvature
+            if not np.array(pd.isnull(pData[saccTraceKw[1]][i])).all():
+                curv, ang = calculateSaccadeCurvature(pData[saccTraceKw[1]][i], pData[saccTraceKw[2]][i], pixPerDegree, flipY = True)
+                pData.set_value(i, keyPrefix+'curvature', [np.median(sacc) for sacc in curv])
+                pData.set_value(i, keyPrefix+'saccAngle', ang)
+               
             # Epoch variables
-            varBool     = np.logical_and(varTimes >= start, varTimes <= stop)
-            varEpochT   = varTimes[varBool]
+            varBool = np.logical_and(varTimes >= start, varTimes <= stop)
+            varEpochT = varTimes[varBool]
             varEpochMsg = varMsg[varBool]
-            varEpochHead= msgHeaders[varBool]
+            varEpochHead= varHeaders[varBool]
             for it, (times, key) in enumerate(izip(varEpochT, varEpochHead)):
                 if len(varEpochMsg[it]) == 1:
-                    varDict[key][i] = 'NA'
+                    pData.set_value(i,key, 'NA')
                 elif len(varEpochMsg[it]) == 2:
-                    varDict[key][i] = varEpochMsg[it][1]
+                    pData.set_value(i,key, varEpochMsg[it][1])
                 elif len(varEpochMsg[it]) > 2:
-                    varDict[key][i] = varEpochMsg[it][1:]
-                varDict[key+'TimeStamp'][i] = times
+                    pData.set_value(i,key, varEpochMsg[it][1:])
+                pData.set_value(i,key+'TimeStamp', times)
     
             # Epoch messages
-            msgBool     = np.logical_and(msgTimes >= start, msgTimes <= stop)
-            msgEpochT   = msgTimes[msgBool]
-            msgEpoch    = msg[msgBool]
+            msgBool = np.logical_and(msgTimes >= start, msgTimes <= stop)
+            msgEpochT = msgTimes[msgBool]
+            msgEpoch = msg[msgBool]
             for times, key in izip(msgEpochT, msgEpoch):
-                msgDict[varPrefix+key][i] = times
-    
-        #==============================================================================
-        # Populate the parsed data dataframe
-        #==============================================================================
-        for key in rawDict:
-            parsedData[key] = rawDict[key]
-        for key in fixDict:
-            parsedData[key] = fixDict[key]
-        for key in saccDict:
-            parsedData[key] = saccDict[key]
-        for key in blinkDict:
-            parsedData[key] = blinkDict[key]
-        for oldKey, newKey in izip(fixTraceKw, newFixTraceKw):
-            parsedData[newKey] = fixTraceDict[oldKey]
-        for oldKey, newKey in izip(saccTraceKw, newSaccTraceKw):
-            parsedData[newKey] = saccTraceDict[oldKey]
-        parsedData[keyPrefix+'euclidDist'] = euclidDistance
-        parsedData[keyPrefix+'curvature'] = saccCurvature
-        parsedData[keyPrefix+'saccAngle'] = saccAngles
-        parsedData[keyPrefix+'includedTrial'] = True
-        
-        varDf   = pd.DataFrame(varDict)
-        msgDf   = pd.DataFrame(msgDict)
-        parsedData = pd.concat([parsedData, varDf, msgDf], axis=1)
-        rawData.rename(columns=dict(zip(rawKw , newRawKw)), inplace=True)
-    
+                if key in uniqueMSG:
+                    pData.set_value(i,varPrefix+key, times)
+                
+        # =============================================================================
+        # Add included trial column
+        # =============================================================================
+        pData[keyPrefix+'includedTrial'] = True
+
         # Filter the columns we dont want
-        parsedData = filterDF(parsedData, deleteColumns)
+        pData = filterDF(pData, deleteColumns)
         
         # Convert data to long format
         if convertToLong == 'Yes':
-            parsedLong = parseToLongFormat(parsedData, duplicateValues)
+            parsedLong = parseToLongFormat(pData, duplicateValues)
         else:
             parsedLong = False
             
@@ -539,9 +523,12 @@ def eyeLinkDataParser(FILENAME, **par):
         error = False
         
     except:# Exception as e: 
-        parsedData = False
+        pData = False
         rawData = False
         parsedLong = False
         error = traceback.format_exc()
         
-    return FILENAME, parsedData, rawData, parsedLong, error
+    return FILENAME, pData, rawData, parsedLong, error
+
+
+
