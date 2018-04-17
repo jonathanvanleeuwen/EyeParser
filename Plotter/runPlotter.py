@@ -246,6 +246,7 @@ class Window(QtWidgets.QMainWindow):
             # Set background variable options
             keys = [key for key in self.data.keys() if key[:3] == 'DK_' or key[:3] == 'DV_']
             keys = [key for key in keys if len(key.split()) == 1]
+            keys = sorted(keys)
             self.ui.bgImageVariable.addItems(keys)
             self.ui.trialScroll.setMinimum(1)
             self.ui.trialScroll.setMaximum(self.maxTrialNr)
