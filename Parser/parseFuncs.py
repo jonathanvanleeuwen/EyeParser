@@ -75,6 +75,11 @@ def calculateSaccadeCurvature(xSacc, ySacc, pixPerDegree, ignoreDist = 0.5, flip
     saccAngles = deque([])
     for sacc in range(0,len(xSacc)):
         saccX           = xSacc[sacc]
+        # Check if there are enough samples in the saccade to calculate curvature
+        if len(saccX) < 4: 
+            curveData.append(np.nan)
+            saccAngles.append(np.nan)
+            continue
         if flipY == True:
             saccY           = [i*-1 for i in ySacc[sacc]]
         else:

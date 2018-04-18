@@ -2,8 +2,8 @@ saveRawFiles:No
 saveExtension:Parsed
 saveRawExtension:Raw
 saveLongExtension:Long
-startTrialKey:start_trial
-stopTrialKey:stop_trial
+startTrialKey:var START_TRIAL
+stopTrialKey:var END_TRIAL
 variableKey:var
 defaultSaveAs:pickle
 rawSaveAs:pickle
