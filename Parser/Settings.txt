@@ -2,8 +2,8 @@ saveRawFiles:No
 saveExtension:Parsed
 saveRawExtension:Raw
 saveLongExtension:Long
-startTrialKey:var START_TRIAL
-stopTrialKey:var END_TRIAL
+startTrialKey:start_trial
+stopTrialKey:stop_trial
 variableKey:var
 defaultSaveAs:pickle
 rawSaveAs:pickle
@@ -20,11 +20,11 @@ regExpStartNew:False
 regExpStopNew:False
 regExpVarNew:False
 regExpMsgNew:False
-runParallel:Yes
+runParallel:No
 nrCores:7
 pxPerDeg:48
 pxMode:Automatic
-longFormat:No
+longFormat:Yes
 duplicateValues:No
 DFsaveRawFiles:No
 DFsaveExtension:Parsed

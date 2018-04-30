@@ -518,6 +518,10 @@ def eyeLinkDataParser(FILENAME, **par):
         # Filter the columns we dont want
         pData = filterDF(pData, deleteColumns)
         
+        # Turn values into numeric if possible
+        for k in pData.keys():
+            pData[k] = pd.to_numeric(pData[k], errors = 'ignore')
+        
         # Convert data to long format
         if convertToLong == 'Yes':
             parsedLong = parseToLongFormat(pData, duplicateValues)
