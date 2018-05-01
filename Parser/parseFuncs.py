@@ -401,7 +401,7 @@ def eyeLinkDataParser(FILENAME, **par):
         # Prealocate the parsed data dataframe
         msgHeadersUniqueT = [h+'TimeStamp' for h in varHeadersUnique]
         cols = np.hstack((prsKw, varHeadersUnique, msgHeadersUniqueT, uniqueMSGHeaders))
-        pData = pd.DataFrame(index = range(len(trialNrs)), columns=cols)
+        pData = pd.DataFrame(index = range(len(trialNrs)), columns=np.unique(cols))
         
         #==============================================================================
         # Start populating the output dataframe. 
