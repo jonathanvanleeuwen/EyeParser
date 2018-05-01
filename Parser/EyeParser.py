@@ -645,8 +645,10 @@ def run():
         import sys
         import ctypes
         myappid = 'mycompany.myproduct.subproduct.version' # arbitrary string
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
-        
+        try:
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+        except:
+            pass
         if not QtWidgets.QApplication.instance():
             app = QtWidgets.QApplication(sys.argv)
         else:
