@@ -425,19 +425,19 @@ def eyeLinkDataParser(FILENAME, **par):
             fixEndEpoch = np.logical_or(fixData[fixKw[0]] <= stop, fixData[fixKw[1]] <= stop)
             fixEpoch = fixData.loc[np.logical_and(fixStartEpoch, fixEndEpoch)]
             for key in fixKw:
-                pData.set_value(i, key, fixEpoch[key].values)
+                pData.at[i, key] = fixEpoch[key].values
         
             # Epoch saccades  
             saccStartEpoch = np.logical_or(saccData[saccKw[0]] >= start, saccData[saccKw[1]] >= start)
             saccStopEpoch = np.logical_or(saccData[saccKw[0]] <= stop, saccData[saccKw[1]] <= stop)
             saccEpoch   = saccData.loc[np.logical_and(saccStartEpoch, saccStopEpoch)]
             for key in saccKw:
-                pData.set_value(i, key, saccEpoch[key].values)
+                pData.at[i, key] = saccEpoch[key].values
             
             # Epoch blinks
             blinkEpoch  = blinkData.loc[np.logical_and(blinkData[blinkKw[0]] >= start, blinkData[blinkKw[1]] <= stop)]
             for key in blinkKw:
-                pData.set_value(i, key, blinkEpoch[key].values)
+                pData.at[i, key] = blinkEpoch[key].values
         
             # Get the start and stop time for the trial (to include all data)
             if len(fixEpoch[fixKw[0]]) > 0 and len(saccEpoch[saccKw[0]]) > 0:
@@ -450,7 +450,7 @@ def eyeLinkDataParser(FILENAME, **par):
             
             # Extract the raw data
             for key in rawKw:
-                pData.set_value(i, key, epochData[key].values)
+                pData.at[i, key] = epochData[key].values
             
             # Extract fixation traces
             sFix = pData[fixKw[0]][i]
@@ -459,7 +459,7 @@ def eyeLinkDataParser(FILENAME, **par):
             fixBools = [np.logical_and(epTime >= s, epTime <= e) for (s,e) in zip(sFix, eFix)]
             for key, rKey in zip(fixTraceKw, rawKw):
                 fixTraces = [epochData[rKey][b].values for b in fixBools]
-                pData.set_value(i, key, fixTraces)
+                pData.at[i, key] = fixTraces
             
             # Extract Saccade traces
             sSacc = pData[saccKw[0]][i]
@@ -467,7 +467,7 @@ def eyeLinkDataParser(FILENAME, **par):
             saccBools = [np.logical_and(epTime >= s, epTime <= e) for (s,e) in zip(sSacc, eSacc)]
             for key, rKey in zip(saccTraceKw, rawKw):
                 saccTraces = [epochData[rKey][b].values for b in saccBools]
-                pData.set_value(i, key, saccTraces)
+                pData.at[i, key] = saccTraces
                     
             # Calculate euclidian distance between samples (if more than 4 samples)
             if len(pData[rawKw[1]][i]) > 4:
@@ -475,15 +475,15 @@ def eyeLinkDataParser(FILENAME, **par):
                 p1Y = np.append(pData[rawKw[2]][i],0)[:-1]
                 p2X = np.append(pData[rawKw[1]][i][0], pData[rawKw[1]][i])[:-1]
                 p2Y = np.append(pData[rawKw[2]][i][0], pData[rawKw[2]][i])[:-1]
-                pData.set_value(i, keyPrefix+'euclidDist', distBetweenPointsInArray(p1X, p1Y, p2X, p2Y))
+                pData.at[i, keyPrefix+'euclidDist'] = distBetweenPointsInArray(p1X, p1Y, p2X, p2Y)
             else:
-                pData.set_value(i, keyPrefix+'euclidDist', [])
+                pData.at[i, keyPrefix+'euclidDist'] = []
                 
             # Add saccade curvature
             if not np.array(pd.isnull(pData[saccTraceKw[1]][i])).all():
                 curv, ang = calculateSaccadeCurvature(pData[saccTraceKw[1]][i], pData[saccTraceKw[2]][i], pixPerDegree, flipY = True)
-                pData.set_value(i, keyPrefix+'curvature', [np.median(sacc) for sacc in curv])
-                pData.set_value(i, keyPrefix+'saccAngle', ang)
+                pData.at[i, keyPrefix+'curvature'] = [np.median(sacc) for sacc in curv]
+                pData.at[i, keyPrefix+'saccAngle'] = ang
                
             # Epoch variables
             varBool = np.logical_and(varTimes >= start, varTimes <= stop)
@@ -492,12 +492,12 @@ def eyeLinkDataParser(FILENAME, **par):
             varEpochHead= varHeaders[varBool]
             for it, (times, key) in enumerate(izip(varEpochT, varEpochHead)):
                 if len(varEpochMsg[it]) == 1:
-                    pData.set_value(i,key, 'NA')
+                    pData.at[i,key] = 'NA'
                 elif len(varEpochMsg[it]) == 2:
-                    pData.set_value(i,key, varEpochMsg[it][1])
+                    pData.at[i,key] = varEpochMsg[it][1]
                 elif len(varEpochMsg[it]) > 2:
-                    pData.set_value(i,key, varEpochMsg[it][1:])
-                pData.set_value(i,key+'TimeStamp', times)
+                    pData.at[i,key] = varEpochMsg[it][1:]
+                pData.at[i,key+'TimeStamp'] = times
     
             # Epoch messages
             msgBool = np.logical_and(msgTimes >= start, msgTimes <= stop)
@@ -505,7 +505,7 @@ def eyeLinkDataParser(FILENAME, **par):
             msgEpoch = msg[msgBool]
             for times, key in izip(msgEpochT, msgEpoch):
                 if key in uniqueMSG:
-                    pData.set_value(i,varPrefix+key, times)
+                    pData.at[i,varPrefix+key] = times
                 
         # =============================================================================
         # Add included trial column
