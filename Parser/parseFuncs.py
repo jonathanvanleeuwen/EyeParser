@@ -378,10 +378,7 @@ def eyeLinkDataParser(FILENAME, **par):
     
         # =============================================================================
         # Prealocations and extract some info from data
-        # =============================================================================
-        # Prealocate the parsed data dataframe
-        pData = pd.DataFrame(index = range(len(trialNrs)), columns=prsKw)
-             
+        # =============================================================================   
         # Determine pixels per degree (using amplitude)
         if pxPerDegMode == 'Automatic':
             dist = distBetweenPointsInArray(saccData[saccKw[3]].values, saccData[saccKw[4]].values, saccData[saccKw[5]].values, saccData[saccKw[6]].values)
