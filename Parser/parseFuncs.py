@@ -214,9 +214,9 @@ def eyeLinkDataParser(FILENAME, **par):
         # Extract parameters, set defaults if parameeter is not given
         #==========================================================================
         regSamples = par.pop('regExpSamp', r'(\d{3,12})\t\s+(\d+\..)\t\s+(\d+\..)\t\s+(\d+\..).+\n')
-        regEfix = par.pop('regExpEfix', r'EFIX\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(.+)\t\s+(.+)\t\s+(\d+)\n')
-        regEsacc = par.pop('regExpEsacc', r'ESACC\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+)\n')
-        regEblink = par.pop('regExpEblink', r'EBLINK\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\n')
+        regEfix = par.pop('regExpEfix', r'EFIX\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(.+)\t\s+(.+)\t\s+(\d+).+\n')
+        regEsacc = par.pop('regExpEsacc', r'ESACC\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+).+\n')
+        regEblink = par.pop('regExpEblink', r'EBLINK\s+[LR]\s+(\d+)\t(\d+)\t(\d+).+\n')
         # Makes experiment specific expressions for var/start and stop
         var = par.pop('variableKey', 'var')
         startTrial = par.pop('startTrialKey', 'start_trial')

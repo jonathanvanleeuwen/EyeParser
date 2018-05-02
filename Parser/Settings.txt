@@ -9,9 +9,9 @@ defaultSaveAs:pickle
 rawSaveAs:pickle
 longSaveAs:CSV
 regExpSamp:(\d{3,12})\t\s+(\d+\..)\t\s+(\d+\..)\t\s+(\d+\..).+\n
-regExpEfix:EFIX\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(.+)\t\s+(.+)\t\s+(\d+)\n
-regExpEsacc:ESACC\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+)\n
-regExpEblink:EBLINK\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\n
+regExpEfix:EFIX\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(.+)\t\s+(.+)\t\s+(\d+).+\n
+regExpEsacc:ESACC\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+).+\n
+regExpEblink:EBLINK\s+[LR]\s+(\d+)\t(\d+)\t(\d+).+\n
 regExpStart:Output of this expression needs to be [int, str]
 regExpStop:Output of this expression needs to be [int, str]
 regExpVar:Output of this expression needs to be [int, str, str]
@@ -20,7 +20,7 @@ regExpStartNew:False
 regExpStopNew:False
 regExpVarNew:False
 regExpMsgNew:False
-runParallel:Yes
+runParallel:No
 nrCores:7
 pxPerDeg:48
 pxMode:Automatic
@@ -37,9 +37,9 @@ DFdefaultSaveAs:pickle
 DFrawSaveAs:pickle
 DFlongSaveAs:CSV
 DFregExpSamp:(\d{3,12})\t\s+(\d+\..)\t\s+(\d+\..)\t\s+(\d+\..).+\n
-DFregExpEfix:EFIX\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(.+)\t\s+(.+)\t\s+(\d+)\n
-DFregExpEsacc:ESACC\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+)\n
-DFregExpEblink:EBLINK\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\n
+DFregExpEfix:EFIX\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(.+)\t\s+(.+)\t\s+(\d+).+\n
+DFregExpEsacc:ESACC\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+).+\n
+DFregExpEblink:EBLINK\s+[LR]\s+(\d+)\t(\d+)\t(\d+).+\n
 DFregExpStart:Output of this expression needs to be [int, str]
 DFregExpStop:Output of this expression needs to be [int, str]
 DFregExpVar:Output of this expression needs to be [int, str, str]
