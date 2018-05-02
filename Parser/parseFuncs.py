@@ -290,7 +290,16 @@ def eyeLinkDataParser(FILENAME, **par):
         # Load data ASCII data to memory
         #==============================================================================
         raw = open(FILENAME, 'r').read()
-    
+        
+        #==============================================================================
+        # Check if \r\n is in raw, in that case replace \n in regular expression 
+        # with \r (only saccade events)
+        #==============================================================================
+        if '\r\n' in raw:
+            regEfix = regEfix[:-1]+'r'
+            regEsacc = regEsacc[:-1]+'r'
+            regEblink = regEblink[:-1]+'r'    
+            
         #==============================================================================
         # Exract data with regular expressions then delete raw
         #==============================================================================
