@@ -165,6 +165,7 @@ class Window(QtWidgets.QMainWindow):
         self.ui.plotStyle.setCurrentIndex(0)
         self.ui.highlightEvent.setCurrentIndex(0)
         self.ui.plotBackground.setCurrentIndex(0)
+        self.ui.showTrace.setCurrentIndex(0)
         # Add extra settings if data has been loaded 
         if len(self.data) > 2:
             keys = [key for key in self.data.keys() if key[:3] == 'DK_' or key[:3] == 'DV_']
@@ -193,6 +194,7 @@ class Window(QtWidgets.QMainWindow):
         self.ui.toggleIncluded.clicked.connect(self.toggleIncludedTrial)
         self.ui.trialsToPlot.activated.connect(self.toggleTrialsToPlot)
         self.ui.animateButton.clicked.connect(self.animateButtonClick)
+        self.ui.saveAnimButton.clicked.connect(self.saveAnimation)
         
     def varInitiation(self):
         # imageDirectory
@@ -496,8 +498,15 @@ class Window(QtWidgets.QMainWindow):
                 self.animationOn = False
              
             self.animationOn = True
+            self.sampleStep = self.ui.frameStepSize.value() 
+            # Set draw trace
+            drawTrace = self.ui.showTrace.currentText()
+            if drawTrace == 'True':
+                self.drawTrace = True
+            elif drawTrace == 'False':
+                self.drawTrace = False
             self.anim = animation.FuncAnimation(fig, self.animate, init_func=self.init,
-                               frames=len(self.x), interval=1, blit=True)
+                               frames=np.arange(0,len(self.x), self.sampleStep), interval=1, blit=True)
             
     #==========================================================================
     # Functions for running animations
@@ -519,14 +528,13 @@ class Window(QtWidgets.QMainWindow):
         # Remove the two dots
         self.dot.remove()
         self.dot2.remove()
-        
+
         # Draw moving dot
         self.dot = self.ax4.scatter(self.x[i],self.y[i], c= 'k', s=50)
         self.dot2 = self.ax4.scatter(self.x[i],self.y[i], c= 'r', s=20)
         
         # Draw trace
-        drawTrace = False
-        if i > 1 and drawTrace == True:
+        if i > 1 and self.drawTrace == True:
             x = [[self.x[ii], self.x[ii+1]] for ii in range(i-1)]
             y = [[self.y[ii], self.y[ii+1]] for ii in range(i-1)]   
             self.line4.set_data(x,y)
@@ -535,12 +543,21 @@ class Window(QtWidgets.QMainWindow):
             return self.line1, self.line2, self.line3, self.dot, self.dot2,
     
     def saveAnimation(self):
-        if self.animationOn == True:
+        if self.animationOn == True:            
             dir_path = os.path.dirname(self.fileName)
-            trialNr = str(self.par['trial'])
+            trialNr = str(self.par['trial']+1)
             fName = dir_path+'\\Trial'+trialNr+'.mp4'
-            self.anim.save(fName, fps=15, extra_args=['-vcodec', 'libx264'])
+            print '\nSaving animation, please wait...'
+            print 'This may take a while...'
+            self.anim.save(fName, fps=30, extra_args=['-vcodec', 'libx264'])
+            print 'Animation saved as:'
+            print fName
+            
 
+
+
+            
+            
 def run():
     if __name__ == "__main__":
         import sys
