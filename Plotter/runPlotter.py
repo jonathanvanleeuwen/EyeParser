@@ -545,17 +545,14 @@ class Window(QtWidgets.QMainWindow):
     def saveAnimation(self):
         if self.animationOn == True:            
             dir_path = os.path.dirname(self.fileName)
+            fileBase = os.path.splitext(os.path.basename(self.fileName))[0]
             trialNr = str(self.par['trial']+1)
-            fName = dir_path+'\\Trial'+trialNr+'.mp4'
+            fName = dir_path+'\\'+fileBase+'_Trial'+trialNr+'.mp4'
             print '\nSaving animation, please wait...'
             print 'This may take a while...'
             self.anim.save(fName, fps=30, extra_args=['-vcodec', 'libx264'])
             print 'Animation saved as:'
             print fName
-            
-
-
-
             
             
 def run():
