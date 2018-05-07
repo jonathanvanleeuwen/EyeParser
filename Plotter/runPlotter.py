@@ -554,7 +554,6 @@ class Window(QtWidgets.QMainWindow):
             print 'Animation saved as:'
             print fName
             
-            
 def run():
     if __name__ == "__main__":
         import sys
