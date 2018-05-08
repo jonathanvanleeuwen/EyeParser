@@ -574,15 +574,25 @@ class Window(QtWidgets.QMainWindow):
         doc.show()
         return doc
 
+    def getVidSaveName(self):
+        dir_path = os.path.dirname(self.fileName)
+        fileBase = os.path.splitext(os.path.basename(self.fileName))[0]
+        trialNr = str(self.par['trial']+1)
+        defDir = dir_path+'\\'+fileBase+'_Trial'+trialNr+'.mp4'
+        save = QtWidgets.QFileDialog.getSaveFileName(None, 'Save as:', directory=defDir)[0]
+        
+        if len(save) == 0:
+            saveDir = defDir
+        else:
+            ext = os.path.splitext(save)[1]
+            lExt = len(ext)
+            newExt = '.mp4'
+            saveDir = os.path.abspath(save)[:-lExt]+newExt
+        return saveDir
+        
     def saveAnimation(self):
         if self.animationOn == True:   
-            trace = ''
-            if self.drawTrace:
-                trace = '_Trace'
-            dir_path = os.path.dirname(self.fileName)
-            fileBase = os.path.splitext(os.path.basename(self.fileName))[0]
-            trialNr = str(self.par['trial']+1)
-            fName = dir_path+'\\'+fileBase+'_Trial'+trialNr+trace+'.mp4'
+            fName = self.getVidSaveName()
             txt = 'Saving animation, please wait...\nThis may take a while...'\
             +'\n\n\nAnimation saved as:\n'+fName 
             doc = self.dispSaveAnim(txt)
