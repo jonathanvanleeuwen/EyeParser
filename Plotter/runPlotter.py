@@ -561,7 +561,7 @@ class Window(QtWidgets.QMainWindow):
             x = [[self.x[ii], self.x[ii+1]] for ii in range(i-1)]
             y = [[self.y[ii], self.y[ii+1]] for ii in range(i-1)]   
             self.line4.set_data(x,y)
-            return self.line1, self.line2, self.line3, self.line4, self.dot, self.dot2, 
+            return self.line1, self.line2, self.line3, self.line4, self.dot, self.dot2,
         else:
             return self.line1, self.line2, self.line3, self.dot, self.dot2,
         
@@ -584,7 +584,11 @@ class Window(QtWidgets.QMainWindow):
             +'\n\n\nAnimation saved as:\n'+fName 
             doc = self.dispSaveAnim(txt)
             # Save animation
-            self.anim.save(fName, fps=30, extra_args=['-vcodec', 'libx264'])
+            try:
+                self.anim.save(fName, fps=30, extra_args=['-vcodec', 'libx264'])
+            except:
+                'Error, video not saved!'
+                pass
             # Hide message box
             doc.hide()
             
