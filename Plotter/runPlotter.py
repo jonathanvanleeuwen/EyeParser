@@ -62,6 +62,29 @@ def saveToMat(df, fn):
 #==============================================================================
 # Build the GUI
 #==============================================================================
+class MyMessageBox(QtWidgets.QMessageBox):
+    def __init__(self):
+        QtWidgets.QMessageBox.__init__(self)
+        self.setSizeGripEnabled(True)
+
+    def event(self, e):
+        result = QtWidgets.QMessageBox.event(self, e)
+
+        self.setMinimumHeight(0)
+        self.setMaximumHeight(16777215)
+        self.setMinimumWidth(0)
+        self.setMaximumWidth(16777215)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+
+        textEdit = self.findChild(QtWidgets.QTextEdit)
+        if textEdit != None :
+            textEdit.setMinimumHeight(0)
+            textEdit.setMaximumHeight(16777215)
+            textEdit.setMinimumWidth(0)
+            textEdit.setMaximumWidth(16777215)
+            textEdit.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        return result
+
 class Window(QtWidgets.QMainWindow):
     #==============================================================================
     # Build GUI
@@ -195,7 +218,7 @@ class Window(QtWidgets.QMainWindow):
         self.ui.trialsToPlot.activated.connect(self.toggleTrialsToPlot)
         self.ui.animateButton.clicked.connect(self.animateButtonClick)
         self.ui.saveAnimButton.clicked.connect(self.saveAnimation)
-        
+                                               
     def varInitiation(self):
         # imageDirectory
         if self.imDir is None:
@@ -541,18 +564,29 @@ class Window(QtWidgets.QMainWindow):
             return self.line1, self.line2, self.line3, self.line4, self.dot, self.dot2, 
         else:
             return self.line1, self.line2, self.line3, self.dot, self.dot2,
-    
+        
+    def dispSaveAnim(self, txt):
+        doc = MyMessageBox()
+        doc.setWindowTitle("Saving Animation, Please wait!")
+        doc.setText(txt)
+        doc.setStandardButtons(QtWidgets.QMessageBox.NoButton)
+        doc.setWindowIcon(QtGui.QIcon('eye.png'))
+        doc.show()
+        return doc
+
     def saveAnimation(self):
-        if self.animationOn == True:            
+        if self.animationOn == True:   
             dir_path = os.path.dirname(self.fileName)
             fileBase = os.path.splitext(os.path.basename(self.fileName))[0]
             trialNr = str(self.par['trial']+1)
             fName = dir_path+'\\'+fileBase+'_Trial'+trialNr+'.mp4'
-            print '\nSaving animation, please wait...'
-            print 'This may take a while...'
+            txt = 'Saving animation, please wait...\nThis may take a while...'\
+            +'\n\n\nAnimation saved as:\n'+fName 
+            doc = self.dispSaveAnim(txt)
+            # Save animation
             self.anim.save(fName, fps=30, extra_args=['-vcodec', 'libx264'])
-            print 'Animation saved as:'
-            print fName
+            # Hide message box
+            doc.hide()
             
 def run():
     if __name__ == "__main__":
