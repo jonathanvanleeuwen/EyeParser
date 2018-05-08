@@ -576,10 +576,13 @@ class Window(QtWidgets.QMainWindow):
 
     def saveAnimation(self):
         if self.animationOn == True:   
+            trace = ''
+            if self.drawTrace:
+                trace = '_Trace'
             dir_path = os.path.dirname(self.fileName)
             fileBase = os.path.splitext(os.path.basename(self.fileName))[0]
             trialNr = str(self.par['trial']+1)
-            fName = dir_path+'\\'+fileBase+'_Trial'+trialNr+'.mp4'
+            fName = dir_path+'\\'+fileBase+'_Trial'+trialNr+trace+'.mp4'
             txt = 'Saving animation, please wait...\nThis may take a while...'\
             +'\n\n\nAnimation saved as:\n'+fName 
             doc = self.dispSaveAnim(txt)
