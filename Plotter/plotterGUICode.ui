@@ -702,18 +702,18 @@
         <x>39</x>
         <y>109</y>
         <width>351</width>
-        <height>51</height>
+        <height>87</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="AnimationLayout">
-       <item row="0" column="0">
+       <item row="2" column="0">
         <widget class="QLabel" name="frameStepSizeL">
          <property name="text">
           <string>Step size (speed)</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
+       <item row="3" column="0">
         <widget class="QSpinBox" name="frameStepSize">
          <property name="minimum">
           <number>1</number>
@@ -726,14 +726,14 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="2">
+       <item row="3" column="2">
         <widget class="QPushButton" name="saveAnimButton">
          <property name="text">
           <string>Save animation</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="1">
+       <item row="3" column="1">
         <widget class="QComboBox" name="showTrace">
          <property name="currentText">
           <string>False</string>
@@ -750,10 +750,50 @@
          </item>
         </widget>
        </item>
-       <item row="0" column="1">
+       <item row="2" column="1">
         <widget class="QLabel" name="showTraceL">
          <property name="text">
           <string>Show gaze trace</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="blackDotSizeL">
+         <property name="text">
+          <string>Black dot size (area)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLabel" name="redDotSizeL">
+         <property name="text">
+          <string>Red dot size (area)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QSpinBox" name="blackDotSize">
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>1000000</number>
+         </property>
+         <property name="value">
+          <number>50</number>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QSpinBox" name="redDotSize">
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>1000000</number>
+         </property>
+         <property name="value">
+          <number>20</number>
          </property>
         </widget>
        </item>

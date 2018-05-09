@@ -189,10 +189,17 @@ class Window(QtWidgets.QMainWindow):
         self.ui.highlightEvent.setCurrentIndex(0)
         self.ui.plotBackground.setCurrentIndex(0)
         self.ui.showTrace.setCurrentIndex(0)
+        
+        # Animation settings
+        self.ui.showTrace.setCurrentIndex(0)
+
+        
+        
         # Add extra settings if data has been loaded 
         if len(self.data) > 2:
             keys = [key for key in self.data.keys() if key[:3] == 'DK_' or key[:3] == 'DV_']
             keys = [key for key in keys if len(key.split()) == 1]
+            keys = sorted(keys)
             # Clear variables first
             # Set variables for additional info
             self.ui.addInfo.setCurrentIndex(0)
@@ -235,6 +242,11 @@ class Window(QtWidgets.QMainWindow):
         self.ui.kernelScale.setValue(1)
         self.ui.kernelThreshold.setValue(0.00)
         self.ui.kernelAlpha.setValue(0.50)
+        
+        # Animation values
+        self.ui.blackDotSize.setValue(50) 
+        self.ui.redDotSize.setValue(20) 
+        self.ui.frameStepSize.setValue(5) 
         
     def readFile(self, fName):
         dType = os.path.splitext(fName)[1]
@@ -522,12 +534,19 @@ class Window(QtWidgets.QMainWindow):
              
             self.animationOn = True
             self.sampleStep = self.ui.frameStepSize.value() 
+            
             # Set draw trace
             drawTrace = self.ui.showTrace.currentText()
             if drawTrace == 'True':
                 self.drawTrace = True
             elif drawTrace == 'False':
                 self.drawTrace = False
+            
+            # Set dot size for animation
+            self.blackDotSize = self.ui.blackDotSize.value() 
+            self.redDotSize = self.ui.redDotSize.value() 
+                
+            # Start animation
             self.anim = animation.FuncAnimation(fig, self.animate, init_func=self.init,
                                frames=np.arange(0,len(self.x), self.sampleStep), interval=1, blit=True)
             
@@ -553,8 +572,8 @@ class Window(QtWidgets.QMainWindow):
         self.dot2.remove()
 
         # Draw moving dot
-        self.dot = self.ax4.scatter(self.x[i],self.y[i], c= 'k', s=50)
-        self.dot2 = self.ax4.scatter(self.x[i],self.y[i], c= 'r', s=20)
+        self.dot = self.ax4.scatter(self.x[i],self.y[i], marker = 'o', c= 'k', s=self.blackDotSize)
+        self.dot2 = self.ax4.scatter(self.x[i],self.y[i], marker = 'o', c= 'r', s=self.redDotSize)
         
         # Draw trace
         if i > 1 and self.drawTrace == True:
