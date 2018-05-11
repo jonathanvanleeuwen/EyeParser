@@ -657,11 +657,9 @@ class Window(QtWidgets.QMainWindow):
             gMask = self.getGaussRect(self.x[i],self.y[i], self.MaskL)
             if self.par['pltBg'] == True:
                 bgIm = np.array(self.bgIm*gMask, dtype = np.uint8)
-                self.bgAnimIm = self.ax4.imshow(bgIm, aspect=self.par['bgAspect'], extent = self.bgRect, animated = True)
             else:
                 bgIm = np.array(gMask, dtype = np.uint8)
-                self.bgAnimIm = self.ax4.imshow(bgIm, aspect=self.par['bgAspect'], extent = self.bgRect, animated = True, cmap = 'gray')  
-
+            self.bgAnimIm.set_data(bgIm)
         # Draw trace
         if i > 1 and self.drawTrace == True:
             x = [[self.x[ii], self.x[ii+1]] for ii in range(i-1)]
