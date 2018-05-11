@@ -539,11 +539,11 @@ class Window(QtWidgets.QMainWindow):
             self.ax4.set(aspect = self.par['bgAspect'])
             self.dot = self.ax4.scatter(0,0, c= 'k', s=50)
             self.dot2 = self.ax4.scatter(0,0, c= 'r', s=20)
-                        
+            
+            self.bgRect =[xMin, xMax, yMin, yMax]
             if self.par['pltBg'] == True:
                 bgIm = plt.imread(self.par['bgImage'])
                 self.bgIm = bgIm
-                self.bgRect =[xMin, xMax, yMin, yMax]
                 self.bgAnimIm = self.ax4.imshow(bgIm, aspect=self.par['bgAspect'], 
                                                 extent = self.bgRect, 
                                                 animated = self.runGaussAnim)
@@ -577,14 +577,12 @@ class Window(QtWidgets.QMainWindow):
                                 
                 if self.par['pltBg'] == False:
                     self.MaskL *= 255
-                    gMask = self.getGaussRect(self.MaskL.shape[0]/2,self.MaskL.shape[1]/2)
+                    gMask = self.MaskL[self.par['yMax'] :self.par['yMax'] *2, self.par['xMax']:self.par['xMax']*2] 
                     gMask = np.array(gMask, dtype = np.uint8)
-                    self.bgRect =[xMin, xMax, yMin, yMax]
                     self.bgAnimIm = self.ax4.imshow(gMask, aspect=self.par['bgAspect'], 
                                                     extent = self.bgRect, 
                                                     animated = self.runGaussAnim, 
                                                     cmap = 'gray')
-                            
             # Start animation
             self.anim = animation.FuncAnimation(fig, self.animate, init_func=self.init,
                                frames=np.arange(0,len(self.x), self.sampleStep), interval=1, blit=True)
@@ -622,12 +620,12 @@ class Window(QtWidgets.QMainWindow):
         gmap = krn.convolve_fft(mask,gaus)
         return gmap
     
-    def getGaussRect(self, cx, cy):
+    def getGaussRect(self, cx, cy, bigIm):
         xS = self.par['xMax']
         yS = self.par['yMax']
         xrect = [(xS+xS-cx)-xS/2, (xS+xS-cx)+xS/2]
         yrect = [(yS+yS-cy)-yS/2, (yS+yS-cy)+yS/2]
-        return self.MaskL[int(yrect[0]):int(yrect[1]), int(xrect[0]):int(xrect[1])]
+        return bigIm[int(yrect[0]):int(yrect[1]), int(xrect[0]):int(xrect[1])]
         
     #==========================================================================
     # Functions for running animations
@@ -656,12 +654,12 @@ class Window(QtWidgets.QMainWindow):
 
         # Draw Guassian
         if self.runGaussAnim:
-            gMask = self.getGaussRect(self.x[i],self.y[i])
+            gMask = self.getGaussRect(self.x[i],self.y[i], self.MaskL)
             if self.par['pltBg'] == True:
                 bgIm = np.array(self.bgIm*gMask, dtype = np.uint8)
                 self.bgAnimIm = self.ax4.imshow(bgIm, aspect=self.par['bgAspect'], extent = self.bgRect, animated = True)
             else:
-                bgIm = np.array(gMask, dtype = np.uint8)*-1
+                bgIm = np.array(gMask, dtype = np.uint8)
                 self.bgAnimIm = self.ax4.imshow(bgIm, aspect=self.par['bgAspect'], extent = self.bgRect, animated = True, cmap = 'gray')  
 
         # Draw trace
