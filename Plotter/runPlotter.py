@@ -192,8 +192,7 @@ class Window(QtWidgets.QMainWindow):
         
         # Animation settings
         self.ui.showTrace.setCurrentIndex(0)
-
-        
+        self.ui.useAperture.setCurrentIndex(0)        
         
         # Add extra settings if data has been loaded 
         if len(self.data) > 2:
@@ -247,6 +246,12 @@ class Window(QtWidgets.QMainWindow):
         self.ui.blackDotSize.setValue(50) 
         self.ui.redDotSize.setValue(20) 
         self.ui.frameStepSize.setValue(5) 
+        
+        # Gauss values
+        self.ui.apertureR.setValue(75)  #complete opcity circle
+        self.ui.apertureOpac.setValue(1) 
+        self.ui.edgeR.setValue(10) # gaussian radius
+        self.ui.edgeOpac.setValue(0.25)
         
     def readFile(self, fName):
         dType = os.path.splitext(fName)[1]
@@ -511,6 +516,17 @@ class Window(QtWidgets.QMainWindow):
             xMin, xMax = self.ax4.get_xlim()
             yMin, yMax = self.ax4.get_ylim()
             
+            # Get gaussian dot variables
+            runGuass = self.ui.useAperture.currentText()
+            if runGuass == 'True':
+                self.runGaussAnim = True
+            elif runGuass == 'False':
+                self.runGaussAnim = False
+            self.gaussCircR = self.ui.apertureR.value()  #complete opcity circle
+            self.gaussOpac = self.ui.apertureOpac.value() 
+            self.gaussR = self.ui.edgeR.value() # gaussian radius
+            self.gaussShade= self.ui.edgeOpac.value()
+            
             self.ax4.clear()
             plt.title('Gaze position')
             plt.xlabel('X position (px)')
@@ -523,10 +539,15 @@ class Window(QtWidgets.QMainWindow):
             self.ax4.set(aspect = self.par['bgAspect'])
             self.dot = self.ax4.scatter(0,0, c= 'k', s=50)
             self.dot2 = self.ax4.scatter(0,0, c= 'r', s=20)
-            
+                        
             if self.par['pltBg'] == True:
                 bgIm = plt.imread(self.par['bgImage'])
-                self.ax4.imshow(bgIm, aspect=self.par['bgAspect'], extent = [xMin, xMax, yMin, yMax])
+                self.bgIm = bgIm
+                self.bgRect =[xMin, xMax, yMin, yMax]
+                self.bgAnimIm = self.ax4.imshow(bgIm, aspect=self.par['bgAspect'], 
+                                                extent = self.bgRect, 
+                                                animated = self.runGaussAnim)
+                
             if self.animationOn == True:
                 self.anim.event_source.stop()
                 del self.anim
@@ -545,14 +566,72 @@ class Window(QtWidgets.QMainWindow):
             # Set dot size for animation
             self.blackDotSize = self.ui.blackDotSize.value() 
             self.redDotSize = self.ui.redDotSize.value() 
-                
+            
+            if self.runGaussAnim:
+                # Make the gaussian circle image
+                self.MaskL = np.zeros((self.par['yMax'] *3,self.par['xMax']*3))
+                mask = np.rot90(self.gaussMask())
+                self.MaskL[self.par['yMax'] :self.par['yMax'] *2, self.par['xMax']:self.par['xMax']*2] = mask
+                self.MaskL = self.rescale(self.MaskL, self.gaussShade, self.gaussOpac)
+                self.MaskL = np.dstack([self.MaskL,self.MaskL,self.MaskL])
+                                
+                if self.par['pltBg'] == False:
+                    self.MaskL *= 255
+                    gMask = self.getGaussRect(self.MaskL.shape[0]/2,self.MaskL.shape[1]/2)
+                    gMask = np.array(gMask, dtype = np.uint8)
+                    self.bgRect =[xMin, xMax, yMin, yMax]
+                    self.bgAnimIm = self.ax4.imshow(gMask, aspect=self.par['bgAspect'], 
+                                                    extent = self.bgRect, 
+                                                    animated = self.runGaussAnim, 
+                                                    cmap = 'gray')
+                            
             # Start animation
             self.anim = animation.FuncAnimation(fig, self.animate, init_func=self.init,
                                frames=np.arange(0,len(self.x), self.sampleStep), interval=1, blit=True)
             
     #==========================================================================
-    # Functions for running animations
+    # Functions for Making the gaussian image
+    #==========================================================================    
+    def rescale(self, data, minV, maxV):
+        #normalzie
+        ran = np.max(data) - np.min(data)
+        m = (data - np.min(data)) / ran
+        # rescale
+        ran2 = np.abs(np.diff([maxV,minV]))
+        m *=ran2
+        m += minV
+        return m
+
+    def circMask(self):
+        cy = int(((self.par['xMax']/2)/float(self.par['xMax'])) * self.par['xMax'])
+        cx = int(((self.par['yMax']/2)/float(self.par['yMax'])) * self.par['yMax'])
+        x = np.arange(self.par['xMax'])
+        y = np.arange(self.par['yMax'])
+        xx, yy = np.meshgrid(x, y)
+        condition = (xx-cx)**2 + (yy-cy)**2 <= self.gaussCircR**2
+        mask = np.zeros(condition.shape)
+        mask[condition] = 1
+        return np.where(mask >0)
+
+    def gaussMask(self):
+        import astropy.convolution as krn            
+        mask = np.zeros((self.par['xMax'],self.par['yMax']))
+        xx, yy = self.circMask()
+        mask[xx, yy] = 1
+        gaus = krn.Gaussian2DKernel(self.gaussR)
+        gmap = krn.convolve_fft(mask,gaus)
+        return gmap
+    
+    def getGaussRect(self, cx, cy):
+        xS = self.par['xMax']
+        yS = self.par['yMax']
+        xrect = [(xS+xS-cx)-xS/2, (xS+xS-cx)+xS/2]
+        yrect = [(yS+yS-cy)-yS/2, (yS+yS-cy)+yS/2]
+        return self.MaskL[int(yrect[0]):int(yrect[1]), int(xrect[0]):int(xrect[1])]
+        
     #==========================================================================
+    # Functions for running animations
+    #==========================================================================    
     def init(self):
         self.line1.set_data([],[])
         self.line2.set_data([],[])
@@ -574,15 +653,27 @@ class Window(QtWidgets.QMainWindow):
         # Draw moving dot
         self.dot = self.ax4.scatter(self.x[i],self.y[i], marker = 'o', c= 'k', s=self.blackDotSize)
         self.dot2 = self.ax4.scatter(self.x[i],self.y[i], marker = 'o', c= 'r', s=self.redDotSize)
-        
+
+        # Draw Guassian
+        if self.runGaussAnim:
+            gMask = self.getGaussRect(self.x[i],self.y[i])
+            if self.par['pltBg'] == True:
+                bgIm = np.array(self.bgIm*gMask, dtype = np.uint8)
+                self.bgAnimIm = self.ax4.imshow(bgIm, aspect=self.par['bgAspect'], extent = self.bgRect, animated = True)
+            else:
+                bgIm = np.array(gMask, dtype = np.uint8)*-1
+                self.bgAnimIm = self.ax4.imshow(bgIm, aspect=self.par['bgAspect'], extent = self.bgRect, animated = True, cmap = 'gray')  
+
         # Draw trace
         if i > 1 and self.drawTrace == True:
             x = [[self.x[ii], self.x[ii+1]] for ii in range(i-1)]
             y = [[self.y[ii], self.y[ii+1]] for ii in range(i-1)]   
             self.line4.set_data(x,y)
-            return self.line1, self.line2, self.line3, self.line4, self.dot, self.dot2,
+
+        if self.runGaussAnim:
+            return self.bgAnimIm, self.line1, self.line2, self.line3, self.line4, self.dot, self.dot2,
         else:
-            return self.line1, self.line2, self.line3, self.dot, self.dot2,
+            return self.line1, self.line2, self.line3, self.line4, self.dot, self.dot2,
         
     def dispSaveAnim(self, txt):
         doc = MyMessageBox()
