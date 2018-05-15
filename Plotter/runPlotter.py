@@ -373,7 +373,7 @@ class Window(QtWidgets.QMainWindow):
             self.nextTrial = self.currTrial+1
             self.previousTrial = self.currTrial-1
         self.setCounters()
-        self.plotData(runAnimation = True)
+        self.runAni()
     
     def nextButtonClick(self):
         if self.nextTrial <= self.maxTrialNr:
@@ -438,7 +438,7 @@ class Window(QtWidgets.QMainWindow):
         if len(self.allowedIndexes) == 0:
             self.allowedIndexes = self.data.index
                 
-    def plotData(self, runAnimation = False):
+    def plotData(self):
         self.trialIndex = self.currTrial-1
         self.time = self.data[self.ui.time.currentText().split()[0]][self.trialIndex]
         self.x = self.data[self.ui.xCoords.currentText().split()[0]][self.trialIndex]
@@ -503,16 +503,13 @@ class Window(QtWidgets.QMainWindow):
             self.anim.event_source.stop()
             del self.anim
             self.animationOn = False
+                        
+        self.figAx = plotTrial(self.time, self.x, self.y, self.speed, **self.par)
             
-        # Plot the trial 
-        if runAnimation == True:
-            plt.close('all')
-            
-        figAx = plotTrial(self.time, self.x, self.y, self.speed, **self.par)
-        
+    def runAni(self):
         # Run animation
-        if len(figAx) == 5 and runAnimation == True:
-            fig,ax1,ax2,ax3,self.ax4 = figAx
+        if len(self.figAx) == 5:
+            fig,ax1,ax2,ax3,self.ax4 = self.figAx
             xMin, xMax = self.ax4.get_xlim()
             yMin, yMax = self.ax4.get_ylim()
             
@@ -531,14 +528,14 @@ class Window(QtWidgets.QMainWindow):
             plt.title('Gaze position')
             plt.xlabel('X position (px)')
             plt.ylabel('Y position (px)')
-            self.line1, = ax1.plot([0,0], [self.par['xMin'], self.par['xMax']], lw=2, c='k')
-            self.line2, = ax2.plot([0,0], [self.par['yMin'], self.par['yMax']], lw=2, c='k')
-            self.line3, = ax3.plot([0,0], [np.min(self.speed)-20,np.max(self.speed)+20], lw=2, c='k')
-            self.line4, = self.ax4.plot([0,0], [0,0], lw=2, c='k')
+            self.line1, = ax1.plot([],[], lw=2, c='k')
+            self.line2, = ax2.plot([],[], lw=2, c='k')
+            self.line3, = ax3.plot([],[], lw=2, c='k')
+            self.line4, = self.ax4.plot([],[], lw=2, c='k')
             self.ax4.axis([xMin, xMax, yMin, yMax])
             self.ax4.set(aspect = self.par['bgAspect'])
-            self.dot = self.ax4.scatter(0,0, c= 'k', s=50)
-            self.dot2 = self.ax4.scatter(0,0, c= 'r', s=20)
+            self.dot = self.ax4.scatter([],[], c= 'k', s=50)
+            self.dot2 = self.ax4.scatter([],[], c= 'r', s=20)
             
             self.bgRect =[xMin, xMax, yMin, yMax]
             if self.par['pltBg'] == True:
@@ -585,7 +582,7 @@ class Window(QtWidgets.QMainWindow):
                                                     cmap = 'gray')
             # Start animation
             self.anim = animation.FuncAnimation(fig, self.animate, init_func=self.init,
-                               frames=np.arange(0,len(self.x), self.sampleStep), interval=1, blit=True)
+                               frames=np.arange(0,len(self.x), self.sampleStep), interval=1, blit=True)  
             
     #==========================================================================
     # Functions for Making the gaussian image
@@ -673,7 +670,7 @@ class Window(QtWidgets.QMainWindow):
         
     def dispSaveAnim(self, txt):
         doc = MyMessageBox()
-        doc.setWindowTitle("Saving Animation, Please wait!")
+        doc.setWindowTitle("Saving Animation, Please wait! (Don't click the GUI)")
         doc.setText(txt)
         doc.setStandardButtons(QtWidgets.QMessageBox.NoButton)
         doc.setWindowIcon(QtGui.QIcon('eye.png'))
@@ -697,19 +694,21 @@ class Window(QtWidgets.QMainWindow):
         return saveDir
         
     def saveAnimation(self):
-        if self.animationOn == True:   
-            fName = self.getVidSaveName()
-            txt = 'Saving animation, please wait...\nThis may take a while...'\
-            +'\n\n\nAnimation saved as:\n'+fName 
-            doc = self.dispSaveAnim(txt)
-            # Save animation
-            try:
-                self.anim.save(fName, fps=30, extra_args=['-vcodec', 'libx264'])
-            except:
-                'Error, video not saved!'
-                pass
-            # Hide message box
-            doc.hide()
+        #if self.animationOn == True:   
+        fName = self.getVidSaveName()
+        txt = 'Saving animation, please wait...\nThis may take a while...'\
+        +'\n\n\nAnimation saved as:\n'+fName 
+        doc = self.dispSaveAnim(txt)
+        # Save animation
+        try:
+            self.plotData()
+            self.runAni()
+            self.anim.save(fName, fps=30, extra_args=['-vcodec', 'libx264'])
+        except:
+            'Error, video not saved!'
+            pass
+        # Hide message box
+        doc.hide()
             
 def run():
     if __name__ == "__main__":
