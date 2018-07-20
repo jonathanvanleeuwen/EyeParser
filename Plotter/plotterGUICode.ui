@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>798</width>
+    <width>811</width>
     <height>635</height>
    </rect>
   </property>
@@ -23,934 +23,1518 @@
    <property name="styleSheet">
     <string notr="true"/>
    </property>
-   <widget class="QWidget" name="gridLayoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>240</x>
-      <y>80</y>
-      <width>496</width>
-      <height>124</height>
-     </rect>
-    </property>
-    <layout class="QGridLayout" name="gridLayout">
-     <property name="horizontalSpacing">
-      <number>6</number>
-     </property>
-     <property name="verticalSpacing">
-      <number>12</number>
-     </property>
-     <item row="2" column="4">
-      <widget class="QSpinBox" name="jumpToTrialNr">
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="maximum">
-        <number>1000000</number>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <widget class="QPushButton" name="backButton">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>Back</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="3">
-      <widget class="QPushButton" name="nextButton">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>Next</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="2">
-      <widget class="QPushButton" name="updateButton">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>Update</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="4">
-      <widget class="QPushButton" name="jumpToTrial">
-       <property name="text">
-        <string>Plot trial number</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QComboBox" name="trialsToPlot">
-       <item>
-        <property name="text">
-         <string>All</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Included</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Excluded</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item row="5" column="0" colspan="5">
-      <widget class="QScrollBar" name="trialScroll">
-       <property name="maximum">
-        <number>0</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLineEdit" name="includedOrExcluded">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="2">
-      <widget class="QLCDNumber" name="currentTrialDisp">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="segmentStyle">
-        <enum>QLCDNumber::Flat</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QPushButton" name="toggleIncluded">
-       <property name="text">
-        <string>Include/Exclude</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="5">
-      <widget class="QPushButton" name="animateButton">
-       <property name="text">
-        <string>Animate</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QWidget" name="gridLayoutWidget_2">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>160</width>
-      <height>121</height>
-     </rect>
-    </property>
-    <layout class="QGridLayout" name="gridLayout_2">
-     <item row="0" column="0">
-      <widget class="QPushButton" name="selectFile">
-       <property name="text">
-        <string>Select file</string>
-       </property>
-       <property name="autoDefault">
-        <bool>false</bool>
-       </property>
-       <property name="default">
-        <bool>false</bool>
-       </property>
-       <property name="flat">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLineEdit" name="selectedFile">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QCheckBox" name="unLockSettings">
-       <property name="text">
-        <string>Unlock settings</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QPushButton" name="saveFile">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>Save file</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QTabWidget" name="heatmapTab">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>210</y>
-      <width>771</width>
-      <height>381</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: rgb(255, 255, 255);</string>
-    </property>
-    <property name="currentIndex">
-     <number>0</number>
-    </property>
-    <widget class="QWidget" name="windowTab">
-     <attribute name="title">
-      <string>General</string>
-     </attribute>
-     <widget class="QWidget" name="gridLayoutWidget_3">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>20</y>
-        <width>261</width>
-        <height>71</height>
-       </rect>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_3">
-       <item row="1" column="0">
-        <widget class="QComboBox" name="plotType"/>
-       </item>
-       <item row="1" column="1">
-        <widget class="QComboBox" name="aspectRatio"/>
-       </item>
-       <item row="0" column="0" alignment="Qt::AlignHCenter|Qt::AlignBottom">
-        <widget class="QLabel" name="plotTypeLabel">
-         <property name="text">
-          <string>Plot type</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1" alignment="Qt::AlignHCenter|Qt::AlignBottom">
-        <widget class="QLabel" name="aspectRatioLabel">
-         <property name="text">
-          <string>Aspect ratio</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="gridLayoutWidget_5">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>220</y>
-        <width>591</width>
-        <height>81</height>
-       </rect>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_5">
-       <item row="1" column="0">
-        <widget class="QComboBox" name="plotBackground">
-         <item>
-          <property name="text">
-           <string>False</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>True</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item row="0" column="1" alignment="Qt::AlignHCenter|Qt::AlignBottom">
-        <widget class="QLabel" name="backgroundMainLabel">
-         <property name="font">
-          <font>
-           <pointsize>10</pointsize>
-           <weight>75</weight>
-           <bold>true</bold>
-           <underline>true</underline>
-          </font>
-         </property>
-         <property name="text">
-          <string>Plot image behind gaze</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QComboBox" name="bgImageVariable"/>
-       </item>
-       <item row="1" column="1">
-        <widget class="QPushButton" name="selectImageFolder">
-         <property name="text">
-          <string>Select folder with background images</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="gridLayoutWidget_6">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>120</y>
-        <width>591</width>
-        <height>71</height>
-       </rect>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_6">
-       <item row="0" column="1" alignment="Qt::AlignHCenter|Qt::AlignBottom">
-        <widget class="QLabel" name="xMaxLabel">
-         <property name="text">
-          <string>xMax</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QSpinBox" name="xMaxValue">
-         <property name="minimum">
-          <number>-10000</number>
-         </property>
-         <property name="maximum">
-          <number>10000</number>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="3" alignment="Qt::AlignHCenter|Qt::AlignBottom">
-        <widget class="QLabel" name="yMaxLabel">
-         <property name="text">
-          <string>yMax</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QSpinBox" name="yMinValue">
-         <property name="minimum">
-          <number>-10000</number>
-         </property>
-         <property name="maximum">
-          <number>10000</number>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2" alignment="Qt::AlignHCenter|Qt::AlignBottom">
-        <widget class="QLabel" name="yMinLabel">
-         <property name="text">
-          <string>yMin</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QSpinBox" name="xMinValue">
-         <property name="minimum">
-          <number>-10000</number>
-         </property>
-         <property name="maximum">
-          <number>10000</number>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="3">
-        <widget class="QSpinBox" name="yMaxValue">
-         <property name="minimum">
-          <number>-10000</number>
-         </property>
-         <property name="maximum">
-          <number>10000</number>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0" alignment="Qt::AlignHCenter|Qt::AlignBottom">
-        <widget class="QLabel" name="xMinLabel">
-         <property name="text">
-          <string>xMin</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="4">
-        <widget class="QComboBox" name="highlightEvent">
-         <item>
-          <property name="text">
-           <string>None</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Fixation</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Saccade</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item row="0" column="4">
-        <widget class="QLabel" name="highlight">
-         <property name="text">
-          <string>Highlight</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignBottom|Qt::AlignHCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="5">
-        <widget class="QLabel" name="addInfoL">
-         <property name="text">
-          <string>Additional info</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignBottom|Qt::AlignHCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="5">
-        <widget class="QComboBox" name="addInfo"/>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QPushButton" name="resetVariables">
-      <property name="geometry">
-       <rect>
-        <x>640</x>
-        <y>10</y>
-        <width>91</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Reset settings</string>
-      </property>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="tab">
-     <attribute name="title">
-      <string>Gazemap</string>
-     </attribute>
-     <widget class="QWidget" name="gridLayoutWidget_7">
-      <property name="geometry">
-       <rect>
-        <x>9</x>
-        <y>19</y>
-        <width>131</width>
-        <height>51</height>
-       </rect>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_7">
-       <item row="0" column="0">
-        <widget class="QLabel" name="plotStyleL">
-         <property name="text">
-          <string>Plot Style</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QComboBox" name="plotStyle">
-         <item>
-          <property name="text">
-           <string>Scatter</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Line</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="gridLayoutWidget_8">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>160</y>
-        <width>541</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_8">
-       <item row="2" column="0">
-        <widget class="QComboBox" name="xCoords"/>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="xCoordsL">
-         <property name="text">
-          <string>X</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLabel" name="yCoordsL">
-         <property name="text">
-          <string>Y</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QComboBox" name="yCoords"/>
-       </item>
-       <item row="2" column="3">
-        <widget class="QComboBox" name="time"/>
-       </item>
-       <item row="1" column="2">
-        <widget class="QLabel" name="speedCoordsL">
-         <property name="text">
-          <string>Speed</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QComboBox" name="speed"/>
-       </item>
-       <item row="1" column="3">
-        <widget class="QLabel" name="timeL">
-         <property name="text">
-          <string>Time</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QLabel" name="dataInfoLabel">
-      <property name="geometry">
-       <rect>
-        <x>220</x>
-        <y>140</y>
-        <width>131</width>
-        <height>20</height>
-       </rect>
-      </property>
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="1" column="0">
+     <widget class="QLabel" name="settingsLabel">
       <property name="font">
        <font>
-        <pointsize>10</pointsize>
+        <pointsize>16</pointsize>
        </font>
       </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
       <property name="text">
-       <string>Data to plot</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
+       <string>Settings</string>
       </property>
      </widget>
-    </widget>
-    <widget class="QWidget" name="tab_2">
-     <attribute name="title">
-      <string>Heatmap</string>
-     </attribute>
-     <widget class="QWidget" name="gridLayoutWidget_4">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>70</y>
-        <width>721</width>
-        <height>71</height>
-       </rect>
+    </item>
+    <item row="0" column="0" colspan="2">
+     <layout class="QGridLayout" name="gridLayout">
+      <property name="horizontalSpacing">
+       <number>6</number>
       </property>
-      <layout class="QGridLayout" name="gridLayout_4">
-       <item row="1" column="5">
-        <widget class="QDoubleSpinBox" name="kernelThreshold">
-         <property name="minimum">
-          <double>-1.000000000000000</double>
-         </property>
-         <property name="maximum">
-          <double>1.000000000000000</double>
-         </property>
-         <property name="singleStep">
-          <double>0.010000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QSpinBox" name="kernelScale">
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>100</number>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0" alignment="Qt::AlignHCenter|Qt::AlignBottom">
-        <widget class="QLabel" name="kernelLabel">
-         <property name="text">
-          <string>Kernel</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="3" alignment="Qt::AlignHCenter|Qt::AlignBottom">
-        <widget class="QLabel" name="kernelCMLabel">
-         <property name="text">
-          <string>Kernel colormap</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QComboBox" name="kernel"/>
-       </item>
-       <item row="1" column="3">
-        <widget class="QComboBox" name="kernelCM"/>
-       </item>
-       <item row="1" column="1">
-        <widget class="QDoubleSpinBox" name="kernelParameter">
-         <property name="maximum">
-          <double>10000.000000000000000</double>
-         </property>
-         <property name="singleStep">
-          <double>0.010000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2" alignment="Qt::AlignHCenter|Qt::AlignBottom">
-        <widget class="QLabel" name="kernelScaleLabel">
-         <property name="text">
-          <string>Kernel scaling</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="4">
-        <widget class="QComboBox" name="kernelCMInverse"/>
-       </item>
-       <item row="0" column="1" alignment="Qt::AlignHCenter|Qt::AlignBottom">
-        <widget class="QLabel" name="kernelParameterLabel">
-         <property name="text">
-          <string>Kernel (parameter)</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="6">
-        <widget class="QDoubleSpinBox" name="kernelAlpha">
-         <property name="maximum">
-          <double>1.000000000000000</double>
-         </property>
-         <property name="singleStep">
-          <double>0.010000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="4" alignment="Qt::AlignHCenter|Qt::AlignBottom">
-        <widget class="QLabel" name="kernelCMInverseLabel">
-         <property name="text">
-          <string>Inverse color</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="5" alignment="Qt::AlignHCenter|Qt::AlignBottom">
-        <widget class="QLabel" name="kernelThresholdLabel">
-         <property name="text">
-          <string>Kernel threshold</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="6" alignment="Qt::AlignHCenter|Qt::AlignBottom">
-        <widget class="QLabel" name="kernelAlphaLabel">
-         <property name="text">
-          <string>Kernel alpha</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="AnimationTab">
-     <attribute name="title">
-      <string>Animation</string>
-     </attribute>
-     <widget class="QWidget" name="gridLayoutWidget_9">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>40</y>
-        <width>591</width>
-        <height>111</height>
-       </rect>
+      <property name="verticalSpacing">
+       <number>12</number>
       </property>
-      <layout class="QGridLayout" name="AnimationLayout">
-       <item row="3" column="0">
-        <widget class="QComboBox" name="useAperture">
-         <item>
-          <property name="text">
-           <string>False</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>True</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLabel" name="apertureRL">
+      <item row="3" column="3">
+       <widget class="QPushButton" name="toggleIncluded">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Include/Exclude</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="4">
+       <widget class="QLCDNumber" name="currentTrialDisp">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="segmentStyle">
+         <enum>QLCDNumber::Flat</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLineEdit" name="selectedFile">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QPushButton" name="saveFile">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Save file</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="3">
+       <widget class="QPushButton" name="backButton">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Back</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="5">
+       <widget class="QPushButton" name="nextButton">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Next</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="4">
+       <widget class="QPushButton" name="updateButton">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Update</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="6">
+       <widget class="QPushButton" name="jumpToTrial">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Plot trial number</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QComboBox" name="trialsToPlot">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <item>
          <property name="text">
-          <string>Aperture (radius)</string>
+          <string>All</string>
          </property>
-        </widget>
-       </item>
-       <item row="2" column="4">
-        <widget class="QLabel" name="edgeOpacL">
+        </item>
+        <item>
          <property name="text">
-          <string>Edge opacity</string>
+          <string>Included</string>
          </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QLabel" name="apertureOpacL">
+        </item>
+        <item>
          <property name="text">
-          <string>Aperture opacity</string>
+          <string>Excluded</string>
          </property>
-        </widget>
-       </item>
-       <item row="2" column="3">
-        <widget class="QLabel" name="edgeRL">
-         <property name="text">
-          <string>edge (radius)</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="showTraceL">
-         <property name="text">
-          <string>Show gaze trace</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="2">
-        <widget class="QLabel" name="redDotSizeL">
-         <property name="text">
-          <string>Red dot size (area)</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="1">
-        <widget class="QSpinBox" name="blackDotSize">
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>1000000</number>
-         </property>
-         <property name="value">
-          <number>50</number>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="0">
-        <widget class="QComboBox" name="showTrace">
-         <property name="currentText">
-          <string>False</string>
-         </property>
-         <item>
-          <property name="text">
-           <string>False</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>True</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item row="5" column="4">
-        <widget class="QPushButton" name="saveAnimButton">
-         <property name="text">
-          <string>Save animation</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="3">
-        <widget class="QLabel" name="frameStepSizeL">
-         <property name="text">
-          <string>Step size (speed)</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QLabel" name="blackDotSizeL">
-         <property name="text">
-          <string>Black dot size (area)</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="2">
-        <widget class="QSpinBox" name="redDotSize">
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>1000000</number>
-         </property>
-         <property name="value">
-          <number>20</number>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="3">
-        <widget class="QSpinBox" name="frameStepSize">
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>1000</number>
-         </property>
-         <property name="value">
-          <number>5</number>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="useApertureL">
-         <property name="text">
-          <string>Use aperture (slow)</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QSpinBox" name="apertureR">
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>1000</number>
-         </property>
-         <property name="value">
-          <number>75</number>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="2">
-        <widget class="QDoubleSpinBox" name="apertureOpac">
-         <property name="maximum">
-          <double>1.000000000000000</double>
-         </property>
-         <property name="singleStep">
-          <double>0.010000000000000</double>
-         </property>
-         <property name="value">
-          <double>1.000000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="4">
-        <widget class="QDoubleSpinBox" name="edgeOpac">
-         <property name="maximum">
-          <double>1.000000000000000</double>
-         </property>
-         <property name="singleStep">
-          <double>0.010000000000000</double>
-         </property>
-         <property name="value">
-          <double>0.250000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="3">
-        <widget class="QSpinBox" name="edgeR">
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>1000</number>
-         </property>
-         <property name="value">
-          <number>10</number>
-         </property>
-        </widget>
-       </item>
-      </layout>
+        </item>
+       </widget>
+      </item>
+      <item row="5" column="2" colspan="5">
+       <widget class="QScrollBar" name="trialScroll">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximum">
+         <number>0</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="7">
+       <widget class="QPushButton" name="animateButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Animate</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="6">
+       <widget class="QSpinBox" name="jumpToTrialNr">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>1000000</number>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QCheckBox" name="unLockSettings">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Unlock settings</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QPushButton" name="selectFile">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Select file</string>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
+        <property name="default">
+         <bool>false</bool>
+        </property>
+        <property name="flat">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLineEdit" name="includedOrExcluded">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item row="2" column="0" colspan="2">
+     <widget class="Line" name="settingsLine">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
      </widget>
-    </widget>
-   </widget>
-   <widget class="QLabel" name="settingsLabel">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>160</y>
-      <width>161</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>16</pointsize>
-     </font>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="text">
-     <string>Settings</string>
-    </property>
-   </widget>
-   <widget class="Line" name="settingsLine">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>190</y>
-      <width>771</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-   </widget>
-   <zorder>gridLayoutWidget</zorder>
-   <zorder>gridLayoutWidget_2</zorder>
+    </item>
+    <item row="3" column="2">
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="3" column="0" colspan="2">
+     <widget class="QTabWidget" name="heatmapTab">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(255, 255, 255);</string>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="windowTab">
+       <attribute name="title">
+        <string>General</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_10">
+        <item row="0" column="0" rowspan="2">
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="1" column="0">
+           <widget class="QComboBox" name="plotType">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="aspectRatio">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" alignment="Qt::AlignHCenter|Qt::AlignBottom">
+           <widget class="QLabel" name="plotTypeLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Plot type</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" alignment="Qt::AlignHCenter|Qt::AlignBottom">
+           <widget class="QLabel" name="aspectRatioLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Aspect ratio</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="0" column="1">
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>518</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="0" column="2">
+         <widget class="QPushButton" name="resetVariables">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Reset settings</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2" rowspan="2">
+         <spacer name="verticalSpacer_5">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>65</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="2" column="0">
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>59</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="3" column="0" colspan="2">
+         <layout class="QGridLayout" name="gridLayout_6">
+          <item row="0" column="1" alignment="Qt::AlignHCenter|Qt::AlignBottom">
+           <widget class="QLabel" name="xMaxLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>xMax</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="xMaxValue">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimum">
+             <number>-10000</number>
+            </property>
+            <property name="maximum">
+             <number>10000</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3" alignment="Qt::AlignHCenter|Qt::AlignBottom">
+           <widget class="QLabel" name="yMaxLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>yMax</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QSpinBox" name="yMinValue">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimum">
+             <number>-10000</number>
+            </property>
+            <property name="maximum">
+             <number>10000</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2" alignment="Qt::AlignHCenter|Qt::AlignBottom">
+           <widget class="QLabel" name="yMinLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>yMin</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QSpinBox" name="xMinValue">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimum">
+             <number>-10000</number>
+            </property>
+            <property name="maximum">
+             <number>10000</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QSpinBox" name="yMaxValue">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimum">
+             <number>-10000</number>
+            </property>
+            <property name="maximum">
+             <number>10000</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" alignment="Qt::AlignHCenter|Qt::AlignBottom">
+           <widget class="QLabel" name="xMinLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>xMin</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="4">
+           <widget class="QComboBox" name="highlightEvent">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <item>
+             <property name="text">
+              <string>None</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Fixation</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Saccade</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QLabel" name="highlight">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Highlight</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="5">
+           <widget class="QLabel" name="addInfoL">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Additional info</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="5">
+           <widget class="QComboBox" name="addInfo">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="4" column="0">
+         <spacer name="verticalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>47</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="5" column="0" colspan="2">
+         <layout class="QGridLayout" name="gridLayout_5">
+          <item row="1" column="0">
+           <widget class="QComboBox" name="plotBackground">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <item>
+             <property name="text">
+              <string>False</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>True</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="0" column="1" alignment="Qt::AlignHCenter|Qt::AlignBottom">
+           <widget class="QLabel" name="backgroundMainLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+              <underline>true</underline>
+             </font>
+            </property>
+            <property name="text">
+             <string>Plot image behind gaze</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QComboBox" name="bgImageVariable">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QPushButton" name="selectImageFolder">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Select folder with background images</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="6" column="0">
+         <spacer name="verticalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>47</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Gazemap</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_7">
+        <item row="0" column="0">
+         <layout class="QGridLayout" name="gridLayout_8">
+          <item row="4" column="4">
+           <spacer name="horizontalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>200</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="4" column="0">
+           <widget class="QComboBox" name="xCoords">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="xCoordsL">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>X</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLabel" name="yCoordsL">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Y</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QComboBox" name="yCoords">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="3">
+           <widget class="QComboBox" name="time">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QLabel" name="speedCoordsL">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Speed</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2">
+           <widget class="QComboBox" name="speed">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="3">
+           <widget class="QLabel" name="timeL">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Time</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="plotStyleL">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Plot Style</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QComboBox" name="plotStyle">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <item>
+             <property name="text">
+              <string>Scatter</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Line</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <spacer name="verticalSpacer_6">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="0">
+         <spacer name="verticalSpacer_10">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>17</width>
+            <height>218</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_2">
+       <attribute name="title">
+        <string>Heatmap</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_9">
+        <item row="0" column="0">
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="2" column="7">
+           <spacer name="horizontalSpacer_7">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>202</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="3" column="3">
+           <spacer name="verticalSpacer_13">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>330</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="2" column="5">
+           <widget class="QDoubleSpinBox" name="kernelThreshold">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimum">
+             <double>-1.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QSpinBox" name="kernelScale">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>100</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" alignment="Qt::AlignHCenter|Qt::AlignBottom">
+           <widget class="QLabel" name="kernelLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Kernel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3" alignment="Qt::AlignHCenter|Qt::AlignBottom">
+           <widget class="QLabel" name="kernelCMLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Kernel colormap</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QComboBox" name="kernel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3">
+           <widget class="QComboBox" name="kernelCM">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QDoubleSpinBox" name="kernelParameter">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximum">
+             <double>10000.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2" alignment="Qt::AlignHCenter|Qt::AlignBottom">
+           <widget class="QLabel" name="kernelScaleLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Kernel scaling</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="4">
+           <widget class="QComboBox" name="kernelCMInverse">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" alignment="Qt::AlignHCenter|Qt::AlignBottom">
+           <widget class="QLabel" name="kernelParameterLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Kernel (parameter)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="6">
+           <widget class="QDoubleSpinBox" name="kernelAlpha">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="4" alignment="Qt::AlignHCenter|Qt::AlignBottom">
+           <widget class="QLabel" name="kernelCMInverseLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Inverse color</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="5" alignment="Qt::AlignHCenter|Qt::AlignBottom">
+           <widget class="QLabel" name="kernelThresholdLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Kernel threshold</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="6" alignment="Qt::AlignHCenter|Qt::AlignBottom">
+           <widget class="QLabel" name="kernelAlphaLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Kernel alpha</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <spacer name="verticalSpacer_7">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="AnimationTab">
+       <attribute name="title">
+        <string>Animation</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_13">
+        <item row="1" column="0">
+         <layout class="QGridLayout" name="AnimationLayout">
+          <item row="5" column="5">
+           <spacer name="horizontalSpacer_8">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>273</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="0" column="3">
+           <spacer name="verticalSpacer_18">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>35</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="3" column="0">
+           <widget class="QComboBox" name="useAperture">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <item>
+             <property name="text">
+              <string>False</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>True</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLabel" name="apertureRL">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Aperture (radius)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="4">
+           <widget class="QLabel" name="edgeOpacL">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Edge opacity</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QLabel" name="apertureOpacL">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Aperture opacity</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3">
+           <widget class="QLabel" name="edgeRL">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>edge (radius)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="showTraceL">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Show gaze trace</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2">
+           <widget class="QLabel" name="redDotSizeL">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Red dot size (area)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QSpinBox" name="blackDotSize">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>1000000</number>
+            </property>
+            <property name="value">
+             <number>50</number>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QComboBox" name="showTrace">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="currentText">
+             <string>False</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>False</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>True</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="5" column="4">
+           <widget class="QPushButton" name="saveAnimButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Save animation</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="3">
+           <widget class="QLabel" name="frameStepSizeL">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Step size (speed)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QLabel" name="blackDotSizeL">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Black dot size (area)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="2">
+           <widget class="QSpinBox" name="redDotSize">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>1000000</number>
+            </property>
+            <property name="value">
+             <number>20</number>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="3">
+           <widget class="QSpinBox" name="frameStepSize">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>1000</number>
+            </property>
+            <property name="value">
+             <number>5</number>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="useApertureL">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Use aperture (slow)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QSpinBox" name="apertureR">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>1000</number>
+            </property>
+            <property name="value">
+             <number>75</number>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QDoubleSpinBox" name="apertureOpac">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="4">
+           <widget class="QDoubleSpinBox" name="edgeOpac">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
+            </property>
+            <property name="value">
+             <double>0.250000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="3">
+           <widget class="QSpinBox" name="edgeR">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>1000</number>
+            </property>
+            <property name="value">
+             <number>10</number>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="2">
+           <spacer name="verticalSpacer_19">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>233</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
    <zorder>heatmapTab</zorder>
    <zorder>settingsLine</zorder>
    <zorder>settingsLabel</zorder>
+   <zorder></zorder>
+   <zorder>verticalSpacer</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>798</width>
+     <width>811</width>
      <height>21</height>
     </rect>
    </property>
@@ -969,29 +1553,8 @@
    </property>
   </action>
  </widget>
- <tabstops>
-  <tabstop>selectFile</tabstop>
-  <tabstop>selectedFile</tabstop>
-  <tabstop>unLockSettings</tabstop>
- </tabstops>
  <resources/>
  <connections>
-  <connection>
-   <sender>unLockSettings</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>heatmapTab</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>102</x>
-     <y>132</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>212</x>
-     <y>317</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>unLockSettings</sender>
    <signal>toggled(bool)</signal>
@@ -1011,16 +1574,32 @@
   <connection>
    <sender>unLockSettings</sender>
    <signal>toggled(bool)</signal>
+   <receiver>heatmapTab</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>76</x>
+     <y>123</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>398</x>
+     <y>396</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>unLockSettings</sender>
+   <signal>toggled(bool)</signal>
    <receiver>settingsLabel</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>89</x>
-     <y>136</y>
+     <x>76</x>
+     <y>123</y>
     </hint>
     <hint type="destinationlabel">
-     <x>100</x>
-     <y>196</y>
+     <x>76</x>
+     <y>155</y>
     </hint>
    </hints>
   </connection>
