@@ -211,6 +211,7 @@ def calculateSaccadeCurvature(xSacc, ySacc, pixPerDegree, ignoreDist = 0.5, flip
         startPos        = (saccX[0], saccY[0])
         endPos          = (saccX[-1], saccY[-1])
         saccadeAngle    = determineAngle(startPos,endPos) *-1
+        saccAngle360    = pointAngle((xSacc[sacc][0], ySacc[sacc][0]), (xSacc[sacc][-1], ySacc[sacc][-1]))
 
         # we calculate point angle for all points except the last point (also exclude first point)
         pointAngles     = np.zeros(len(saccX)-2)
@@ -234,11 +235,11 @@ def calculateSaccadeCurvature(xSacc, ySacc, pixPerDegree, ignoreDist = 0.5, flip
         pointAngles = pointAngles[pointAngles < 9999]
         curveData.append(pointAngles)
         # Append saccadeAngles
-        if saccadeAngle > 180:
-            saccadeAngle -=360
-        elif saccadeAngle < -180:
-            saccadeAngle +=360
-        saccAngles.append(saccadeAngle)
+#        if saccadeAngle > 180:
+#            saccadeAngle -=360
+#        elif saccadeAngle < -180:
+#            saccadeAngle +=360
+        saccAngles.append(saccAngle360)
     return curveData, saccAngles
 
 def parseToLongFormat(data, duplicate = 'No'):
@@ -395,7 +396,8 @@ def eyeLinkDataParser(FILENAME, **par):
                     'fixTracePup','sFix', 'eFix', 'durFix', 'fixX', \
                     'fixY', 'fixPup', 'sBlink', 'eBlink', 'durBlink', \
                     'rawX', 'rawY', 'rawTime', 'rawPupSize', 'euclidDist', \
-                    'curvature', 'saccAngle']
+                    'curvature', 'saccAngle', 'stdvPix', 'stdvDeg', 'RMSPix', \
+                    'RMSDeg']
     
         # Add prefix to avoid double columns
         rawKw  = [keyPrefix + k for k in rawKw ]
@@ -618,6 +620,14 @@ def eyeLinkDataParser(FILENAME, **par):
                 pData.at[i, keyPrefix+'curvature'] = [np.median(sacc) for sacc in curv]
                 pData.at[i, keyPrefix+'saccAngle'] = ang
                
+            # Add quality measures sdtv and RMS noise
+            if not np.array(pd.isnull(pData[fixTraceKw[1]][i])).all():
+                stdvP, stdvD, RMSP, RMSD = getFixQual(pData[fixTraceKw[1]][i], pData[fixTraceKw[2]][i], pixPerDegree)
+                pData.at[i, keyPrefix+'stdvPix'] = np.array(stdvP)
+                pData.at[i, keyPrefix+'stdvDeg'] = np.array( stdvD)
+                pData.at[i, keyPrefix+'RMSPix'] = np.array(RMSP)
+                pData.at[i, keyPrefix+'RMSDeg'] = np.array(RMSD)
+            
             # Epoch variables
             varBool = np.logical_and(varTimes >= start, varTimes <= stop)
             varEpochT = varTimes[varBool]
