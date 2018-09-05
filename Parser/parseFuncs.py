@@ -39,6 +39,93 @@ def determineAngle(p1, p2):
 	sdegree = ((narcdeg * 180)/math.pi)
 	return sdegree
 
+def getFixQual(fixX, fixY, pxPerDeg):
+    '''
+    Calculates the standard deviation and RMS in pixels 
+    and in degrees for each fixation in a list of fixations
+    Retuns False for a specific fixation if there are less than
+    5 samples in the fixation
+    
+    Parameters
+    ------------
+    fixX : np.array with np.arrays 
+        List of lists containing the x positions of the gaze for each sample
+    fixY : np.array with np.arrays 
+        List of lists containing the y positions of the gaze for each sample
+    pxPerDeg : Float or int
+        The number of pixels spanning 1 visual degree
+        
+        
+    Returns
+    ------------
+    stdvPix : list of floats
+        The standard deviation of each fixation in pixel values
+    stdvDeg : list of floats
+        The standard deviation of each fixation in visual degrees
+    RMSPix : list of floats
+        The RMS of each fixation in pixel values
+    RMSDeg : list of floats
+        The RMS of each fixation in visual degrees
+    
+    Examples
+    ------------
+    >>> pxPerDeg = 48.0
+    >>> 
+    >>> fixX = np.array([
+            np.array([838.4,  838.9,  839.2,  839.6,  840. ,  840.1]), 
+            np.array([809.1,  811.5,  813.2,  814.7,  815.8,  816.6,  817.4])
+            ])
+    >>> 
+    >>> fixY = np.array([
+            np.array([977.8,  976. ,  975.1,  974.2,  973.3,  971.9]),
+            np.array([992.3,   993.9,   997.4,   999.4,  1002.4,  1004.8,  1007.5])
+            ])
+    >>> 
+    >>> stdvPix, stdvDeg, RMSPix, RMSDeg = getFixQual(fixX, fixY, pxPerDeg)
+    >>> 
+    >>> print 'stdvPix:', stdvPix
+    stdvPix: [1.9866918342924882, 5.8657776073403518]
+    >>> 
+    >>> print 'stdvDeg:', stdvDeg
+    stdvDeg: [0.041389413214426837, 0.12220370015292399]
+    >>> 
+    >>> print 'RMSPix:', RMSPix
+    RMSPix: [1.288409872672502, 3.0069364254447883]
+    >>> 
+    >>> print 'RMSDeg:', RMSDeg
+    RMSDeg: [0.026841872347343792, 0.06264450886343309]
+
+    '''
+    
+    # Initiate lists
+    stdvPix = []
+    stdvDeg = []
+    RMSPix = []
+    RMSDeg = []
+    
+    for i, (x,y) in enumerate(zip(fixX, fixY)):
+        if len(x) > 5:
+            # Get average position
+            avX = np.mean(x)
+            avY = np.mean(y)
+            
+            # Calculate standard deviation
+            thetaAv = np.sqrt((x - avX)**2 + (y - avY)**2)
+            stdvPix.append(np.sqrt(np.sum(np.square(thetaAv))/len(thetaAv)))
+            stdvDeg.append(stdvPix[-1]/float(pxPerDeg))
+            
+            # Calculate the distance between each sample point in visual degrees
+            theta = np.sqrt((x[:-1]-x[1:])**2 + (y[:-1] - y[1:])**2)
+            RMSPix.append(np.sqrt(np.sum(np.square(theta))/len(theta)))
+            RMSDeg.append(RMSPix[-1]/float(pxPerDeg))
+        else:
+            stdvPix.append(False)
+            stdvDeg.append(False)
+            RMSPix.append(False)
+            RMSDeg.append(False)
+    
+    return stdvPix, stdvDeg, RMSPix, RMSDeg
+
 def calculateSaccadeCurvature(xSacc, ySacc, pixPerDegree, ignoreDist = 0.5, flipY = False):
     ''' Calculates the saccade curvature.\n
     Input a list of xSaccade data points as well as a list of ySaccade data points.\n
