@@ -126,6 +126,43 @@ def getFixQual(fixX, fixY, pxPerDeg):
     
     return stdvPix, stdvDeg, RMSPix, RMSDeg
 
+def pointAngle(p1, p2):
+    '''
+    Determine the angle of a point (360degrees).
+    Assumes that x goes from lower to high (left right)
+    Assumes that y goes from high to low (bottom top)
+    
+    Parameters
+    ------------
+    p1 : tuple or list of ints or floats
+        The x,y coordinates of the start point
+    p2 : tuple or list of ints or floats
+        The x,y coordinates of the end point
+
+    Returns
+    ------------
+    angle : float
+        The Angle between point 1 (p1) and point 2 (p2)
+
+    Examples
+    ------------
+    >>> p1 = [0,0]
+    >>> p2 = [45,45]
+    >>> angle = pointAngle(p1, p2)
+    >>> print angle
+    315.0
+
+    
+    '''
+    normx = ((p2[0] - p1[0]))
+    normy = ((p2[1] - p1[1]))
+    narcdeg = math.atan2(normy, normx)
+    sdegree = math.degrees(narcdeg)
+    angle = sdegree + ((180-sdegree)*2)
+    if angle > 360:
+        angle -= 360
+    return angle
+
 def calculateSaccadeCurvature(xSacc, ySacc, pixPerDegree, ignoreDist = 0.5, flipY = False):
     ''' Calculates the saccade curvature.\n
     Input a list of xSaccade data points as well as a list of ySaccade data points.\n
