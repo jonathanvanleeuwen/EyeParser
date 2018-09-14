@@ -117,7 +117,7 @@ class Window(QtWidgets.QMainWindow):
         # Set tab color 
         self.ui.heatmapTab.setStyleSheet('QTabBar::tab {color: rgb(0,0,0)}')
         self.ui.heatmapTab.setVisible(False)
-        self.ui.settingsLabel.setVisible(False)
+        self.ui.heatmapTab.setEnabled(False)
         
         # Set animation flag
         self.animationOn = False

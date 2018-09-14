@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>811</width>
-    <height>635</height>
+    <width>778</width>
+    <height>402</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,21 +24,6 @@
     <string notr="true"/>
    </property>
    <layout class="QGridLayout" name="gridLayout_2">
-    <item row="1" column="0">
-     <widget class="QLabel" name="settingsLabel">
-      <property name="font">
-       <font>
-        <pointsize>16</pointsize>
-       </font>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Settings</string>
-      </property>
-     </widget>
-    </item>
     <item row="0" column="0" colspan="2">
      <layout class="QGridLayout" name="gridLayout">
       <property name="horizontalSpacing">
@@ -311,6 +296,9 @@
     </item>
     <item row="2" column="0" colspan="2">
      <widget class="Line" name="settingsLine">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
         <horstretch>0</horstretch>
@@ -325,19 +313,6 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="2">
-     <spacer name="verticalSpacer">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>40</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
     <item row="3" column="0" colspan="2">
      <widget class="QTabWidget" name="heatmapTab">
       <property name="enabled">
@@ -347,7 +322,19 @@
        <string notr="true">background-color: rgb(255, 255, 255);</string>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
+      </property>
+      <property name="documentMode">
+       <bool>false</bool>
+      </property>
+      <property name="tabsClosable">
+       <bool>false</bool>
+      </property>
+      <property name="movable">
+       <bool>false</bool>
+      </property>
+      <property name="tabBarAutoHide">
+       <bool>false</bool>
       </property>
       <widget class="QWidget" name="windowTab">
        <attribute name="title">
@@ -1522,10 +1509,22 @@
       </widget>
      </widget>
     </item>
+    <item row="3" column="2">
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
    </layout>
    <zorder>heatmapTab</zorder>
    <zorder>settingsLine</zorder>
-   <zorder>settingsLabel</zorder>
    <zorder></zorder>
    <zorder>verticalSpacer</zorder>
   </widget>
@@ -1534,7 +1533,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>811</width>
+     <width>778</width>
      <height>21</height>
     </rect>
    </property>
@@ -1584,22 +1583,6 @@
     <hint type="destinationlabel">
      <x>398</x>
      <y>396</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>unLockSettings</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>settingsLabel</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>76</x>
-     <y>123</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>76</x>
-     <y>155</y>
     </hint>
    </hints>
   </connection>
