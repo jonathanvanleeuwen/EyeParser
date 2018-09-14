@@ -1,0 +1,19 @@
+Using conda promt, cd to correct directory
+This turns .ui file into .py file
+
+To change drive in anaconda promt, type the drive name without cd e.g. D:
+
+
+input
+
+pyuic4 -x Eyelinkplotter.ui -o Eyelinkplotter.py
+
+
+
+With pyqt5
+
+pyuic5 -x eyeParserBuilder.ui -o eyeParserBuilder.py
+
+pyuic5 -x plotterGUICode.ui -o plotterGUICode.py
+
+pyuic5 -x eyeParserBuilderV2.ui -o eyeParserBuilder.py
