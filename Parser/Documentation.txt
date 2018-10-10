@@ -3,7 +3,7 @@
 # Eyelink 1000 Documentation, V0.6
 #=======================================
 #=======================================
-Writen by Jonathan van Leeuwen, 2017
+Written by Jonathan van Leeuwen, 2017
 
 #=======================================
 # Using the parser
@@ -59,23 +59,23 @@ See settings for a more detailed explanation
 of how the data is extracted.
 
 ###
-# Caveauts
+# Caveats
 As there are a multitude of ways to log the data
-and each one having its own spesific cofiguration
+and each one having its own specific configuration
 there is a possibility that the parser wont be able to parse the data.
 For instance, the parser expects to get data from
-the regular experisions in a spesific format, if the format
+the regular expressions in a specific format, if the format
 does not match then the merging and data calculation probably
-oes not work. 
+does not work. 
 
 That being said.
 If that is the case then some slight modifications to the parser 
 function should do the trick:
 	remove/add the relevant keywords
-	Doube check the new indices finding keywords (you don't want timestamps used for curvature calculation)
+	Double check the new indices finding keywords (you don't want timestamps used for curvature calculation)
 	Remove any data calculations not used, e.g. curvature calculation	
 
-The parser was writen en tested using
+The parser was written and tested using
 Anaconda python 64bit.
 
 #=======================================
@@ -96,10 +96,10 @@ collections
 multiprocessing
 
 ###
-# Installing dependancies
+# Installing dependencies
 
 If you use Anaconda 64bit most
-of the labraries are allready installed.
+of the libraries are already installed.
 The remaining libraries can be installed
 by either method 1 or method 2.
 
@@ -139,7 +139,7 @@ Method 2
 # End fixation
     Default = r"EFIX\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(.+)\t\s+(.+)\t\s+(\d+)\n"
 
-    With the default expression input data should look like:
+    With the default expression, input data should look like:
     EFIX L   49826	50555	730	  813.3	  491.8	   1991\n
 
     Without changing the source code outputs should
@@ -155,7 +155,7 @@ Method 2
 # End saccade
     Default = r"ESACC\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+)\n"
 
-    With the default expression input data should look like:
+    With the default expression, input data should look like:
     ESACC L  50556	50563	8	  813.0	  489.0	  830.6	  490.0	   0.36	     49\n
 
     Without changing the source code outputs should
@@ -201,7 +201,7 @@ Method 2
     Default = 'MSG\\t(\d+)\s+('+stopTrial+').*\\n'
     stopTrial = The string input from "Stop trial key"
 
-    With the default expression input data should look like:
+    With the default expression, input data should look like:
     MSG	55095 stop_trial\n
 
     Without changing the source code outputs should
@@ -214,7 +214,7 @@ Method 2
     Default = 'MSG\\t(\d+)\s+('+var+')\s+(.+)[\s+]?.*\\n'
     var = The string input from "Variable prefix"
 
-    With the default expression input data should look like:
+    With the default expression, input data should look like:
     MSG	58956 var correct_response 1\n
 
     Without changing the source code outputs should
@@ -234,7 +234,7 @@ Method 2
     This saves all messages which are not start, stop or variable messages.
     Used as a catch all.
 
-    With the default expression input data should look like:
+    With the default expression, input data should look like:
     MSG	63902 badLogging some data
 
     Without changing the source code outputs should
@@ -263,7 +263,7 @@ Merged name
     Default = AllDataMerged
 
     This is the string appended to the 
-    file containing the marged data sets.
+    file containing the merged data sets.
 
 Merge files
     Default = No
@@ -288,7 +288,7 @@ Parallel processing:
     Defaults to Yes if more than 1 files
 
     Automatically sets itself, but can be over
-    writen. 
+    written. 
 
 CPU cores
     Default = 64 
@@ -303,10 +303,10 @@ Pixels per degree
     Default = Automatic
     
     Determines whether pixels per visual degree is calculated
-    based on saccade amplitudes and positoons (automatic)
+    based on saccade amplitudes and positions (automatic)
     or manual preset value.
 
-    Pixcels per degree is used for some of the calculations.
+    Pixels per degree is used for some of the calculations.
         Which samples to use for saccade curvature calculation.
 
 Px per deg(manual)
@@ -333,7 +333,7 @@ ending the trial with a stop trial keyword:
 	"stop_trial"
 
 The parser epochs the data around the 
-start and stop keys, and loggs all variables 
+start and stop keys, and logs all variables 
 and data between these two keys.
 Any variables sent before the start trial key
 or after the stop trial key will not be logged.
@@ -387,9 +387,9 @@ Don't:
 2:  Constructs keywords data frames.
 3:  Opens and reads file.
 4:  Extracts data using regular expressions.
-5:  Puts all the data into pandas dataframes.
+5:  Puts all the data into pandas data frames.
 6:  Creates dicts to store temporary data.
-7:  Itterates through each trial based
+7:  Iterates through each trial based
     on start/stop times
 8:  For each trial extracts all eyetracking
     events, variables and messages
@@ -400,14 +400,14 @@ Don't:
     eye movements 
 11: For each trial calculates the curvature
     of each saccade.
-12: Combines all the data into one dataframe
-13: Saves the dataframe as a pickele (.p) file
+12: Combines all the data into one data frame
+13: Saves the data frame as a pickle (.p) file
 
 #=======================================
 # Output data
 #=======================================
 The following keywords are written to the
-dataframe, all keywords are preceded by 
+data frame, all keywords are preceded by 
 the prefix "DK_".
 All user sent messages are preceded with
 the prefix "DV_".
@@ -416,7 +416,7 @@ the prefix "DV_".
 # Data keywords and what is stored for each row
 
 All eye position related values are in pixels
-unless otherwhise specified
+unless otherwise specified
 
 DK_trialNr = Trial number (float)
 DK_sTrial = Timestamp for trial start (float)
@@ -430,7 +430,7 @@ DK_ssaccX = list of start saccade x positions (list of floats)
 DK_ssaccY = list of start saccade y positions (list of floats)
 DK_esaccX = list of end saccade x positions (list of floats)
 DK_esaccY = list of start saccade Y positions (list of floats)
-DK_saccAmp = list of saccade amplitudes in visual dgerees (list of floats)
+DK_saccAmp = list of saccade amplitudes in visual degrees (list of floats)
 DK_peakVelocity = list of peak velocities of saccades in degrees/s
 DK_saccTraceX = list of lists of all X positions during all saccades (list of list of floats)
 DK_saccTraceY = list of lists of all Y positions during all saccades (list of list of floats)
@@ -449,7 +449,7 @@ DK_rawX = list of all gaze x positions during the trial (list of floats)
 DK_rawY = list of all gaze Y positions during the trial (list of floats)
 DK_rawTime = list of all gaze times during the trial (list of floats)
 DK_rawPupSize = list of all pupil sizes during the trial (list of floats)
-DK_euclidDist = list of euclidian distances between all samples in a trial (list of floats)
+DK_euclidDist = list of Euclidian distances between all samples in a trial (list of floats)
 DK_curvature = list of median saccade curvatures for all saccades (list of floats)
 DK_fixTraceX = list of lists of all X positions during all fixations (list of list of floats)
 DK_fixTraceY = list of lists of all Y positions during all fixations (list of list of floats)
@@ -459,13 +459,13 @@ DK_saccAngle = List of saccade angles, between -180 and 180
 DK_includedTrial= Bool - Defaults to all values as True, Use this for filtering data later (integrated with plotter)
 
 ###
-# Variables writen to data file
+# Variables written to data file
 # preceded with the variable keyword
 
 The first string after the keyword
 is saved as the column name while
 the value directly after the first space
-is writen for each trial (row)
+is written for each trial (row)
 The time the message was sent is 
 put in a different column with the
 same name + TimeStamp
@@ -477,9 +477,3 @@ The preceding line will be saved
 as two columns in the data frame:
 DV_Ydistr (column) with the value 767 (row)
 DV_YdistrTimeStamp (column) with the value 1681525 (row)
-
-#=======================================
-# Debugging
-#=======================================
-Don't run parallel processing when debugging.
-

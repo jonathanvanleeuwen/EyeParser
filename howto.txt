@@ -17,3 +17,9 @@ pyuic5 -x eyeParserBuilder.ui -o eyeParserBuilder.py
 pyuic5 -x plotterGUICode.ui -o plotterGUICode.py
 
 pyuic5 -x eyeParserBuilderV2.ui -o eyeParserBuilder.py
+
+
+
+
+pyuic5 -x mainwindow.ui -o mainTemp.py
+
