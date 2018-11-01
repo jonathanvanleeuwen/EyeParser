@@ -397,7 +397,7 @@ def eyeLinkDataParser(FILENAME, **par):
                     'fixY', 'fixPup', 'sBlink', 'eBlink', 'durBlink', \
                     'rawX', 'rawY', 'rawTime', 'rawPupSize', 'euclidDist', \
                     'curvature', 'saccAngle', 'stdvPix', 'stdvDeg', 'RMSPix', \
-                    'RMSDeg']
+                    'RMSDeg','pxDeg',]
     
         # Add prefix to avoid double columns
         rawKw  = [keyPrefix + k for k in rawKw ]
@@ -524,7 +524,7 @@ def eyeLinkDataParser(FILENAME, **par):
             
         elif pxPerDegMode == 'Manual':
             pixPerDegree = float(pxPerDegManual)        
-        
+
         # Deal with the variables
         varMsg = np.array([i.split() for i in varMsg])
         varHeaders = np.array([varPrefix + i[0] for i in varMsg])
@@ -551,6 +551,7 @@ def eyeLinkDataParser(FILENAME, **par):
         pData[prsKw[3]] = startMsg # pData.sMsg
         pData[prsKw[4]] = stopMsg # pData.eMsg
     
+        pData[keyPrefix+'pxDeg'] = pixPerDegree
         #==============================================================================
         # Epoch all data for each trial
         #==============================================================================
