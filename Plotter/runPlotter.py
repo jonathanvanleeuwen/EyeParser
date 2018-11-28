@@ -6,15 +6,18 @@ Created on Fri Jan 26 14:35:24 2018
 """
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import  QSizePolicy, QFrame
 import os
 import pandas as pd
 import numpy as np
-from plotCode import plotTrial
+from plotCode_GUI import plotTrial as pltGUI
 from plotterGUICode import Ui_Eyelinkplotter
 import scipy
 import scipy.io
 import matplotlib.pyplot as plt
 from matplotlib import animation
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
 
 #==============================================================================
 # Functions for reading mat files
@@ -58,6 +61,36 @@ def saveToMat(df, fn):
     import scipy
     a_dict = {col_name : df[col_name].values for col_name in df.columns.values}  
     scipy.io.savemat(fn, {'data':a_dict})
+    
+# =============================================================================
+# Plot things in the GUI
+# =============================================================================
+class MyMplCanvas(FigureCanvas):
+    def __init__(self, parent=None, width=5, height=4, dpi=100):
+        fig = Figure(figsize=(width, height), dpi=dpi)
+        self.ax1 = fig.add_subplot(3,2,1)
+        self.ax2 = fig.add_subplot(3,2,3)
+        self.ax3 = fig.add_subplot(3,2,5)
+        self.ax4 = fig.add_subplot(1,2,2)
+        self.Axis = [self.ax1, self.ax2, self.ax3, self.ax4]
+        FigureCanvas.__init__(self, fig)
+        self.setParent(parent)
+        FigureCanvas.setSizePolicy(self, QSizePolicy.Expanding, QSizePolicy.Expanding)
+        FigureCanvas.updateGeometry(self)
+        self.figAx = [fig, self.ax1, self.ax2, self.ax3, self.ax4]
+
+    def compute_initial_figure(self):
+        for ax in self.Axis:
+            ax.plot([], [])
+            ax.set_xticks([])
+            ax.set_yticks([])
+    
+    def updateFig(self):
+        self.draw()
+    
+    def clearFig(self):
+        for ax in self.Axis:
+            ax.clear()
 
 #==============================================================================
 # Build the GUI
@@ -117,7 +150,6 @@ class Window(QtWidgets.QMainWindow):
         # Set tab color 
         self.ui.heatmapTab.setStyleSheet('QTabBar::tab {color: rgb(0,0,0)}')
         self.ui.heatmapTab.setVisible(False)
-        self.ui.heatmapTab.setEnabled(False)
         
         # Set animation flag
         self.animationOn = False
@@ -130,6 +162,13 @@ class Window(QtWidgets.QMainWindow):
         self.space = QtWidgets.QShortcut(QtGui.QKeySequence('space'), self)
         self.space.activated.connect(self.toggleIncludedTrial)
         
+        # Init plot area
+        frame = QFrame(self)
+        self.Canvas = MyMplCanvas(frame)
+        self.ui.plotGrid.addWidget(self.Canvas)
+        self.ui.plotGrid.addWidget(frame)
+        self.Canvas.compute_initial_figure()
+
         # Display GUI
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowStaysOnTopHint)
         self.show()
@@ -504,12 +543,15 @@ class Window(QtWidgets.QMainWindow):
             del self.anim
             self.animationOn = False
                         
-        self.figAx = plotTrial(self.time, self.x, self.y, self.speed, **self.par)
-            
+        self.Canvas.clearFig()
+        self.par['figAx'] = self.Canvas.figAx
+        self.figAx = pltGUI(self.time, self.x, self.y, self.speed, **self.par)
+        self.Canvas.updateFig()
+        
     def runAni(self):
         # Run animation
         if len(self.figAx) == 5:
-            fig,ax1,ax2,ax3,self.ax4 = self.figAx
+            self.fig,self.ax1,self.ax2,self.ax3,self.ax4 = self.figAx
             xMin, xMax = self.ax4.get_xlim()
             yMin, yMax = self.ax4.get_ylim()
             
@@ -525,12 +567,12 @@ class Window(QtWidgets.QMainWindow):
             self.gaussShade= self.ui.edgeOpac.value()
             
             self.ax4.clear()
-            plt.title('Gaze position')
-            plt.xlabel('X position (px)')
-            plt.ylabel('Y position (px)')
-            self.line1, = ax1.plot([],[], lw=2, c='k')
-            self.line2, = ax2.plot([],[], lw=2, c='k')
-            self.line3, = ax3.plot([],[], lw=2, c='k')
+            self.ax4.set_title('Gaze position')
+            self.ax4.set_xlabel('X position (px)')
+            self.ax4.set_ylabel('Y position (px)')
+            self.line1, = self.ax1.plot([],[], lw=2, c='k')
+            self.line2, = self.ax2.plot([],[], lw=2, c='k')
+            self.line3, = self.ax3.plot([],[], lw=2, c='k')
             self.line4, = self.ax4.plot([],[], lw=2, c='k')
             self.ax4.axis([xMin, xMax, yMin, yMax])
             self.ax4.set(aspect = self.par['bgAspect'])
@@ -581,7 +623,7 @@ class Window(QtWidgets.QMainWindow):
                                                     animated = self.runGaussAnim, 
                                                     cmap = 'gray')
             # Start animation
-            self.anim = animation.FuncAnimation(fig, self.animate, init_func=self.init,
+            self.anim = animation.FuncAnimation(self.fig, self.animate, init_func=self.init,
                                frames=np.arange(0,len(self.x), self.sampleStep), interval=1, blit=True)  
             
     #==========================================================================
