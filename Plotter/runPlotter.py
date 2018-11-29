@@ -140,7 +140,7 @@ class Window(QtWidgets.QMainWindow):
         self.populateLists()
         
         # Run button press initiation
-        self.defineButtonPresses()
+        self.ui.selectFile.clicked.connect(self.selectDataFile)
         
         # set background color
         palette = QtGui.QPalette()
@@ -249,7 +249,7 @@ class Window(QtWidgets.QMainWindow):
             
         
     def defineButtonPresses(self):
-        self.ui.selectFile.clicked.connect(self.selectDataFile)
+        
         self.ui.saveFile.clicked.connect(self.saveDataFile)
         self.ui.actionSelect_file.triggered.connect(self.selectDataFile)
         self.ui.selectImageFolder.clicked.connect(self.selectImDir)
@@ -258,12 +258,17 @@ class Window(QtWidgets.QMainWindow):
         self.ui.nextButton.clicked.connect(self.nextButtonClick)
         self.ui.jumpToTrial.clicked.connect(self.plotSpecificTrial)
         self.ui.resetVariables.clicked.connect(self.resetVars)
-        self.ui.trialScroll.valueChanged.connect(self.trialScrollChange)
+        self.ui.trialScroll.sliderReleased.connect(self.trialScrollChange)
+        self.ui.trialScroll.sliderMoved.connect(self.scrollDrag)
         self.ui.toggleIncluded.clicked.connect(self.toggleIncludedTrial)
         self.ui.trialsToPlot.activated.connect(self.toggleTrialsToPlot)
         self.ui.animateButton.clicked.connect(self.animateButtonClick)
         self.ui.saveAnimButton.clicked.connect(self.saveAnimation)
                                                
+
+    def scrollDrag(self):
+        self.ui.currentTrialDisp.display(self.ui.trialScroll.value())
+
     def varInitiation(self):
         # imageDirectory
         if self.imDir is None:
@@ -346,9 +351,9 @@ class Window(QtWidgets.QMainWindow):
             self.ui.speed.setCurrentIndex(keys.index("DK_euclidDist"))
                     
             # Initiate counters
+            self.defineButtonPresses()
             self.setCounters()
             self.plotData()
-            self.updateButtonClick()
             # Initiate save file button
             self.ui.saveFile.setEnabled(True)
         
@@ -373,6 +378,7 @@ class Window(QtWidgets.QMainWindow):
         # Set counters
         self.ui.currentTrialDisp.display(self.currTrial)
         self.ui.trialScroll.setValue(self.currTrial)
+        self.ui.jumpToTrialNr.setValue(self.currTrial)
         # Set included trial
         included = str(self.data.DK_includedTrial[self.trialIndex])
         self.ui.includedOrExcluded.setText(included)
@@ -453,7 +459,7 @@ class Window(QtWidgets.QMainWindow):
     def trialScrollChange(self):
         self.ui.jumpToTrialNr.setValue(self.ui.trialScroll.value())
         self.plotSpecificTrial()
-    
+
     def resetVars(self):
         self.populateLists()
         self.plotData()
@@ -479,6 +485,8 @@ class Window(QtWidgets.QMainWindow):
                 
     def plotData(self):
         self.trialIndex = self.currTrial-1
+        print self.trialIndex
+        print self.ui.time.currentText().split()
         self.time = self.data[self.ui.time.currentText().split()[0]][self.trialIndex]
         self.x = self.data[self.ui.xCoords.currentText().split()[0]][self.trialIndex]
         self.y = self.data[self.ui.yCoords.currentText().split()[0]][self.trialIndex]
@@ -763,6 +771,8 @@ def run():
             pass
         if not QtWidgets.QApplication.instance():
             app = QtWidgets.QApplication(sys.argv)
+            ui = Window()
+            sys.exit(app.exec_())
         else:
             app = QtWidgets.QApplication.instance() 
             ui = Window()
