@@ -651,6 +651,8 @@ def run():
             pass
         if not QtWidgets.QApplication.instance():
             app = QtWidgets.QApplication(sys.argv)
+            ui = Window()
+            sys.exit(app.exec_())
         else:
             app = QtWidgets.QApplication.instance() 
             ui = Window()

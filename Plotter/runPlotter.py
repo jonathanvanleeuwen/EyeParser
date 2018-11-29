@@ -485,8 +485,6 @@ class Window(QtWidgets.QMainWindow):
                 
     def plotData(self):
         self.trialIndex = self.currTrial-1
-        print self.trialIndex
-        print self.ui.time.currentText().split()
         self.time = self.data[self.ui.time.currentText().split()[0]][self.trialIndex]
         self.x = self.data[self.ui.xCoords.currentText().split()[0]][self.trialIndex]
         self.y = self.data[self.ui.yCoords.currentText().split()[0]][self.trialIndex]
