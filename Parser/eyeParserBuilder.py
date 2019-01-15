@@ -714,7 +714,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Eyelink 100 parser"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Eyelink 1000 data parser"))
         self.filebtn.setText(_translate("MainWindow", "Select file(s)"))
         self.varKeyL.setText(_translate("MainWindow", "Variable prefix"))
         self.Parsebtn.setText(_translate("MainWindow", "Parse"))

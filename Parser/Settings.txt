@@ -21,7 +21,7 @@ regExpStopNew:False
 regExpVarNew:False
 regExpMsgNew:False
 runParallel:Yes
-nrCores:7
+nrCores:3
 pxPerDeg:48
 pxMode:Automatic
 longFormat:No
