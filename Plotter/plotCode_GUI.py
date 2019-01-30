@@ -91,7 +91,8 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
 
         # lets plot x position over time
         ax1 = figAx[1]
-        ax1.set_title('Xgaze(time)')
+        #ax1.set_title('Xgaze(time)')
+        ax1.set_xlabel('Time (ms)')
         ax1.set_ylabel(xLabel)
         ax1.set_ylim([xMin,xMax])
         if pltStyle == 'Line':
@@ -113,7 +114,8 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
         else:
             yTime = np.arange(len(yPos))
         ax2 = figAx[2]
-        ax2.set_title('Ygaze(time)')
+        #ax2.set_title('Ygaze(time)')
+        ax2.set_xlabel('Time (ms)')
         ax2.set_ylabel(ylabel)
         ax2.set_ylim([yMin,yMax])
         if pltStyle == 'Line':
@@ -135,7 +137,7 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
         else:
             speedTime = np.arange(len(euclidDist))
         ax3 = figAx[3]
-        ax3.set_title('Speed(time)')
+        #ax3.set_title('Speed(time)')
         ax3.set_xlabel('Time (ms)')
         ax3.set_ylabel(speedLabel)
         if pltStyle == 'Line':
@@ -156,7 +158,7 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
         timeCol = np.linspace(1,0,len(xPos))
         # Lets plot the gaze position during trial
         ax4 = figAx[4]
-        ax4.set_title('Gaze position')
+        #ax4.set_title('Gaze position')
         ax4.set_xlabel('X position (px)')
         ax4.set_ylabel('Y position (px)')
         ax4.axis([xMin, xMax, yMin, yMax])

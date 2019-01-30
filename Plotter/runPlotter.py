@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 from matplotlib import animation
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-
+import matplotlib.gridspec as gridspec
 
 # ==============================================================================
 # Functions for reading mat files
@@ -76,10 +76,13 @@ def saveToMat(df, fn):
 class MyMplCanvas(FigureCanvas):
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
-        self.ax1 = fig.add_subplot(3, 2, 1)
-        self.ax2 = fig.add_subplot(3, 2, 3)
-        self.ax3 = fig.add_subplot(3, 2, 5)
-        self.ax4 = fig.add_subplot(1, 2, 2)
+        gs = gridspec.GridSpec(4, 3)
+        gs.update(wspace=0.3, hspace=0.5)
+        self.ax1 = fig.add_subplot(gs[-1,0])
+        self.ax2 = fig.add_subplot(gs[-1,1])
+        self.ax3 = fig.add_subplot(gs[-1,2])
+        self.ax4 = fig.add_subplot(gs[:-1,:])
+        
         self.Axis = [self.ax1, self.ax2, self.ax3, self.ax4]
         FigureCanvas.__init__(self, fig)
         self.setParent(parent)
