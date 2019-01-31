@@ -9,9 +9,6 @@ from PyQt5.QtWidgets import QSizePolicy, QFrame
 import os
 import pandas as pd
 import numpy as np
-from numpy.core.multiarray import ndarray
-from typing import Any, Union
-
 from plotCode_GUI import plotTrial as pltGUI
 from plotterGUICode import Ui_Eyelinkplotter
 import scipy
