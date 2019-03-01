@@ -427,7 +427,7 @@ class Window(QtWidgets.QMainWindow):
         self.ui.bussyBar.setRange(0,1)
 
     def selectFile(self):
-        tempFiles = QtWidgets.QFileDialog.getOpenFileNames(self, 'Select file(s)')[0]
+        tempFiles = QtWidgets.QFileDialog.getOpenFileNames(self, 'Select file(s)', "","ASCII (*.asc);;All Files (*)")[0]
         if len(tempFiles) > 0:
             self.files = tempFiles
         if len(self.files) > 0:
@@ -609,7 +609,6 @@ class Window(QtWidgets.QMainWindow):
             self.parseSingleCore()
             
         if len(self.files) == 0:
-            print 'yes'
             self.stopBussyBar()
             self.ui.progressBar.setRange(0,1)
 
