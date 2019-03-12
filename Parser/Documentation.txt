@@ -76,7 +76,7 @@ function should do the trick:
 	Remove any data calculations not used, e.g. curvature calculation	
 
 The parser was written and tested using
-Anaconda python 64bit.
+Anaconda python 2.7 - 64bit.
 
 #=======================================
 # Dependencies (required libraries)
@@ -88,7 +88,7 @@ sys
 time
 math
 numpy
-PyQt4
+PyQt5
 pandas
 psutil
 itertools
@@ -98,23 +98,39 @@ multiprocessing
 ###
 # Installing dependencies
 
-If you use Anaconda 64bit most
+If you use Anaconda python 2.7 64bit (recommended) most
 of the libraries are already installed.
 The remaining libraries can be installed
-by either method 1 or method 2.
+by either method 1 or 2 or 3.
 
-Method 1
+Method 1 - Use this method if you are using Anaconda
+   Open Anaconda promt
+   conda install library_name
+   Example: "conda install pandas"
+
+Method 2 - dont use "pip" if you are using Anaconda
    Open a console and type: 
    pip install library_name
    Example: "pip install pandas"
    
-Method 2
+Method 3
    If method 1 does not work you can go
    to "http://www.lfd.uci.edu/~gohlke/pythonlibs/".
    Download the .whl file.
    Open a console and type:
    pip install "fileDirectory\fileName.whl"
-   Example: pip install "D:\Work\PyQt4-4.11.4-cp27-none-win_amd64.whl"
+   Example: pip install "D:\Work\filename.whl"
+   
+###
+# When using Anaconda 64it python 2.7 (Recomended)
+After succesful instalation of Anaconda python 2.7 – 64bit, 
+use the recommended editor “Spyder 3”. 
+
+Before running the “EyeParser.py” script you need to 
+change some settings in spyder 3.
+
+	Tools -> Preferences -> IPython console -> Graphics --- Change backend to “Automatic”
+
 
 #=======================================
 # Settings
@@ -456,7 +472,12 @@ DK_fixTraceY = list of lists of all Y positions during all fixations (list of li
 DK_fixTracePup = list of lists of all pupil sizes during fixations (list of list of floats)
 DK_fixTraceTime = list of lists of all sample times during all fixations (list of list of floats)
 DK_saccAngle = List of saccade angles, between -180 and 180
-DK_includedTrial= Bool - Defaults to all values as True, Use this for filtering data later (integrated with plotter)
+DK_includedTrial = Bool - Defaults to all values as True, Use this for filtering data later (integrated with plotter)
+DK_pixPerDegree = Float - The calculated pixels per degree based on saccade amplitude (might deviate slightly from expected value)
+DK_RMSDeg = list of floats - The root mean square noise for each fixation in visual degrees 
+DK_RMSPix = list of floats - The root mean square noise for each fixation in pixels 
+DK_stdvDeg = list of floats - The sdtv noise for each fixation in visual degrees
+DK_stdvPix = list of floats - The sdtv noise for each fixation in pixels
 
 ###
 # Variables written to data file
