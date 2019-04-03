@@ -67,7 +67,7 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
         ylabel = par.pop('yLabel', 'Pixel position')
         speedLabel = par.pop('speedLabel', 'Speed')
         figAx = par.pop('figAx', False)
-      
+        
         if highlight == 'Saccade':
             sHighL = par.pop('ssacc')
             durHighL = par.pop('saccDur')
@@ -77,7 +77,7 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
         elif highlight == 'None':
             sHighL = par.pop('sFix', [])
             durHighL = par.pop('fixDur', [])
-            
+        
         #==========================================================================
         # Plotting
         #==========================================================================
@@ -88,7 +88,7 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
             xTime = normTime
         else:
             xTime = np.arange(len(xPos))
-
+        
         # lets plot x position over time
         ax1 = figAx[1]
         #ax1.set_title('Xgaze(time)')
@@ -107,7 +107,7 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
                                                durHighL[i],
                                                abs(ax1.get_ylim()[1] - ax1.get_ylim()[0]),
                                                fill=True, alpha = 0.3))
-    
+        
         # lets plot y position over time
         if len(normTime) == len(yPos):
             yTime = normTime
@@ -130,7 +130,7 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
                                                durHighL[i],
                                                abs(ax2.get_ylim()[1] - ax2.get_ylim()[0]),
                                                fill=True, alpha = 0.3))
-    
+        
         # Lets plot speed over time (distance between points)
         if len(normTime) == len(euclidDist):
             speedTime = normTime
@@ -153,7 +153,7 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
                                                durHighL[i],
                                                abs(ax3.get_ylim()[1] - ax3.get_ylim()[0]),
                                                fill=True, alpha = 0.3))
-    
+
         # Lets get make a timeseries to plot over time.
         timeCol = np.linspace(1,0,len(xPos))
         # Lets plot the gaze position during trial
@@ -176,7 +176,7 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
                 elif pltStyle == 'Scatter':
                     ax4.scatter(xPos, yPos,c = timeCol, edgecolors = 'face', marker = 'p', s = 5, cmap='hot')            
             ax4.set(aspect = bgAspect)
-    
+
         elif pltType == 'heat' :
             #======================================================================
             # Make gaussian image

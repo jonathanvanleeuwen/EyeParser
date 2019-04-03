@@ -14,7 +14,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Eyetracker data plotter</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="autoFillBackground">

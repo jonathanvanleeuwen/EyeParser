@@ -100,7 +100,6 @@ class MyMplCanvas(FigureCanvas):
         for ax in self.Axis:
             ax.clear()
 
-
 # ==============================================================================
 # Build the GUI
 # ==============================================================================
@@ -143,7 +142,6 @@ class Window(QtWidgets.QMainWindow):
         _translate = QtCore.QCoreApplication.translate
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.setWindowIcon(QtGui.QIcon('eye.png'))
-        self.setWindowTitle(_translate("Eyelinkplotter", "Eyelink data plotter", None))
 
         self.imDir = None
         self.data = []
@@ -322,7 +320,7 @@ class Window(QtWidgets.QMainWindow):
         return data
 
     def selectDataFile(self):
-        self.fileName = QtWidgets.QFileDialog.getOpenFileName(None, 'Select file')[0]
+        self.fileName = QtWidgets.QFileDialog.getOpenFileName(None, 'Select file(s)', "","Pickle (*.p);;All Files (*)")[0]
         if self.fileName:
             fileBase = os.path.basename(self.fileName)
             self.ui.selectedFile.setText(os.path.splitext(fileBase)[0])
@@ -346,7 +344,6 @@ class Window(QtWidgets.QMainWindow):
 
             # Set variables for additional info
             self.ui.addInfo.addItems(['False'] + keys)
-
             # Set plot data
             self.ui.time.addItems(keys)
             self.ui.time.setCurrentIndex(keys.index("DK_rawTime"))
@@ -355,15 +352,17 @@ class Window(QtWidgets.QMainWindow):
             self.ui.yCoords.addItems(keys)
             self.ui.yCoords.setCurrentIndex(keys.index("DK_rawY"))
             self.ui.speed.addItems(keys)
-            self.ui.speed.setCurrentIndex(keys.index("DK_euclidDist"))
-
+            if 'DK_speed' in keys:
+                self.ui.speed.setCurrentIndex(keys.index("DK_speed"))
+            else:
+                self.ui.speed.setCurrentIndex(keys.index("DK_euclidDist"))
             # Initiate counters
             self.defineButtonPresses()
             self.setCounters()
             self.plotData()
             # Initiate save file button
             self.ui.saveFile.setEnabled(True)
-
+            
     def saveDataFile(self):
         dType = os.path.splitext(self.fileName)[1]
         if dType == '.p':
@@ -496,7 +495,7 @@ class Window(QtWidgets.QMainWindow):
         self.x = self.data[self.ui.xCoords.currentText().split()[0]][self.trialIndex]
         self.y = self.data[self.ui.yCoords.currentText().split()[0]][self.trialIndex]
         self.speed = self.data[self.ui.speed.currentText().split()[0]][self.trialIndex]
-
+        
         # Do some sanity checks on settings
         pltBg = self.ui.plotBackground.currentText()
         if pltBg == 'True':
@@ -516,7 +515,15 @@ class Window(QtWidgets.QMainWindow):
             inverseKernel = True
         elif inverseKernel == 'False':
             inverseKernel = False
-
+        
+        # Compatibility mode
+        durSaccKey = 'DK_durSacc'
+        durFixKey = 'DK_durFix'
+        if 'DK_saccDur' in self.data.keys():
+            durSaccKey = 'DK_saccDur'
+        if 'DK_fixDur' in self.data.keys():
+            durFixKey = 'DK_fixDur'
+        
         # Build the final parameter dict
         self.par = {
             'pltType': self.ui.plotType.currentText().split()[0],
@@ -539,13 +546,13 @@ class Window(QtWidgets.QMainWindow):
             'included': str(self.data.DK_includedTrial[self.trialIndex]),
             'highlight': str(self.ui.highlightEvent.currentText()),
             'ssacc': self.data.DK_ssacc[self.trialIndex],
-            'saccDur': self.data.DK_durSacc[self.trialIndex],
+            'saccDur': self.data[durSaccKey][self.trialIndex],
             'sFix': self.data.DK_sFix[self.trialIndex],
-            'fixDur': self.data.DK_durFix[self.trialIndex],
+            'fixDur': self.data[durFixKey][self.trialIndex],
             'xLabel': self.ui.xCoords.currentText().split()[0],
             'yLabel': self.ui.yCoords.currentText().split()[0],
             'speedLabel': self.ui.speed.currentText().split()[0]}
-
+        
         self.par['addLabel'] = self.ui.addInfo.currentText().split()[0]
         if self.par['addLabel'] != 'False':
             self.par['addInfo'] = self.data[self.par['addLabel']][self.trialIndex]
@@ -555,7 +562,7 @@ class Window(QtWidgets.QMainWindow):
             self.anim.event_source.stop()
             del self.anim
             self.animationOn = False
-
+        
         self.Canvas.clearFig()
         self.par['figAx'] = self.Canvas.figAx
         self.figAx = pltGUI(self.time, self.x, self.y, self.speed, **self.par)
@@ -692,10 +699,11 @@ class Window(QtWidgets.QMainWindow):
 
     # animation function. This is called sequentially
     def animate(self, i):
+        sampT = self.time - self.time[0]
         # Draw moving line
-        self.line1.set_data([i, i], [self.par['xMin'], self.par['xMax']])
-        self.line2.set_data([i, i], [self.par['yMin'], self.par['yMax']])
-        self.line3.set_data([i, i], [np.min(self.speed) - 20, np.max(self.speed) + 20])
+        self.line1.set_data([sampT[i], sampT[i]], [self.par['xMin'], self.par['xMax']])
+        self.line2.set_data([sampT[i], sampT[i]], [self.par['yMin'], self.par['yMax']])
+        self.line3.set_data([sampT[i], sampT[i]], [np.min(self.speed) - 20, np.max(self.speed) + 20])
 
         # Remove the two dots
         self.dot.remove()
@@ -784,6 +792,4 @@ def run():
             app = QtWidgets.QApplication.instance()
             ui = Window()
             sys.exit(app.exec_())
-
-
 run()

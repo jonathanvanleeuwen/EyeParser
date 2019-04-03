@@ -844,7 +844,7 @@ class Ui_Eyelinkplotter(object):
 
     def retranslateUi(self, Eyelinkplotter):
         _translate = QtCore.QCoreApplication.translate
-        Eyelinkplotter.setWindowTitle(_translate("Eyelinkplotter", "MainWindow"))
+        Eyelinkplotter.setWindowTitle(_translate("Eyelinkplotter", "Eyetracker data plotter"))
         self.plotTypeLabel.setText(_translate("Eyelinkplotter", "Plot type"))
         self.aspectRatioLabel.setText(_translate("Eyelinkplotter", "Aspect ratio"))
         self.resetVariables.setText(_translate("Eyelinkplotter", "Reset settings"))

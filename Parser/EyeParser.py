@@ -18,7 +18,7 @@ import psutil
 import multiprocessing
 from parseFuncs import parseWrapper
 import time
-from eyeParserBuilder import Ui_MainWindow
+from eyeParserBuilder import Ui_eyeTrackerSelection
 
 #==============================================================================
 # Functions used by the parser
@@ -124,16 +124,14 @@ class Window(QtWidgets.QMainWindow):
         # Set variables
         self.files = []
         self.docLoc = 'Documentation.txt'
-        self.settingsLoc = 'Settings.txt'
+        self.settingsLoc = 'SettingsEyelink.txt'
         self.progressValue = 0
-        # Load settings
-        self.loadSettings()
 
         #======================================================================
         # Initiate main features of the GUI
         #======================================================================
         super(QtWidgets.QMainWindow, self).__init__()
-        self.ui = Ui_MainWindow()
+        self.ui = Ui_eyeTrackerSelection()
         self.ui.setupUi(self)
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.setWindowIcon(QtGui.QIcon('eye.png'))
@@ -145,6 +143,9 @@ class Window(QtWidgets.QMainWindow):
 
         # Hide tabs
         self.ui.optionsTab.setVisible(False)
+        
+        # Load settings
+        self.loadSettings()
         
         #======================================================================
         # Set the menu bar triggers
@@ -171,6 +172,11 @@ class Window(QtWidgets.QMainWindow):
         self.ui.Parsebtn.clicked.connect(self.setValues)
         # textbox displaying the selected files
         self.ui.filebtn.clicked.connect(self.selectFile)
+        # The trigger for pixels per degree mode
+        self.ui.pixMode.currentIndexChanged.connect(self.setPxMode)
+        # Trigger loading of data
+        self.ui.TobiiBox.clicked.connect(self.changeSettingsloc)
+        self.ui.EyelinkBox.clicked.connect(self.changeSettingsloc)
         
         #======================================================================
         # Initiate options tab
@@ -186,16 +192,13 @@ class Window(QtWidgets.QMainWindow):
         if int(self.par['nrCores']) > maxCores-1:
             self.par['nrCores'] = str(maxCores-1)
         self.ui.nrCores.setText(self.par['nrCores'])
+        
         # Pixels per degree
-        self.ui.pixMode.addItem("Automatic")
-        self.ui.pixMode.addItem("Manual")
         if self.par['pxMode'] == 'Automatic':
             self.ui.pixMode.setCurrentIndex(0)
         else:
             self.ui.pixMode.setCurrentIndex(1)
-        #Number of pixels per degree
-        self.ui.pixPerDeg.setText(self.par['pxPerDeg'])
-        
+
         #======================================================================
         # Initiate Save options tab
         #======================================================================
@@ -239,26 +242,6 @@ class Window(QtWidgets.QMainWindow):
             self.ui.fileTypeLongBtn.setCurrentIndex(idx)
         
         #======================================================================
-        # Initiate regular rexpressions tab
-        #======================================================================
-        #regSamples
-        self.ui.regSamp.setText(self.par['regExpSamp'])
-        #regEfix
-        self.ui.regEfix.setText(self.par['regExpEfix'])
-        #regEsacc
-        self.ui.regEsacc.setText(self.par['regExpEsacc'])
-        #regEblink
-        self.ui.regEblink.setText(self.par['regExpEblink'])
-        #regStart
-        self.ui.regStart.setText(self.par['regExpStart'])
-        #regStop
-        self.ui.regStop.setText(self.par['regExpStop'])
-        #regVar
-        self.ui.regVar.setText(self.par['regExpVar'])
-        #regMsg
-        self.ui.regMsg.setText(self.par['regExpMsg'])
-       
-        #======================================================================
         # Status labels
         #======================================================================
         self.ui.statusL.hide()
@@ -300,7 +283,17 @@ class Window(QtWidgets.QMainWindow):
         
     #==============================================================================
     # Define button actions
-    #==============================================================================
+    #==============================================================================   
+    def changeSettingsloc(self):
+        if self.ui.TobiiBox.isChecked():
+            self.settingsLoc = 'SettingsTobii.txt'
+            self.ui.pixMode.setCurrentIndex(1)
+            self.ui.pixMode.setEnabled(False)
+        elif self.ui.EyelinkBox.isChecked():
+            self.settingsLoc = 'SettingsEyelink.txt'
+            self.ui.pixMode.setEnabled(True)
+        self.loadSettings()
+            
     def loadSettings(self):
         with open(self.settingsLoc, 'r') as f:
             f = f.read().splitlines()
@@ -320,6 +313,7 @@ class Window(QtWidgets.QMainWindow):
                 values.append(value)
         self.DFSettings = pd.DataFrame([values], columns = keys)
         self.par = {key:self.DFSettings[key][0] for key in self.DFSettings.keys()}
+        self.updateGUI()
 
     def writeSettings(self):
         settings = ''
@@ -347,62 +341,63 @@ class Window(QtWidgets.QMainWindow):
             # Write and load the deffault settings
             self.writeDefaultSettings()
             self.loadSettings()
-            
-            # Sets the default textbox settings 
-            self.ui.startKey.setText(self.par['startTrialKey'])
-            self.ui.stopKey.setText(self.par['stopTrialKey'])
-            self.ui.varKey.setText(self.par['variableKey'])
-            self.ui.textbox.setText('')
-            self.ui.regSamp.setText(self.par['regExpSamp'])
-            self.ui.regEfix.setText(self.par['regExpEfix'])
-            self.ui.regEsacc.setText(self.par['regExpEsacc']) 
-            self.ui.regEblink.setText(self.par['regExpEblink'])
-            self.ui.regStart.setText(self.par['regExpStart'])
-            self.ui.regStop.setText(self.par['regExpStop'])
-            self.ui.regVar.setText(self.par['regExpVar'])
-            self.ui.regMsg.setText(self.par['regExpMsg'])
-            self.ui.parsedName.setText(self.par['saveExtension'])
-            self.ui.rawName.setText(self.par['saveRawExtension'])
-            self.ui.pixPerDeg.setText(self.par['pxPerDeg'])
-            maxCores = psutil.cpu_count()
-            if int(self.par['nrCores']) > maxCores-1:
-                self.par['nrCores'] = str(maxCores-1)
-            self.ui.nrCores.setText(self.par['nrCores'])
-
-            
-            # Set button defaults
-            # Parallel button is not set, sets depending on file number
-            if self.par['saveRawFiles'] == 'No':
-                self.ui.saveRawbtn.setCurrentIndex(0)
-            else:
-                self.ui.saveRawbtn.setCurrentIndex(1)
-            if self.par['pxMode'] == 'Automatic':
-                self.ui.pixMode.setCurrentIndex(0)
-            else:
-                self.ui.pixMode.setCurrentIndex(1)
-            if self.par['longFormat'] == 'No':
-                self.ui.longbtn.setCurrentIndex(0)
-            else:
-                self.ui.longbtn.setCurrentIndex(1)
-            if self.par['duplicateValues'] == 'No':
-                self.ui.duplicLongbtn.setCurrentIndex(0)
-            else:
-                self.ui.duplicLongbtn.setCurrentIndex(1)
-            # Save as dropDowns
-            idx = self.ui.fileTypeBtn.findText(self.par['defaultSaveAs'])
-            if idx != -1:
-                self.ui.fileTypeBtn.setCurrentIndex(idx)
-            idx = self.ui.fileTypeRawBtn.findText(self.par['rawSaveAs'])
-            if idx != -1:
-                self.ui.fileTypeRawBtn.setCurrentIndex(idx)
-            idx = self.ui.fileTypeLongBtn.findText(self.par['longSaveAs'])
-            if idx != -1:
-                self.ui.fileTypeLongBtn.setCurrentIndex(idx)
-            idx = self.ui.paralell.findText(self.par['runParallel'])
-            if idx != -1:
-                self.ui.paralell.setCurrentIndex(idx)
         else:
             pass
+            
+    def updateGUI(self):
+        # Sets the default textbox settings 
+        self.ui.startKey.setText(self.par['startTrialKey'])
+        self.ui.stopKey.setText(self.par['stopTrialKey'])
+        self.ui.varKey.setText(self.par['variableKey'])
+        self.ui.textbox.setText('')
+        self.ui.Parsebtn.setEnabled(False)
+        self.files = []
+        self.ui.parsedName.setText(self.par['saveExtension'])
+        self.ui.rawName.setText(self.par['saveRawExtension'])
+        maxCores = psutil.cpu_count()
+        if int(self.par['nrCores']) > maxCores-1:
+            self.par['nrCores'] = str(maxCores-1)
+        self.ui.nrCores.setText(self.par['nrCores'])
+
+        
+        # Set button defaults
+        # Parallel button is not set, sets depending on file number
+        if self.par['saveRawFiles'] == 'No':
+            self.ui.saveRawbtn.setCurrentIndex(0)
+        else:
+            self.ui.saveRawbtn.setCurrentIndex(1)
+        if self.par['pxMode'] == 'Automatic':
+            self.ui.pixMode.setCurrentIndex(0)
+        else:
+            self.ui.pixMode.setCurrentIndex(1)
+        if self.par['longFormat'] == 'No':
+            self.ui.longbtn.setCurrentIndex(0)
+        else:
+            self.ui.longbtn.setCurrentIndex(1)
+        if self.par['duplicateValues'] == 'No':
+            self.ui.duplicLongbtn.setCurrentIndex(0)
+        else:
+            self.ui.duplicLongbtn.setCurrentIndex(1)
+        # Save as dropDowns
+        idx = self.ui.fileTypeBtn.findText(self.par['defaultSaveAs'])
+        if idx != -1:
+            self.ui.fileTypeBtn.setCurrentIndex(idx)
+        idx = self.ui.fileTypeRawBtn.findText(self.par['rawSaveAs'])
+        if idx != -1:
+            self.ui.fileTypeRawBtn.setCurrentIndex(idx)
+        idx = self.ui.fileTypeLongBtn.findText(self.par['longSaveAs'])
+        if idx != -1:
+            self.ui.fileTypeLongBtn.setCurrentIndex(idx)
+        idx = self.ui.paralell.findText(self.par['runParallel'])
+        if idx != -1:
+            self.ui.paralell.setCurrentIndex(idx)
+        # Set input values         
+        self.ui.screenDist.setValue(float(self.par['screenDist']))
+        self.ui.screenW.setValue(float(self.par['screenW']))
+        self.ui.resolutionX.setValue(float(self.par['screenX']))
+        self.ui.resolutionY.setValue(float(self.par['screenY']))
+        self.ui.sampleFreq.setValue(float(self.par['sampFreq']))
+        
 
     def updateSystemBars(self, sysval):
         self.ui.cpuBar.setValue(sysval[0])
@@ -426,8 +421,25 @@ class Window(QtWidgets.QMainWindow):
     def stopBussyBar(self):
         self.ui.bussyBar.setRange(0,1)
 
+    def setPxMode(self):
+        if self.ui.pixMode.currentText() == 'Automatic':
+            self.ui.screenDist.setEnabled(False)
+            self.ui.screenW.setEnabled(False)
+            self.ui.resolutionX.setEnabled(False)
+            self.ui.resolutionY.setEnabled(False)
+        elif self.ui.pixMode.currentText() == 'Manual' or self.ui.TobiiBox.isChecked():
+            self.ui.screenDist.setEnabled(True)
+            self.ui.screenW.setEnabled(True)
+            self.ui.resolutionX.setEnabled(True)
+            self.ui.resolutionY.setEnabled(True)
+
     def selectFile(self):
-        tempFiles = QtWidgets.QFileDialog.getOpenFileNames(self, 'Select file(s)', "","ASCII (*.asc);;All Files (*)")[0]
+        if self.ui.EyelinkBox.isChecked():
+            tempFiles = QtWidgets.QFileDialog.getOpenFileNames(self, 'Select file(s)', "","ASC (*.asc);;All Files (*)")[0]
+        elif self.ui.TobiiBox.isChecked(): 
+            tempFiles = QtWidgets.QFileDialog.getOpenFileNames(self, 'Select file(s)', "","TSV (*.tsv);;All Files (*)")[0]
+        else:
+            tempFiles = QtWidgets.QFileDialog.getOpenFileNames(self, 'Select file(s)', "","All Files (*)")[0]
         if len(tempFiles) > 0:
             self.files = tempFiles
         if len(self.files) > 0:
@@ -450,7 +462,7 @@ class Window(QtWidgets.QMainWindow):
         doc.setWindowTitle("Documentation")
         doc.setIcon(QtWidgets.QMessageBox.Information)
         doc.setStandardButtons(QtWidgets.QMessageBox.Close)
-        doc.setText('Eyelink 1000 parser documentation'+'\t'*10)
+        doc.setText('Documentation'+'\t'*10)
         doc.setDetailedText(text)
         doc.exec_()
 
@@ -508,41 +520,29 @@ class Window(QtWidgets.QMainWindow):
         self.par['startTrialKey'] = self.ui.startKey.toPlainText().strip()
         self.par['stopTrialKey'] = self.ui.stopKey.toPlainText().strip()
         self.par['variableKey'] = self.ui.varKey.toPlainText().strip()
-        self.par['regExpSamp'] = self.ui.regSamp.toPlainText()
-        self.par['regExpEfix'] = self.ui.regEfix.toPlainText()
-        self.par['regExpEsacc'] = self.ui.regEsacc.toPlainText()
-        self.par['regExpEblink'] = self.ui.regEblink.toPlainText()
-        # Set regular expressions for start/stop/var/msg
-        if self.par['DFregExpStart'] != self.ui.regStart.toPlainText():
-            self.par['regExpStart'] = self.ui.regStart.toPlainText()
-            self.par['regExpStartNew'] = True
-        else:
-            self.par['regExpStartNew'] = False
-        if self.par['DFregExpStop'] != self.ui.regStop.toPlainText():
-            self.par['regExpStop'] = self.ui.regStop.toPlainText()
-            self.par['regExpStopNew'] = True
-        else:
-            self.par['regExpStopNew'] = False
-        if self.par['DFregExpVar'] != self.ui.regVar.toPlainText():
-            self.par['regExpVar'] = self.ui.regVar.toPlainText()
-            self.par['regExpVarNew'] = True
-        else:
-            self.par['regExpVarNew'] = False
-        if self.par['DFregExpMsg'] != self.ui.regMsg.toPlainText():
-            self.par['regExpMsg'] = self.ui.regMsg.toPlainText()
-            self.par['regExpMsgNew'] = True
-        else:
-            self.par['regExpMsgNew'] = False
 
+        # Screen info
+        self.par['screenDist'] = self.ui.screenDist.value()
+        self.par['screenW'] = self.ui.screenW.value()
+        self.par['screenRes'] = (float(self.ui.resolutionX.value()), float(self.ui.resolutionY.value()))
+        self.par['sampFreq'] = self.ui.sampleFreq.value()
+        self.par['screenX'] = float(self.ui.resolutionX.value())
+        self.par['screenY'] = float(self.ui.resolutionY.value())
+        
         # Processing info
         self.par['saveRawFiles'] = self.ui.saveRawbtn.currentText()
         self.par['runParallel'] = self.ui.paralell.currentText()
         self.par['nrCores'] = self.ui.nrCores.toPlainText()
         self.par['pxMode'] = self.ui.pixMode.currentText()
-        self.par['pxPerDeg'] = self.ui.pixPerDeg.toPlainText()
         self.par['longFormat'] = self.ui.longbtn.currentText()
         self.par['duplicateValues'] = self.ui.duplicLongbtn.currentText()
         
+        # Eytracker type
+        if self.ui.EyelinkBox.isChecked():
+            self.par['Eyetracker'] = 'Eyelink'
+        elif self.ui.TobiiBox.isChecked():
+            self.par['Eyetracker'] = 'Tobii'
+                    
         # Number of available cores
         maxCores = psutil.cpu_count()
         if int(self.par['nrCores']) > maxCores:
@@ -554,12 +554,12 @@ class Window(QtWidgets.QMainWindow):
         # Save settings
         #======================================================================
         self.writeSettings()
-
+        
         #======================================================================
         # Run parser
         #======================================================================
         self.parse()
-
+        
     def updateProgress(self, value):
         self.progressValue += value
 

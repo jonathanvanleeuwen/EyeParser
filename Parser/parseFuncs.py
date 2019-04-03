@@ -10,6 +10,7 @@ Created on Mon Jan 30 10:09:12 2017
 import re
 import math
 import numpy as np
+import scipy.signal as sign
 import pandas as pd
 from collections import deque
 from itertools import izip
@@ -18,6 +19,11 @@ import traceback
 #==============================================================================
 # Functions
 #==============================================================================
+def pixDist(x, y):
+    '''
+    '''
+    return np.hstack([[0],np.sqrt( (x[:-1]-x[1:])**2 + (y[:-1] - y[1:])**2 )])
+
 def distBetweenPointsInArray(point1X, point1Y, point2X, point2Y):
 	'''
 	'''
@@ -38,6 +44,45 @@ def determineAngle(p1, p2):
 	narcdeg = math.atan2(normy, normx)
 	sdegree = ((narcdeg * 180)/math.pi)
 	return sdegree
+
+def angleToPixels(angle, screenDist, screenW, screenXY):
+    """
+    Calculate the number of pixels which equals a specified angle in visual
+    degrees, given parameters. Calculates the pixels based on the width of
+    the screen. If the pixels are not square, a separate conversion needs
+    to be done with the height of the screen.\n
+    "angleToPixelsWH" returns pixels for width and height.
+
+    Parameters
+    ----------
+    angle : float or int
+        The angle to convert in visual degrees
+    screenDist : float or int
+        Viewing distance in cm
+    screenW : float or int
+        The width of the screen in cm
+    screenXY : tuple, ints
+        The resolution of the screen (width - x, height - y), pixels
+
+    Returns
+    -------
+    pix : float
+        The number of pixels which corresponds to the visual degree in angle,
+        horizontally
+
+    Examples
+    --------
+    >>> pix = angleToPixels(1, 75, 47.5, (1920,1080))
+    >>> pix
+    52.912377341863817
+    """
+    pixSize = screenW / float(screenXY[0])
+    angle = np.radians(angle / 2.0)
+    cmOnScreen = np.tan(angle) * float(screenDist)
+    pix = (cmOnScreen / pixSize) * 2
+
+    return pix
+
 
 def getFixQual(fixX, fixY, pxPerDeg):
     '''
@@ -242,7 +287,7 @@ def calculateSaccadeCurvature(xSacc, ySacc, pixPerDegree, ignoreDist = 0.5, flip
         saccAngles.append(saccAngle360)
     return curveData, saccAngles
 
-def parseToLongFormat(data, duplicate = 'No'):
+def parseToLongFormat(data, duplicate = 'No', eyetracker='Eyelink'):
     '''
     Turn a parsed datafile into long data file:
     Deletes the raw data and only keeps events
@@ -253,7 +298,21 @@ def parseToLongFormat(data, duplicate = 'No'):
     #==============================================================================
     LargeData = ['saccTraceTime', 'saccTraceX', 'saccTraceY', 'saccTracePup', 
                  'euclidDist', 'rawPupSize', 'rawTime', 'rawX', 'rawY', 
-                 'fixTraceTime', 'fixTraceX', 'fixTraceY', 'fixTracePup']
+                 'fixTraceTime', 'fixTraceX', 'fixTraceY', 'fixTracePup', 'speed']
+    if eyetracker == 'Tobii':
+        add = []
+        unfilt = ['rawTime', 'GazePointXLeft', 'GazePointYLeft', 
+                 'ValidityLeft', 'GazePointXRight', 'GazePointYRight', 
+                 'ValidityRight', 	'rawX', 'rawY', 'PupilSizeLeft', 
+                 'PupilValidityLeft', 'PupilSizeRight'	, 'PupilValidityRight']
+        variousKeys = ['saccBool', 'fixBool']
+        for item in unfilt: 
+            add.append(item+'Unfilt')
+        for item in variousKeys: 
+            add.append(item)
+        for item in add:
+            LargeData.append(item)
+
     LargeData = ['DK_'+i for i in LargeData]
     LargeData.append('DV_description')
     for key in LargeData:
@@ -325,51 +384,593 @@ def filterDF(df, deleteKeys):
                 del df[key]
     return df
 
+def eventDetect(time, x, y, val, Hz = 300., pxPerDeg = 48., 
+                maxSaccVel = 1000., maxSaccAcc = 100000., minSaccDur = 10., 
+                minFixDur = 40., alpha = 0.7, beta = 0.3, PT = 200, 
+                thresMulti = 3):
+    '''
+    '''
+    # =============================================================================
+    # Parameters 
+    # =============================================================================
+    # Input handeling
+    val = np.array(val, dtype =bool)
+    
+    # Filter settings
+    filt = sign.savgol_filter
+    filtPolyOrder = 2
+    filtWindowLength = minSaccDur*2
+    
+    # Recode the filter variables to number of samples
+    minFixDurSamp = int(minFixDur/(1000./Hz))
+    filtWindowLength /= (1000./Hz)
+    
+    # =============================================================================
+    # Step 1 - Calculate angular velocities and accelerations. Remove noise
+    # =============================================================================
+    # Durattion in seconds per sample
+    sampDur = np.hstack([[(1000./Hz)/1000.],np.diff(time)])/1000
+    # Filter x coordinates
+    xFilt = filt(x, int(filtWindowLength+1), filtPolyOrder)
+    # Filter y coordinates
+    yFilt = filt(y, int(filtWindowLength+1), filtPolyOrder)
+    # Get the filtered euclidian distance 
+    distDeg = pixDist(xFilt,yFilt)/pxPerDeg
+    # Get speed
+    speed = distDeg/sampDur
+    
+    # =============================================================================
+    # Step 2 - Iteratively find velocity peaks (samples larger than a threshold)
+    # =============================================================================
+    while True:
+        belowThreshSamples = speed[val][speed[val] < PT]
+        Uz = np.average(belowThreshSamples)
+        Oz = np.std(belowThreshSamples)
+        PTn = Uz+(6*Oz)
+        if PTn - PT < 1:
+            PT = PTn
+            Uz = np.average(speed[val][speed[val] < PT])
+            Oz = np.std(speed[val][speed[val] < PT])
+            break
+        else:
+            PT = PTn        
+    
+    # =============================================================================
+    # Step 3 -  Saccade detection: For each velocity peak
+    #   (a) Go back until velocity saccade onset threshold
+    #   (b) Go forward until velocity saccade offset threshold (adaptive)
+    #   (c) Make sure the saccade duration  minimum saccade duration
+    # Does no exclude based on stilness
+    # =============================================================================
+    saccBool = np.zeros(len(x),dtype=bool)
+    ssaccThresh = Uz+(thresMulti*Oz)
+    esaccThresh = 0
+    sIdx = 0
+    startIndx = 0
+    stopIndex = 0
+    inEvent = False
+    for idx, (s,t) in enumerate(zip(speed, time)): 
+        # Find the start of the saccade
+        if s > ssaccThresh and not inEvent and sIdx <=idx:
+            sIdx = idx
+            while True and sIdx > 0:
+                if speed[sIdx-1] > speed[sIdx]:
+                    startIndx = sIdx
+                    inEvent = True
+                    break
+                sIdx -= 1
+            sIdx = idx
+        
+        # Determine esacc treshold
+        if inEvent and idx+minFixDurSamp < len(speed):
+            localMean = np.mean(speed[idx-minFixDurSamp:idx])
+            localStd = np.std(speed[idx-minFixDurSamp:idx])
+            localNoise = localMean + (3*localStd)
+            esaccThresh = (alpha*ssaccThresh)+(beta*localNoise)
+        
+            # Find end of the saccade
+            if s < esaccThresh and speed[idx+1] < s:
+                sIdx = idx
+                while True and sIdx < len(speed)-1:
+                    if speed[sIdx+1] > speed[sIdx]:
+                        inEvent = False
+                        stopIndex = sIdx
+                        saccBool[startIndx:stopIndex] = True
+                        break
+                    sIdx += 1
+                    
+        # Set the last sample as end of saccade
+        elif inEvent and idx+1 == len(speed):
+            saccBool[startIndx:idx] = True
+            inEvent = False
+    
+    # Itterate trough the saccades and determine missing values, remove saccades
+    # And pupulate saccade metrics
+    # Still to add in code
+    ssaccIdx = []
+    esaccIdx = []
+    ssacc = []
+    esacc = []
+    saccDur = []
+    saccDist = []
+    saccPeakVel = []
+    ssaccX = []
+    ssaccY = []
+    esaccX = []
+    esaccY = []
+    saccTraceT = []
+    saccTraceX = []
+    saccTraceY = []
+    inEvent = False
+    for idx, s in enumerate(saccBool):
+        # Find the start of the saccae
+        if not inEvent and s:
+            ssaccIdx.append(idx)
+            inEvent = True
+            
+         # Find the end of the saccade
+        if inEvent and (not s or idx+1 == len(saccBool)):   
+            inEvent = False
+            esaccIdx.append(idx)
+            # calculate saccade validity 
+            sDur = time[esaccIdx[-1]] - time[ssaccIdx[-1]]
+            maxVel = np.max(speed[ssaccIdx[-1]:esaccIdx[-1]])
+            #stilness = np.mean(speed[idx-minFixDurSamp:idx]) < PT # Valid if  True
+            allVal = np.sum(~val[ssaccIdx[-1]:esaccIdx[-1]]) == 0 # valid if True
+    
+            # Save the saccade if it passes the criteria                
+#            if allVal and stilness and (sDur > minSaccDur) and (maxVel < maxSaccVel):# and (maxAcc < maxSaccAcc):
+#                ssacc.append(time[ssaccIdx[-1]])
+#                esacc.append(time[esaccIdx[-1]])
+#                saccDur.append(sDur)
+#                saccPeakVel.append(maxVel)
+#                ssaccX.append(xFilt[ssaccIdx[-1]])
+#                ssaccY.append(yFilt[ssaccIdx[-1]])
+#                esaccX.append(xFilt[esaccIdx[-1]])
+#                esaccY.append(yFilt[esaccIdx[-1]])
+#                saccDist.append(np.sqrt( (ssaccX[-1]-esaccX[-1])**2+(ssaccY[-1]-esaccY[-1])**2 )/pxPerDeg)
+#                saccTraceT.append(time[ssaccIdx[-1]:esaccIdx[-1]])
+#                saccTraceX.append(xFilt[ssaccIdx[-1]:esaccIdx[-1]])
+#                saccTraceY.append(yFilt[ssaccIdx[-1]:esaccIdx[-1]])
+                
+            if allVal and (sDur > minSaccDur) and (maxVel < maxSaccVel):# and (maxAcc < maxSaccAcc):
+                ssacc.append(time[ssaccIdx[-1]])
+                esacc.append(time[esaccIdx[-1]])
+                saccDur.append(sDur)
+                saccPeakVel.append(maxVel)
+                ssaccX.append(xFilt[ssaccIdx[-1]])
+                ssaccY.append(yFilt[ssaccIdx[-1]])
+                esaccX.append(xFilt[esaccIdx[-1]])
+                esaccY.append(yFilt[esaccIdx[-1]])
+                saccDist.append(np.sqrt( (ssaccX[-1]-esaccX[-1])**2+(ssaccY[-1]-esaccY[-1])**2 )/pxPerDeg)
+                saccTraceT.append(time[ssaccIdx[-1]:esaccIdx[-1]])
+                saccTraceX.append(xFilt[ssaccIdx[-1]:esaccIdx[-1]])
+                saccTraceY.append(yFilt[ssaccIdx[-1]:esaccIdx[-1]])
+                
+            else:
+                saccBool[esaccIdx[-1] - ssaccIdx[-1]] = False
+                del ssaccIdx[-1], esaccIdx[-1]  
+                
+    # Set all samples not a saccade as fixation
+    fixBool = ~saccBool
+    
+    # =============================================================================
+    # Step 4 - Glissade detection: Glissades are detected if
+    #   (a) Low-velocity detection: velocity saccade offset threshold
+    #       within a fixed time window after saccade offset.
+    #   (b) High-velocity detection: velocity peak saccade threshold
+    #       within a fixed time window after saccade offset.
+    #
+    # Glissade detection is skipped and I assign gliassades as part of fixations
+    # =============================================================================
+    
+    
+    # =============================================================================
+    # Step 5 - Fixation detection: Fixations are defined by samples that are
+    #   (a) neither saccades, glissades or noise AND
+    #   (b) longer than the minimum fixation duration
+    #
+    #   Adapted to be anything not a saccade and longer than the minimum 
+    #   fixation duration   
+    # =============================================================================
+    # Remove all points that are not valid 
+    fixBool[~val] = False 
+    sfixIdx = []
+    efixIdx = []
+    sfix = []
+    efix = []
+    fixDur = []
+    fixX = []
+    fixY = []
+    fixTraceT = []
+    fixTraceX = []
+    fixTraceY = []
+    inEvent = False
+    
+    for idx, f in enumerate(fixBool):
+        # Find the start of fixation
+        if not inEvent and f:
+            sfixIdx.append(idx)
+            inEvent = True
+            
+        # Find the end of the fixation
+        if inEvent and (not f or idx+1 == len(fixBool)):
+            inEvent = False
+            sfix.append(time[sfixIdx[-1]])
+            efixIdx.append(idx)
+            efix.append(time[idx])
+            fixDur.append(efix[-1] - sfix[-1])   
+            # Check for fixation parameters
+            if fixDur[-1] > minFixDur:
+                fixX.append(np.average(xFilt[sfixIdx[-1]:efixIdx[-1]]))
+                fixY.append(np.average(yFilt[sfixIdx[-1]:efixIdx[-1]]))
+                fixTraceT.append(time[sfixIdx[-1]:efixIdx[-1]])
+                fixTraceX.append(xFilt[sfixIdx[-1]:efixIdx[-1]])
+                fixTraceY.append(yFilt[sfixIdx[-1]:efixIdx[-1]])
+            else:
+                del sfixIdx[-1], sfix[-1], efixIdx[-1], efix[-1], fixDur[-1]
+    
+    #==============================================================================
+    # Put all the results in a pandas dataframe :)
+    #==============================================================================
+    keyPrefix = 'DK_'
+    saccColName = ['saccBool', 'ssaccIdx', 'esaccIdx', 'ssacc','esacc',
+                   'saccDur', 'saccAmp', 'saccPeakVel', 'ssaccX', 'ssaccY', 
+                   'esaccX', 'esaccY', 'saccTraceTime', 'saccTraceX', 'saccTraceY']
+    fixColName = ['fixBool', 'sfixIdx', 'efixIdx', 'sFix','eFix',
+                   'fixDur', 'fixX', 'fixY', 'fixTraceTime', 'fixTraceX', 'fixTraceY']
+    rawColNames = ['rawTime','rawX', 'rawY', 'speed']
+    saccColName = [keyPrefix+k for k in saccColName]
+    fixColName = [keyPrefix+k for k in fixColName]
+    rawColNames = [keyPrefix+k for k in rawColNames]
+    allCols = np.hstack([saccColName,fixColName, rawColNames])
+    eventDF = pd.DataFrame([],columns = allCols)
+    
+    # Make a list we can itterate through
+    allEvents = [[saccBool],[ssaccIdx],[esaccIdx],[ssacc],[esacc],[saccDur],
+                 [saccDist],[saccPeakVel],[ssaccX],[ssaccY],[esaccX],[esaccY], [saccTraceT],
+                 [saccTraceX],[saccTraceY],[fixBool],[sfixIdx],[efixIdx],[sfix],
+                 [efix],[fixDur],[fixX],[fixY],[fixTraceT],[fixTraceX],[fixTraceY],
+                 [time],[xFilt],[yFilt],[speed]]
+    
+    for i, k in enumerate(allCols):
+        eventDF[allCols[i]] = allEvents[i]
+               
+    return eventDF
 
 #==============================================================================
 #  Parser
 #==============================================================================
 def parseWrapper(f, kwargs):
-    results = eyeLinkDataParser(f, **kwargs)
-    return results
+    if kwargs['Eyetracker'] == 'Eyelink':
+        results = eyeLinkDataParser(f, **kwargs)
+        return results
+    elif kwargs['Eyetracker'] == 'Tobii':
+        results = dataParserTobii(f, **kwargs)
+        return results
+
+#FILENAME = 'C:\Work\DivCode\Python experiment codes\Tobii code\psychoBii\Opensesame exps\\subject-5_TOBII_output.tsv'
+#par = {'longFormat': 'Yes'}
+
+def dataParserTobii(FILENAME, **par):
+    try:
+        #======================================================================
+        # Extract parameters, set defaults if parameeter is not given
+        #======================================================================    
+        # Makes experiment specific expressions for var/start and stop
+        var = par.pop('variableKey', 'var')
+        startTrial = par.pop('startTrialKey', 'start_trial')
+        stopTrial = par.pop('stopTrialKey', 'stop_trial')
+        # Get px per degree settings
+        screenDist = par.pop('screenDist', 75.)
+        screnW = par.pop('screenW', 52.5)
+        screenXY = par.pop('screenRes', (1920.,1080.))
+        pixPerDegree = angleToPixels(1.,screenDist,screnW,screenXY)
+        # Get eyetracker information
+        eyeHz = par.pop('sampFreq', 300.)
+        # Get the information about long format
+        convertToLong = par.pop('longFormat', 'No')
+        duplicateValues = par.pop('duplicateValues', 'No')
+        
+        #======================================================================
+        # Define regular expressions
+        #======================================================================  
+        regSamples =  r'(\d{3,12}.\d{4})\t\t([-]?'+\
+                    '\d{0,4})\t([-]?\d{1,4})\t([-]?\d{1})\t([-]?'+\
+                    '\d{1,4})\t([-]?\d{1,4})\t([-]?\d{1})\t([-]?'+\
+                    '\d{1,4})\t([-]?\d{1,4})\t([-]?\d{1,12}.\d{4})\t'+\
+                    '([-]?\d{1})\t([-]?\d{1,12}.\d{4})\t([-]?\d{1})'
+                    
+        # RegExp for start trial
+        regStart = r'(\d{3,12}.\d{4})\t('+startTrial+').*\n'
+        
+        # RegExp for stop trial
+        regStop = r'(\d{3,12}.\d{4})\t('+stopTrial+').*\n'
+       
+        # RegExp for variables
+        regVar = r'(\d{3,12}.\d{4})\t('+var+')\s+(.+).*\n'
+
+        # RegExp for messages
+        regMsg = r'(\d{3,12}.\d{4})\t+(?!'+var+'|'+startTrial+'|'+stopTrial+')([a-zA-Z].+).*\\n'
+    
+        #==============================================================================
+        # Define keywords
+        #==============================================================================
+        keyPrefix = 'DK_'
+        varPrefix = 'DV_'
+        rawKw = ['rawTime', 'GazePointXLeft', 'GazePointYLeft', 
+                 'ValidityLeft', 'GazePointXRight', 'GazePointYRight', 
+                 'ValidityRight', 	'rawX', 'rawY', 'PupilSizeLeft', 
+                 'PupilValidityLeft', 'PupilSizeRight'	, 'PupilValidityRight']
+        addToRaw = ['gazeValidity','rawPupSize','pupValidity']
+        
+        prsKw = ['trialNr', 'sTrial', 'eTrial', 'sMsg', 'eMsg',\
+                    'curvature', 'saccAngle', 'stdvPix', 'stdvDeg', 'RMSPix', \
+                    'RMSDeg','pxDeg',]
+    
+        # Add prefix to avoid double columns
+        rawKw  = [keyPrefix + k for k in rawKw]
+        addToRaw = [keyPrefix + k for k in addToRaw]
+        prsKw = [keyPrefix + k for k in prsKw]
+    
+        # columns to delete from parsed dataframe
+        deleteColumns = ['VALIDATE','!CAL','!MODE','ELCL','RECCFG','GAZE_COORDS',\
+                     'DISPLAY_COORDS','THRESHOLDS', 'DRIFTCORRECT', 'parserDummyVar']
+        
+        #==============================================================================
+        # Load data ASCII data to memory
+        #==============================================================================
+        raw = open(FILENAME, 'r').read()
+        
+        #==============================================================================
+        # Exract data with regular expressions then delete raw
+        #==============================================================================
+        # Get all samples
+        rawSamples = re.findall(regSamples, raw)
+        rawSamples = np.array(rawSamples, dtype = float)
+        rawData = pd.DataFrame(rawSamples, columns = rawKw , dtype = 'float64')
+            
+        # Get start messages
+        startData = re.findall(regStart, raw)
+        startTimes = np.array(startData)[:,0].astype(float)
+        startMsg = np.array(startData)[:,1]
+        
+        # Get stop messages
+        stopData = re.findall(regStop, raw)
+        stopTimes = np.array(stopData)[:,0].astype(float)
+        stopMsg = np.array(stopData)[:,1]
+        trialNrs = np.arange(1,len(startTimes)+1)
+        
+        # Get variables
+        varData = re.findall(regVar, raw)
+        varData.append(('000.0000', 'var', 'parserDummyVar dummy')) 
+        varData = np.array(varData)
+        varTimes = np.array(varData[:,0], dtype = float)
+        varKey = np.array(varData[:,1], dtype = str)
+        del varKey
+        varMsg = np.array(varData[:,2], dtype = str)
+        
+        # Handle all other messages 
+        msgData = re.findall(regMsg, raw)
+        msgData = np.array(msgData)
+        msgTimes = np.array(msgData[:,0], dtype = float)
+        msg = np.array(msgData[:,1], dtype = str)
+        msgVars = deque([])
+        msgVarTimes = deque([])
+        delIdx = np.ones(len(msg), dtype = bool)
+        for i, ms in enumerate(msg):
+            msLis = ms.split()
+            if len(msLis) == 2:
+                msgVars.append(ms)
+                msgVarTimes.append(msgTimes[i])
+                delIdx[i] = False
+
+        # Append the msgVars and msgVarTimes to the variable array
+        varMsg = np.hstack((varMsg, np.array(msgVars)))
+        varTimes = np.hstack((varTimes, np.array(msgVarTimes)))
+        
+        # Delete the excess data
+        msg = msg[delIdx]
+        msgTimes = msgTimes[delIdx]
+        
+        # Extract all unique messages
+        unMSG = np.unique(msg)
+        uniqueMSG = []
+        for m in unMSG:
+            delete = False
+            for dc in deleteColumns:
+                if dc in m:
+                    delete = True
+            if delete == False:
+                uniqueMSG.append(m)
+        uniqueMSGHeaders = [varPrefix+h for h in uniqueMSG]
+        
+        # Del raw data for speed and memory handeling
+        del raw
+    
+        # =====================================================================
+        # Determine raw data validity, pupil size and pupil validity 
+        # =====================================================================
+        for add in addToRaw:
+            rawData[add] = np.zeros(len(rawData))
+
+        # Gaze validity 
+        rawData[addToRaw[0]] = np.logical_or(rawData.DK_ValidityLeft.values == 1, rawData.DK_ValidityRight.values == 1)
+        rawData[addToRaw[0]] = np.array(rawData[addToRaw[0]].values, dtype=float)
+        
+        # Get pupil booleans
+        bothPupBool =  np.logical_and(rawData.DK_PupilValidityLeft.values == 1, rawData.DK_PupilValidityRight.values == 1)
+        leftPupBool = rawData.DK_PupilValidityLeft.values == 1
+        rightPupBool = rawData.DK_PupilValidityRight.values == 1
+        
+        # Input pupil size data
+        rawData[addToRaw[1]][bothPupBool] = np.average([rawData.DK_PupilSizeLeft.values[bothPupBool], rawData.DK_PupilSizeRight.values[bothPupBool]], axis = 0)
+        rawData[addToRaw[1]][leftPupBool] = rawData.DK_PupilSizeLeft.values[leftPupBool]
+        rawData[addToRaw[1]][rightPupBool] = rawData.DK_PupilSizeRight.values[rightPupBool]
+      
+        # set pupil validity 
+        rawData[addToRaw[2]] = np.logical_or(rawData.DK_PupilValidityLeft.values == 1, rawData.DK_PupilValidityRight.values == 1)
+        rawData[addToRaw[2]] = np.array(rawData[addToRaw[2]].values, dtype=float)
+                       
+        # =============================================================================
+        # Prealocations and extract some info from data
+        # =============================================================================   
+        # Deal with the variables
+        varMsg = np.array([i.split() for i in varMsg])
+        varHeaders = np.array([varPrefix + i[0] for i in varMsg])
+        varHeadersUnique = np.unique(varHeaders)
+
+        # Prealocate the parsed data dataframe
+        msgHeadersUniqueT = [h+'TimeStamp' for h in varHeadersUnique]
+        cols = np.hstack((prsKw, varHeadersUnique, msgHeadersUniqueT, uniqueMSGHeaders))
+        pData = pd.DataFrame(index = range(len(trialNrs)), columns=np.unique(cols))
+        
+        #==============================================================================
+        # Start populating the output dataframe. 
+        #==============================================================================
+        # Make sure that the number of start and stop  messages match
+        # NB: This assumes that if there are unequal numbers there are more stops
+        if len(startTimes) != len(stopTimes):
+            stopTimes = stopTimes[0:len(startTimes)]
+            stopMsg = stopMsg[0:len(startTimes)]
+    
+        # start populating the parsed Dataframe with the values defining epochs/trials
+        pData[prsKw[0]] = trialNrs # pData.trialNr
+        pData[prsKw[1]] = startTimes # pData.sTrial
+        pData[prsKw[2]] = stopTimes # pData.eTrial
+        pData[prsKw[3]] = startMsg # pData.sMsg
+        pData[prsKw[4]] = stopMsg # pData.eMsg
+    
+        pData[keyPrefix+'pxDeg'] = pixPerDegree
+        eventDF = pd.DataFrame()
+        
+        #==============================================================================
+        # Epoch all data for each trial
+        #==============================================================================
+        for i, (start, stop) in enumerate(zip(startTimes, stopTimes)):
+            # Extract raw data required for event detection
+            epochBool = np.logical_and(rawData[rawKw[0]].values >= start, rawData[rawKw[0]].values <= stop)
+            epRawT = rawData[rawKw[0]][epochBool].values # Sample times
+            epRawX = rawData[rawKw[7]][epochBool].values # Sample x position
+            epRawY = rawData[rawKw[8]][epochBool].values # Sample y position
+            epValid = rawData[addToRaw[0]][epochBool].values # Sample validity
+
+            # Do saccade and fixation detection, based on NYSTRÖM AND HOLMQVIST, 2010 (slightly adapted)        
+            eventDF2 = eventDetect(epRawT, epRawX, epRawY, epValid, eyeHz, pixPerDegree)       
+            # Add all the raw-nonFiltered data from the raw dataframe
+            for k in rawKw:
+                eventDF2[k+'Unfilt'] = [rawData[k][epochBool].values]            
+            eventDF = pd.concat([eventDF, eventDF2],ignore_index=True).reset_index(drop=True)
+            
+            # Add saccade curvature
+            if not np.array(pd.isnull(eventDF['DK_saccTraceX'][i])).all():
+                curv, ang = calculateSaccadeCurvature(eventDF['DK_saccTraceX'][i], eventDF['DK_saccTraceY'][i], pixPerDegree, flipY = True)
+                pData.at[i, keyPrefix+'curvature'] = [np.median(sacc) for sacc in curv]
+                pData.at[i, keyPrefix+'saccAngle'] = ang
+               
+            # Add quality measures sdtv and RMS noise
+            if not np.array(pd.isnull(eventDF['DK_fixTraceX'][i])).all():
+                stdvP, stdvD, RMSP, RMSD = getFixQual(eventDF['DK_fixTraceX'][i], eventDF['DK_fixTraceY'][i], pixPerDegree)
+                pData.at[i, keyPrefix+'stdvPix'] = np.array(stdvP)
+                pData.at[i, keyPrefix+'stdvDeg'] = np.array(stdvD)
+                pData.at[i, keyPrefix+'RMSPix'] = np.array(RMSP)
+                pData.at[i, keyPrefix+'RMSDeg'] = np.array(RMSD)
+            
+            # Epoch variables
+            varBool = np.logical_and(varTimes >= start, varTimes <= stop)
+            varEpochT = varTimes[varBool]
+            varEpochMsg = varMsg[varBool]
+            varEpochHead= varHeaders[varBool]
+            for it, (times, key) in enumerate(izip(varEpochT, varEpochHead)):
+                if len(varEpochMsg[it]) == 1:
+                    pData.at[i,key] = 'NA'
+                elif len(varEpochMsg[it]) == 2:
+                    pData.at[i,key] = varEpochMsg[it][1]
+                elif len(varEpochMsg[it]) > 2:
+                    pData.at[i,key] = varEpochMsg[it][1:]
+                pData.at[i,key+'TimeStamp'] = times
+    
+            # Epoch messages
+            msgBool = np.logical_and(msgTimes >= start, msgTimes <= stop)
+            msgEpochT = msgTimes[msgBool]
+            msgEpoch = msg[msgBool]
+            for times, key in izip(msgEpochT, msgEpoch):
+                if key in uniqueMSG:
+                    pData.at[i,varPrefix+key] = times
+                
+
+        # =============================================================================
+        # Add The final things to the parsed dataframe
+        # =============================================================================
+        # Add the events to the parsed data frame
+        for k in eventDF.keys():
+            if not k =='index':
+                pData[k] = eventDF[k]
+            
+        # Add included trial column
+        pData[keyPrefix+'includedTrial'] = True
+
+        # Filter the columns we dont want
+        pData = filterDF(pData, deleteColumns)
+        pData.columns = pData.columns.str.replace("\r", '')
+        
+        # Turn values into numeric if possible
+        for k in pData.keys():
+            pData[k] = pd.to_numeric(pData[k], errors = 'ignore')
+        
+        # Convert data to long format
+        if convertToLong == 'Yes':
+            parsedLong = parseToLongFormat(pData, duplicateValues, 'Tobii')
+        else:
+            parsedLong = False
+            
+        # No error
+        error = False
+        
+    except:# Exception as e: 
+        pData = False
+        rawData = False
+        parsedLong = False
+        error = traceback.format_exc()
+        
+    return FILENAME, pData, rawData, parsedLong, error
+
+
+FILENAME = 'C:\Work\DivCode\Python experiment codes\Tobii code\psychoBii\Opensesame exps\\PP2S1.asc'
+par = {'longFormat': 'Yes'}
 
 def eyeLinkDataParser(FILENAME, **par):
     try:
         #==========================================================================
         # Extract parameters, set defaults if parameeter is not given
         #==========================================================================
-        regSamples = par.pop('regExpSamp', r'(\d{3,12})\t\s+(\d+\..)\t\s+(\d+\..)\t\s+(\d+\..).+\n')
-        regEfix = par.pop('regExpEfix', r'EFIX\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(.+)\t\s+(.+)\t\s+(\d+)\n')
-        regEsacc = par.pop('regExpEsacc', r'ESACC\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+)\n')
-        regEblink = par.pop('regExpEblink', r'EBLINK\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\n')
+        regSamples = r'(\d{3,12})\t\s+(\d+\..)\t\s+(\d+\..)\t\s+(\d+\..).+\n'
+        regEfix =  r'EFIX\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(.+)\t\s+(.+)\t\s+(\d+)\n'
+        regEsacc = r'ESACC\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+.?\d+)\t\s+(\d+)\n'
+        regEblink = r'EBLINK\s+[LR]\s+(\d+)\t(\d+)\t(\d+)\n'
+        
         # Makes experiment specific expressions for var/start and stop
         var = par.pop('variableKey', 'var')
         startTrial = par.pop('startTrialKey', 'start_trial')
         stopTrial = par.pop('stopTrialKey', 'stop_trial')
+        
         # RegExp for start trial
-        if par.pop('regExpStartNew', False) == True:
-            regStart = par.pop('regExpStart')
-        else:
-            regStart = 'MSG\\t(\d+)\s+('+startTrial+').*\\n'
+        regStart = 'MSG\\t(\d+)\s+('+startTrial+').*\\n'
         # RegExp for stop trial
-        if  par.pop('regExpStopNew', False) == True:
-            regStop = par.pop('regExpStop')
-        else:
-            regStop = 'MSG\\t(\d+)\s+('+stopTrial+').*\\n'
+        regStop = 'MSG\\t(\d+)\s+('+stopTrial+').*\\n'
         # RegExp for variables
-        if par.pop('regExpVarNew', False) == True:
-            regVar = par.pop('regExpVar')
-        else:
-            regVar = 'MSG\\t(\d+)\s+('+var+')\s+(.+).*\\n'
+        regVar = 'MSG\\t(\d+)\s+('+var+')\s+(.+).*\\n'
         # RegExp for messages
-        if par.pop('regExpMsgNew', False) == True:
-            regMsg = par.pop('regExpMsg')
-        else:
-            regMsg = 'MSG\\t(\d+)\s+(?!'+var+'|'+startTrial+'|'+stopTrial+')(.+).*\\n'
+        regMsg = 'MSG\\t(\d+)\s+(?!'+var+'|'+startTrial+'|'+stopTrial+')(.+).*\\n'
     
         # Get px per degree settings
+        screenDist = par.pop('screenDist', 75.)
+        screnW = par.pop('screenW', 52.5)
+        screenXY = par.pop('screenRes', (1920.,1080.))
+        pixPerDegree = angleToPixels(1.,screenDist,screnW,screenXY)
         pxPerDegMode = par.pop('pxMode', 'Automatic')
-        pxPerDegManual = par.pop('pxPerDeg', 48)
+        # Get eyetracker information
+        eyeHz = par.pop('sampFreq', 1000.)
         
         # Get the information about long format
         convertToLong = par.pop('longFormat', 'No')
@@ -381,21 +982,21 @@ def eyeLinkDataParser(FILENAME, **par):
         keyPrefix = 'DK_'
         varPrefix = 'DV_'
         rawKw = ['rawTime', 'rawX', 'rawY', 'rawPupSize']
-        fixKw = ['sFix','eFix','durFix','fixX', 'fixY', 'fixPup']
-        saccKw = ['ssacc','esacc','durSacc','ssaccX', 'ssaccY', 'esaccX', \
+        fixKw = ['sFix','eFix','fixDur','fixX', 'fixY', 'fixPup']
+        saccKw = ['ssacc','esacc','saccDur','ssaccX', 'ssaccY', 'esaccX', \
                   'esaccY', 'saccAmp', 'peakVelocity']
-        blinkKw = ['sBlink','eBlink','durBlink']
+        blinkKw = ['sBlink','eBlink','blinkDur'] 
         FixTraceKw = ['fixTraceTime', 'fixTraceX', 'fixTraceY', 'fixTracePup']
         SaccTraceKw= ['saccTraceTime', 'saccTraceX', 'saccTraceY', \
                       'saccTracePup']
         prsKw = ['trialNr', 'sTrial', 'eTrial', 'sMsg', 'eMsg',\
-                    'esacc', 'ssacc', 'durSacc', 'ssaccX', 'ssaccY', \
+                    'esacc', 'ssacc', 'saccDur', 'ssaccX', 'ssaccY', \
                     'esaccX', 'esaccY', 'saccAmp', 'peakVelocity', \
                     'saccTraceTime', 'saccTraceX','saccTraceY',\
                     'saccTracePup', 'fixTraceTime', 'fixTraceX', 'fixTraceY', \
-                    'fixTracePup','sFix', 'eFix', 'durFix', 'fixX', \
-                    'fixY', 'fixPup', 'sBlink', 'eBlink', 'durBlink', \
-                    'rawX', 'rawY', 'rawTime', 'rawPupSize', 'euclidDist', \
+                    'fixTracePup','sFix', 'eFix', 'fixDur', 'fixX', \
+                    'fixY', 'fixPup', 'sBlink', 'eBlink', 'blinkDur', \
+                    'rawX', 'rawY', 'rawTime', 'rawPupSize', 'speed', \
                     'curvature', 'saccAngle', 'stdvPix', 'stdvDeg', 'RMSPix', \
                     'RMSDeg','pxDeg',]
     
@@ -522,9 +1123,6 @@ def eyeLinkDataParser(FILENAME, **par):
             saccAmp = saccAmp[saccAmp != 0]
             pixPerDegree = np.median(dist/saccAmp)
             
-        elif pxPerDegMode == 'Manual':
-            pixPerDegree = float(pxPerDegManual)        
-
         # Deal with the variables
         varMsg = np.array([i.split() for i in varMsg])
         varHeaders = np.array([varPrefix + i[0] for i in varMsg])
@@ -611,9 +1209,9 @@ def eyeLinkDataParser(FILENAME, **par):
                 p1Y = np.append(pData[rawKw[2]][i],0)[:-1]
                 p2X = np.append(pData[rawKw[1]][i][0], pData[rawKw[1]][i])[:-1]
                 p2Y = np.append(pData[rawKw[2]][i][0], pData[rawKw[2]][i])[:-1]
-                pData.at[i, keyPrefix+'euclidDist'] = distBetweenPointsInArray(p1X, p1Y, p2X, p2Y)
+                pData.at[i, keyPrefix+'speed'] = (distBetweenPointsInArray(p1X, p1Y, p2X, p2Y)/pixPerDegree)/((1000./eyeHz)/1000.)
             else:
-                pData.at[i, keyPrefix+'euclidDist'] = []
+                pData.at[i, keyPrefix+'speed'] = []
                 
             # Add saccade curvature
             if not np.array(pd.isnull(pData[saccTraceKw[1]][i])).all():
@@ -666,7 +1264,7 @@ def eyeLinkDataParser(FILENAME, **par):
         
         # Convert data to long format
         if convertToLong == 'Yes':
-            parsedLong = parseToLongFormat(pData, duplicateValues)
+            parsedLong = parseToLongFormat(pData, duplicateValues, 'Eyelink')
         else:
             parsedLong = False
             
@@ -680,6 +1278,3 @@ def eyeLinkDataParser(FILENAME, **par):
         error = traceback.format_exc()
         
     return FILENAME, pData, rawData, parsedLong, error
-
-
-
