@@ -844,6 +844,7 @@ def dataParserTobii(FILENAME, **par):
         pData[keyPrefix+'pxDeg'] = pixPerDegree
         eventDF = pd.DataFrame()
         
+        allRawKeys = rawData.keys()
         #==============================================================================
         # Epoch all data for each trial
         #==============================================================================
@@ -858,7 +859,7 @@ def dataParserTobii(FILENAME, **par):
             # Do saccade and fixation detection, based on NYSTRÖM AND HOLMQVIST, 2010 (slightly adapted)        
             eventDF2 = eventDetect(epRawT, epRawX, epRawY, epValid, eyeHz, pixPerDegree)       
             # Add all the raw-nonFiltered data from the raw dataframe
-            for k in rawKw:
+            for k in allRawKeys:
                 eventDF2[k+'Unfilt'] = [rawData[k][epochBool].values]            
             eventDF = pd.concat([eventDF, eventDF2],ignore_index=True).reset_index(drop=True)
             
