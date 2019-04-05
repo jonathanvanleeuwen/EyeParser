@@ -8,11 +8,11 @@ variableKey:var
 defaultSaveAs:pickle
 rawSaveAs:pickle
 longSaveAs:CSV
-runParallel:No
+runParallel:Yes
 nrCores:3
 pxPerDeg:48
 pxMode:Manual
-longFormat:Yes
+longFormat:No
 duplicateValues:Yes
 screenDist:62.0
 screenW:47.5

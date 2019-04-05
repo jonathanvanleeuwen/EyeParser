@@ -123,6 +123,7 @@ class Window(QtWidgets.QMainWindow):
         #======================================================================
         # Set variables
         self.files = []
+        self.generalSettingsLoc = 'generalSettings.txt'
         self.docLoc = 'Documentation.txt'
         self.settingsLoc = 'SettingsEyelink.txt'
         self.progressValue = 0
@@ -146,6 +147,7 @@ class Window(QtWidgets.QMainWindow):
         
         # Load settings
         self.loadSettings()
+        self.loadGeneralSettings()
         
         #======================================================================
         # Set the menu bar triggers
@@ -264,7 +266,7 @@ class Window(QtWidgets.QMainWindow):
         #Memory bar
         self.ui.memBar.setRange(0,100)
         self.ui.memBar.setValue(getSys()[1])
-
+            
         #======================================================================
         # Finishing touches
         #======================================================================
@@ -294,8 +296,8 @@ class Window(QtWidgets.QMainWindow):
             self.ui.pixMode.setEnabled(True)
         self.loadSettings()
             
-    def loadSettings(self):
-        with open(self.settingsLoc, 'r') as f:
+    def readFile(self, f):
+        with open(f, 'r') as f:
             f = f.read().splitlines()
             keys = []
             values = []
@@ -311,10 +313,33 @@ class Window(QtWidgets.QMainWindow):
                     value = True
                 keys.append(key)
                 values.append(value)
+        return keys, values
+    
+    def loadSettings(self):
+        keys, values = self.readFile(self.settingsLoc)
         self.DFSettings = pd.DataFrame([values], columns = keys)
         self.par = {key:self.DFSettings[key][0] for key in self.DFSettings.keys()}
         self.updateGUI()
-
+        
+    def loadGeneralSettings(self):
+        keys, values = self.readFile(self.generalSettingsLoc)
+        self.genSet = {k:v for (k,v) in zip(keys, values)}
+        
+        # Set the general settings
+        if self.genSet['runTobii'] == True:
+            self.ui.TobiiBox.setChecked(True)
+            self.ui.EyelinkBox.setChecked(False)
+        else:
+            self.ui.TobiiBox.setChecked(False)
+            self.ui.EyelinkBox.setChecked(True)
+            
+    def writeGeneralSettings(self):
+        settings = ''
+        for key in self.genSet.keys():
+             settings += key+':'+str(self.genSet[key])+'\n'
+        with open(self.generalSettingsLoc, 'w') as f:
+            f.write(settings)
+        
     def writeSettings(self):
         settings = ''
         for key in self.DFSettings.keys():
@@ -540,20 +565,23 @@ class Window(QtWidgets.QMainWindow):
         # Eytracker type
         if self.ui.EyelinkBox.isChecked():
             self.par['Eyetracker'] = 'Eyelink'
+            self.genSet['runTobii'] = False
         elif self.ui.TobiiBox.isChecked():
             self.par['Eyetracker'] = 'Tobii'
-                    
+            self.genSet['runTobii'] = True
+                       
         # Number of available cores
         maxCores = psutil.cpu_count()
         if int(self.par['nrCores']) > maxCores:
             self.par['nrCores'] = str(maxCores)
         self.ui.nrCores.setText(self.par['nrCores'])
         self.pool = multiprocessing.Pool(processes=int(self.par['nrCores']))
-
+        
         #======================================================================
         # Save settings
         #======================================================================
         self.writeSettings()
+        self.writeGeneralSettings()
         
         #======================================================================
         # Run parser

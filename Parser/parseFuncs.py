@@ -752,6 +752,7 @@ def dataParserTobii(FILENAME, **par):
         
         # Handle all other messages 
         msgData = re.findall(regMsg, raw)
+        msgData.append(('000.0000', 'parserDummyVar2 dummy2'))
         msgData = np.array(msgData)
         msgTimes = np.array(msgData[:,0], dtype = float)
         msg = np.array(msgData[:,1], dtype = str)
