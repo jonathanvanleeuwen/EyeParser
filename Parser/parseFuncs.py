@@ -418,6 +418,8 @@ def eventDetect(time, x, y, val, Hz = 300., pxPerDeg = 48.,
     distDeg = pixDist(xFilt,yFilt)/pxPerDeg
     # Get speed
     speed = distDeg/sampDur
+    # get acceleration
+    acc = speed/sampDur
     
     # =============================================================================
     # Step 2 - Iteratively find velocity peaks (samples larger than a threshold)
@@ -440,7 +442,6 @@ def eventDetect(time, x, y, val, Hz = 300., pxPerDeg = 48.,
     #   (a) Go back until velocity saccade onset threshold
     #   (b) Go forward until velocity saccade offset threshold (adaptive)
     #   (c) Make sure the saccade duration  minimum saccade duration
-    # Does no exclude based on stilness
     # =============================================================================
     saccBool = np.zeros(len(x),dtype=bool)
     ssaccThresh = Uz+(thresMulti*Oz)
@@ -515,25 +516,12 @@ def eventDetect(time, x, y, val, Hz = 300., pxPerDeg = 48.,
             # calculate saccade validity 
             sDur = time[esaccIdx[-1]] - time[ssaccIdx[-1]]
             maxVel = np.max(speed[ssaccIdx[-1]:esaccIdx[-1]])
-            #stilness = np.mean(speed[idx-minFixDurSamp:idx]) < PT # Valid if  True
+            maxAcc = np.max(acc[ssaccIdx[-1]:esaccIdx[-1]])
+            stilness = np.mean(speed[idx-minFixDurSamp:idx]) < PT # Valid if  True
             allVal = np.sum(~val[ssaccIdx[-1]:esaccIdx[-1]]) == 0 # valid if True
     
-            # Save the saccade if it passes the criteria                
-#            if allVal and stilness and (sDur > minSaccDur) and (maxVel < maxSaccVel):# and (maxAcc < maxSaccAcc):
-#                ssacc.append(time[ssaccIdx[-1]])
-#                esacc.append(time[esaccIdx[-1]])
-#                saccDur.append(sDur)
-#                saccPeakVel.append(maxVel)
-#                ssaccX.append(xFilt[ssaccIdx[-1]])
-#                ssaccY.append(yFilt[ssaccIdx[-1]])
-#                esaccX.append(xFilt[esaccIdx[-1]])
-#                esaccY.append(yFilt[esaccIdx[-1]])
-#                saccDist.append(np.sqrt( (ssaccX[-1]-esaccX[-1])**2+(ssaccY[-1]-esaccY[-1])**2 )/pxPerDeg)
-#                saccTraceT.append(time[ssaccIdx[-1]:esaccIdx[-1]])
-#                saccTraceX.append(xFilt[ssaccIdx[-1]:esaccIdx[-1]])
-#                saccTraceY.append(yFilt[ssaccIdx[-1]:esaccIdx[-1]])
-                
-            if allVal and (sDur > minSaccDur) and (maxVel < maxSaccVel):# and (maxAcc < maxSaccAcc):
+            # Save the saccade if it passes the criteria                               
+            if allVal and (sDur > minSaccDur) and (maxVel < maxSaccVel) and stilness and (maxAcc < maxSaccAcc):
                 ssacc.append(time[ssaccIdx[-1]])
                 esacc.append(time[esaccIdx[-1]])
                 saccDur.append(sDur)
