@@ -305,7 +305,7 @@ def parseToLongFormat(data, duplicate = 'No', eyetracker='Eyelink'):
                  'ValidityLeft', 'GazePointXRight', 'GazePointYRight', 
                  'ValidityRight', 	'rawX', 'rawY', 'PupilSizeLeft', 
                  'PupilValidityLeft', 'PupilSizeRight'	, 'PupilValidityRight',
-                 'rawPupSize', 'pupValidity']
+                 'rawPupSize', 'pupValidity', 'gazeValidity']
         variousKeys = ['saccBool', 'fixBool']
         for item in unfilt: 
             add.append(item+'Unfilt')
