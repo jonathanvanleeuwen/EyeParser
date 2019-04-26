@@ -343,9 +343,18 @@ def parseToLongFormat(data, duplicate = 'No', eyetracker='Eyelink'):
             if keyLen > trialLengths[trial]:
                 trialLengths[trial] = keyLen
     
+    # Itterate trough each trial and add an index for the events given
+    saccNr = []
+    fixNr = []
+    for i in range(len(data)):
+        saccNr.append(np.arange(len(data['DK_ssacc']))+1)
+        fixNr.append(np.arange(len(data['DK_sFix']))+1)
+    data['DK_saccNr'] = saccNr
+    data['DK_fixNr'] = fixNr
+
     # Initiate a long format data frame
     dataL = pd.DataFrame(index = xrange(int(np.sum(trialLengths))), columns = data.keys())
-    
+        
     # Itterate through each key and populate the long format data
     for key in data.keys():
         strtIndex = 0
