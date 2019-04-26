@@ -332,7 +332,8 @@ class Window(QtWidgets.QMainWindow):
         else:
             self.ui.TobiiBox.setChecked(False)
             self.ui.EyelinkBox.setChecked(True)
-            
+        self.changeSettingsloc()
+        
     def writeGeneralSettings(self):
         settings = ''
         for key in self.genSet.keys():

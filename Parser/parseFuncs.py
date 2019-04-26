@@ -304,7 +304,8 @@ def parseToLongFormat(data, duplicate = 'No', eyetracker='Eyelink'):
         unfilt = ['rawTime', 'GazePointXLeft', 'GazePointYLeft', 
                  'ValidityLeft', 'GazePointXRight', 'GazePointYRight', 
                  'ValidityRight', 	'rawX', 'rawY', 'PupilSizeLeft', 
-                 'PupilValidityLeft', 'PupilSizeRight'	, 'PupilValidityRight']
+                 'PupilValidityLeft', 'PupilSizeRight'	, 'PupilValidityRight',
+                 'rawPupSize', 'pupValidity']
         variousKeys = ['saccBool', 'fixBool']
         for item in unfilt: 
             add.append(item+'Unfilt')
@@ -638,6 +639,9 @@ def parseWrapper(f, kwargs):
         return results
 
 #FILENAME = 'C:\Work\DivCode\Python experiment codes\Tobii code\psychoBii\Opensesame exps\\subject-5_TOBII_output.tsv'
+#par = {'longFormat': 'Yes'}
+
+#FILENAME = 'C:\Users\User1\Desktop\Chris\pilot data\\subject-1_TOBII_output.tsv'
 #par = {'longFormat': 'Yes'}
 
 def dataParserTobii(FILENAME, **par):
