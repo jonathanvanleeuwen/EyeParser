@@ -347,8 +347,8 @@ def parseToLongFormat(data, duplicate = 'No', eyetracker='Eyelink'):
     saccNr = []
     fixNr = []
     for i in range(len(data)):
-        saccNr.append(np.arange(len(data['DK_ssacc']))+1)
-        fixNr.append(np.arange(len(data['DK_sFix']))+1)
+        saccNr.append(np.arange(len(data['DK_ssacc'][i]))+1)
+        fixNr.append(np.arange(len(data['DK_sFix'][i]))+1)
     data['DK_saccNr'] = saccNr
     data['DK_fixNr'] = fixNr
 
@@ -650,7 +650,7 @@ def parseWrapper(f, kwargs):
 #FILENAME = 'C:\Work\DivCode\Python experiment codes\Tobii code\psychoBii\Opensesame exps\\subject-5_TOBII_output.tsv'
 #par = {'longFormat': 'Yes'}
 
-#FILENAME = 'C:\Users\User1\Desktop\Chris\pilot data\\subject-1_TOBII_output.tsv'
+#FILENAME = 'D:\Work\PhD Vu\TechnicalHelpDep\Chris\DataParsing\\subject-1_TOBII_output_fixed.tsv'
 #par = {'longFormat': 'Yes'}
 
 def dataParserTobii(FILENAME, **par):

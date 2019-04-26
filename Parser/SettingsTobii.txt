@@ -13,7 +13,7 @@ nrCores:3
 pxPerDeg:48
 pxMode:Manual
 longFormat:Yes
-duplicateValues:No
+duplicateValues:Yes
 screenDist:80.0
 screenW:47.5
 screenX:1680.0
