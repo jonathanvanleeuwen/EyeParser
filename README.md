@@ -1,2 +1,4 @@
 # EyeParser
-GUIs for parsing and plotting eyetracking data (curently only eyelink data)
+GUIs for parsing and plotting eyetracking data
+
+Python 2.7
