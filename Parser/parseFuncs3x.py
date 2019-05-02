@@ -13,9 +13,8 @@ import numpy as np
 import scipy.signal as sign
 import pandas as pd
 from collections import deque
-from itertools import izip
 import traceback
-
+  
 #==============================================================================
 # Functions
 #==============================================================================
@@ -279,14 +278,12 @@ def calculateSaccadeCurvature(xSacc, ySacc, pixPerDegree, ignoreDist = 0.5, flip
                 pointAngles[pointNr] = pointCurv
         pointAngles = pointAngles[pointAngles < 9999]
         curveData.append(pointAngles)
-        # Append saccadeAngles
-#        if saccadeAngle > 180:
-#            saccadeAngle -=360
-#        elif saccadeAngle < -180:
-#            saccadeAngle +=360
         saccAngles.append(saccAngle360)
     return curveData, saccAngles
 
+#data = pData
+#duplicate = 'Yes'
+#eyetracker = 'Tobii'
 def parseToLongFormat(data, duplicate = 'No', eyetracker='Eyelink'):
     '''
     Turn a parsed datafile into long data file:
@@ -329,10 +326,10 @@ def parseToLongFormat(data, duplicate = 'No', eyetracker='Eyelink'):
             
     # Get the largest number of events for each trial
     trialLengths = np.zeros(len(data))
-    for trial in xrange(len(data)):
+    for trial in range(len(data)):
         for key in data.keys():        
             try: 
-                if isinstance(data[key][trial], basestring): 
+                if isinstance(data[key][trial], str): 
                     keyLen = 1
                 else:
                     keyLen = len(data[key][trial])
@@ -353,7 +350,7 @@ def parseToLongFormat(data, duplicate = 'No', eyetracker='Eyelink'):
     data['DK_fixNr'] = fixNr
 
     # Initiate a long format data frame
-    dataL = pd.DataFrame(index = xrange(int(np.sum(trialLengths))), columns = data.keys())
+    dataL = pd.DataFrame(index = range(int(np.sum(trialLengths))), columns = data.keys())
         
     # Itterate through each key and populate the long format data
     for key in data.keys():
@@ -362,14 +359,14 @@ def parseToLongFormat(data, duplicate = 'No', eyetracker='Eyelink'):
         keyVector = np.empty(len(dataL[key]))
         keyVector[:] = np.NAN
         keyVector = pd.Series(keyVector)
-        for trial in xrange(len(data)):
+        for trial in range(len(data)):
             try:
                 dataLen = len(data[key][trial])
-                if isinstance(data[key][trial], basestring): 
+                if isinstance(data[key][trial], str): 
                     if duplicate == 'Yes':
-                        keyVector[strtIndex:stopIndex] = data[key][trial]
+                        keyVector[strtIndex:stopIndex] = str(data[key][trial])
                     else:
-                        keyVector[strtIndex] = data[key][trial]
+                        keyVector[strtIndex] = str(data[key][trial])
                 else:
                     keyVector[strtIndex:strtIndex+dataLen] = data[key][trial]
             except:
@@ -641,17 +638,9 @@ def eventDetect(time, x, y, val, Hz = 300., pxPerDeg = 48.,
 #==============================================================================
 def parseWrapper(f, kwargs):
     if kwargs['Eyetracker'] == 'Eyelink':
-        results = eyeLinkDataParser(f, **kwargs)
-        return results
+        return eyeLinkDataParser(f, **kwargs)
     elif kwargs['Eyetracker'] == 'Tobii':
-        results = dataParserTobii(f, **kwargs)
-        return results
-
-#FILENAME = 'C:\Work\DivCode\Python experiment codes\Tobii code\psychoBii\Opensesame exps\\subject-5_TOBII_output.tsv'
-#par = {'longFormat': 'Yes'}
-
-#FILENAME = 'D:\Work\PhD Vu\TechnicalHelpDep\Chris\DataParsing\\subject-1_TOBII_output_fixed.tsv'
-#par = {'longFormat': 'Yes'}
+        return dataParserTobii(f, **kwargs)
 
 def dataParserTobii(FILENAME, **par):
     try:
@@ -795,7 +784,7 @@ def dataParserTobii(FILENAME, **par):
             if delete == False:
                 uniqueMSG.append(m)
         uniqueMSGHeaders = [varPrefix+h for h in uniqueMSG]
-        
+            
         # =====================================================================
         # Determine raw data validity, pupil size and pupil validity 
         # =====================================================================
@@ -890,20 +879,20 @@ def dataParserTobii(FILENAME, **par):
             varEpochT = varTimes[varBool]
             varEpochMsg = varMsg[varBool]
             varEpochHead= varHeaders[varBool]
-            for it, (times, key) in enumerate(izip(varEpochT, varEpochHead)):
+            for it, (times, key) in enumerate(zip(varEpochT, varEpochHead)):
                 if len(varEpochMsg[it]) == 1:
                     pData.at[i,key] = 'NA'
                 elif len(varEpochMsg[it]) == 2:
-                    pData.at[i,key] = varEpochMsg[it][1]
+                    pData.at[i,key] = str(varEpochMsg[it][1])
                 elif len(varEpochMsg[it]) > 2:
-                    pData.at[i,key] = varEpochMsg[it][1:]
+                    pData.at[i,key] = str(varEpochMsg[it][1:])
                 pData.at[i,key+'TimeStamp'] = times
     
             # Epoch messages
             msgBool = np.logical_and(msgTimes >= start, msgTimes <= stop)
             msgEpochT = msgTimes[msgBool]
             msgEpoch = msg[msgBool]
-            for times, key in izip(msgEpochT, msgEpoch):
+            for times, key in zip(msgEpochT, msgEpoch):
                 if key in uniqueMSG:
                     pData.at[i,varPrefix+key] = times
                 
@@ -943,10 +932,6 @@ def dataParserTobii(FILENAME, **par):
         error = traceback.format_exc()
         
     return FILENAME, pData, rawData, parsedLong, error
-
-
-#FILENAME = 'C:\Work\DivCode\Python experiment codes\Tobii code\psychoBii\Opensesame exps\\PP2S1.asc'
-#par = {'longFormat': 'Yes'}
 
 def eyeLinkDataParser(FILENAME, **par):
     try:
@@ -1025,7 +1010,6 @@ def eyeLinkDataParser(FILENAME, **par):
         #==============================================================================
         # Load data ASCII data to memory
         #==============================================================================
-        #raw = open(FILENAME, 'r').read()
         with open(FILENAME, 'r') as f:
             raw = f.read()
             #==============================================================================
@@ -1057,7 +1041,7 @@ def eyeLinkDataParser(FILENAME, **par):
             
         #==============================================================================
         # Reformat all the data
-        #==============================================================================
+        #==============================================================================        
         # Get all samples
         rawSamples = np.array(rawSamples, dtype = float)
         rawData = pd.DataFrame(rawSamples, columns = rawKw , dtype = 'float64')
@@ -1128,7 +1112,7 @@ def eyeLinkDataParser(FILENAME, **par):
             if delete == False:
                 uniqueMSG.append(m)
         uniqueMSGHeaders = [varPrefix+h for h in uniqueMSG]
-            
+    
         # =============================================================================
         # Prealocations and extract some info from data
         # =============================================================================   
@@ -1249,7 +1233,7 @@ def eyeLinkDataParser(FILENAME, **par):
             varEpochT = varTimes[varBool]
             varEpochMsg = varMsg[varBool]
             varEpochHead= varHeaders[varBool]
-            for it, (times, key) in enumerate(izip(varEpochT, varEpochHead)):
+            for it, (times, key) in enumerate(zip(varEpochT, varEpochHead)):
                 if len(varEpochMsg[it]) == 1:
                     pData.at[i,key] = 'NA'
                 elif len(varEpochMsg[it]) == 2:
@@ -1262,7 +1246,7 @@ def eyeLinkDataParser(FILENAME, **par):
             msgBool = np.logical_and(msgTimes >= start, msgTimes <= stop)
             msgEpochT = msgTimes[msgBool]
             msgEpoch = msg[msgBool]
-            for times, key in izip(msgEpochT, msgEpoch):
+            for times, key in zip(msgEpochT, msgEpoch):
                 if key in uniqueMSG:
                     pData.at[i,varPrefix+key] = times
                 
@@ -1294,4 +1278,4 @@ def eyeLinkDataParser(FILENAME, **par):
         parsedLong = False
         error = traceback.format_exc()
         
-    return FILENAME, pData, rawData, parsedLong, error
+    return FILENAME, pData, rawData, parsedLong, error           

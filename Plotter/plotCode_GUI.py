@@ -194,7 +194,7 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
             dataY = np.floor(dataY)
     
             # initiate map and gauskernel
-            gazeMap = np.zeros([(xMax-xMin)/dataScaling,(yMax-yMin)/dataScaling])+0.001
+            gazeMap = np.zeros([int((xMax-xMin)/dataScaling),int((yMax-yMin)/dataScaling)])+0.001
             gausKernel = eval('krn.'+kernel)(kernelPar)
             
             # Rescale the position vectors (if xmin or ymin != 0)
@@ -235,9 +235,12 @@ def plotTrial(timeStamp, xPos, yPos, euclidDist, **par):
         return fig, ax1, ax2, ax3, ax4
     except:
         ax4 = figAx[4]
-        ax4.clf()
+        try:
+            ax4.clf()
+        except:
+            ax4.clear()
         ax4.set_title('Error, try different settings!')
-        print traceback.format_exc()
+        print(traceback.format_exc())
         return fig
         
 

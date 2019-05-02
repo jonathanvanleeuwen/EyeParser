@@ -16,7 +16,10 @@ import pandas as pd
 from PyQt5 import QtGui, QtCore, QtWidgets
 import psutil
 import multiprocessing
-from parseFuncs import parseWrapper
+if sys.version_info[0] < 3:
+    from parseFuncs import parseWrapper
+else:
+    from parseFuncs3x import parseWrapper
 import time
 from eyeParserBuilder import Ui_eyeTrackerSelection
 
@@ -80,12 +83,12 @@ class workerClass(QtCore.QThread):
                 if self.par['longFormat'] == 'Yes':
                     saveResults(parsedLong, self.par['saveFileNamesLong'][indx], self.par['longFormatType'])
             else:
-                print "\n\nUnfortunatly an Error occured!"
-                print os.path.basename(FILENAME), "Was not saved"
-                print "Please try to parse this file again"
-                print "Error Message:"
-                print error
-                print '\n'
+                print("\n\nUnfortunatly an Error occured!")
+                print(os.path.basename(FILENAME), "Was not saved")
+                print("Please try to parse this file again")
+                print("Error Message:")
+                print(error)
+                print('\n')
                 
             # Send progress
             self.prog.emit(1)
@@ -112,7 +115,7 @@ class MyMessageBox(QtWidgets.QMessageBox):
             textEdit.setMaximumWidth(16777215)
             textEdit.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         return result
-
+    
 class Window(QtWidgets.QMainWindow):
     #==============================================================================
     # Build GUI
@@ -437,8 +440,8 @@ class Window(QtWidgets.QMainWindow):
                 dur = time.time() - self.parseStartTime
                 timem = int(dur/60)
                 times = dur%60
-                print "Finished!"
-                print "Duration: %d minutes, %d seconds" %(timem, times)
+                print("Finished!")
+                print("Duration: %d minutes, %d seconds" %(timem, times))
                 self.finished = True
 
     def startBussyBar(self):
@@ -575,7 +578,7 @@ class Window(QtWidgets.QMainWindow):
         maxCores = psutil.cpu_count()
         if int(self.par['nrCores']) > maxCores:
             self.par['nrCores'] = str(maxCores)
-        self.ui.nrCores.setText(self.par['nrCores'])
+        self.ui.nrCores.setText(self.par['nrCores'])    
         self.pool = multiprocessing.Pool(processes=int(self.par['nrCores']))
         
         #======================================================================
@@ -606,34 +609,36 @@ class Window(QtWidgets.QMainWindow):
             if self.par['longFormat'] == 'Yes':
                 saveResults(results[3], saveFileNameslong, self.par['longFormatType'])
         else:
-            print "\n\nUnfortunatly an Error occured!"
-            print os.path.basename(savefileName), "Was not saved"
-            print "Please try to parse this file again"
-            print "Error Message:"
-            print results[-1]
-            print '\n'
-            
-        # Update progresbar       
+            print("\n\nUnfortunatly an Error occured!")
+            print(os.path.basename(savefileName), "Was not saved")
+            print("Please try to parse this file again")
+            print("Error Message:")
+            print(results[-1])
+            print('\n')
+        del results
+        # Update progressbar       
         self.progressValue += 1
-            
+                
     def parse(self):
         self.startBussyBar()        
         self.parseStartTime = time.time()
-        if self.par['runParallel'] == 'Yes':
+        # Only run parallel if system version is lover than 3.7
+        if (self.par['runParallel'] == 'Yes' and sys.version_info[0] < 3) \
+        or self.par['runParallel'] == 'Yes' and (sys.version_info[0] == 3 and sys.version_info[1] < 7):
             try:
                 self.ui.statusL.setText(self.MCPL)
                 self.ui.statusL.show()
                 self.repaint()
                 # Start threading System resources
+                results = []
                 for sub in self.files:
-                    results = self.pool.apply_async(parseWrapper,
-                                               args = (sub, self.par),
-                                               callback=self.callbackParser)
+                    results.append(self.pool.apply_async(parseWrapper,
+                                               args = (sub, self.par, ),
+                                               callback=self.callbackParser))  
             except:
                 self.ui.statusL.setText(self.MCERRORL)
                 self.ui.statusL.show()
                 self.parseSingleCore()
-
         else:
             self.parseSingleCore()
             
