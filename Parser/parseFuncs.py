@@ -434,18 +434,22 @@ def eventDetect(time, x, y, val, Hz = 300., pxPerDeg = 48.,
     # =============================================================================
     # Step 2 - Iteratively find velocity peaks (samples larger than a threshold)
     # =============================================================================
+    itt = 0
     while True:
         belowThreshSamples = speed[val][speed[val] < PT]
-        Uz = np.average(belowThreshSamples)
-        Oz = np.std(belowThreshSamples)
+        Uz = np.nanmean(belowThreshSamples)
+        Oz = np.nanstd(belowThreshSamples)
         PTn = Uz+(6*Oz)
         if PTn - PT < 1:
             PT = PTn
-            Uz = np.average(speed[val][speed[val] < PT])
-            Oz = np.std(speed[val][speed[val] < PT])
+            Uz = np.nanmean(speed[val][speed[val] < PT])
+            Oz = np.nanstd(speed[val][speed[val] < PT])
             break
         else:
-            PT = PTn        
+            PT = PTn   
+        itt+=1
+        if itt >= 10000:
+            break
     
     # =============================================================================
     # Step 3 -  Saccade detection: For each velocity peak
@@ -646,12 +650,6 @@ def parseWrapper(f, kwargs):
     elif kwargs['Eyetracker'] == 'Tobii':
         results = dataParserTobii(f, **kwargs)
         return results
-
-#FILENAME = 'C:\Work\DivCode\Python experiment codes\Tobii code\psychoBii\Opensesame exps\\subject-5_TOBII_output.tsv'
-#par = {'longFormat': 'Yes'}
-
-#FILENAME = 'D:\Work\PhD Vu\TechnicalHelpDep\Chris\DataParsing\\subject-1_TOBII_output_fixed.tsv'
-#par = {'longFormat': 'Yes'}
 
 def dataParserTobii(FILENAME, **par):
     try:
@@ -907,7 +905,6 @@ def dataParserTobii(FILENAME, **par):
                 if key in uniqueMSG:
                     pData.at[i,varPrefix+key] = times
                 
-
         # =============================================================================
         # Add The final things to the parsed dataframe
         # =============================================================================
@@ -943,10 +940,6 @@ def dataParserTobii(FILENAME, **par):
         error = traceback.format_exc()
         
     return FILENAME, pData, rawData, parsedLong, error
-
-
-#FILENAME = 'C:\Work\DivCode\Python experiment codes\Tobii code\psychoBii\Opensesame exps\\PP2S1.asc'
-#par = {'longFormat': 'Yes'}
 
 def eyeLinkDataParser(FILENAME, **par):
     try:

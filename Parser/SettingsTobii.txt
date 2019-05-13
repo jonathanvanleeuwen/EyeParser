@@ -8,7 +8,7 @@ variableKey:var
 defaultSaveAs:pickle
 rawSaveAs:pickle
 longSaveAs:CSV
-runParallel:Yes
+runParallel:No
 nrCores:7
 pxPerDeg:48
 pxMode:Manual
