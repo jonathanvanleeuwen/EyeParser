@@ -1,5 +1,5 @@
 {
-    "Eyetracker": "Eyelink", 
+    "Eyetracker": "Tobii", 
     "Eyelink": {
         "default": {
             "duplicateValues": "No", 
@@ -30,12 +30,12 @@
             "eyetracker": "Eyelink", 
             "longFormat": "No", 
             "longSaveAs": "CSV", 
-            "nrCores": "7", 
+            "nrCores": 7, 
             "pxMode": "Automatic", 
             "pxPerDeg": 48.0, 
             "rawSaveAs": "pickle", 
             "runParallel": "Yes", 
-            "sampFreq": 1000, 
+            "sampFreq": 1000.0, 
             "saveAs": "pickle", 
             "saveExtension": "Parsed", 
             "saveLongExtension": "Long", 

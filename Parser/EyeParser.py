@@ -323,7 +323,7 @@ class Window(QtWidgets.QMainWindow):
         self.updateGUI()
         
     def loadSettings(self):
-        settings = readFile('settings.txt')
+        settings = readFile('settings.json')
         self.eyeTracker = settings['Eyetracker']
         self.eyelink = sortDict(settings['Eyelink']['par'])
         self.eyelinkDF = sortDict(settings['Eyelink']['default'])
@@ -353,14 +353,14 @@ class Window(QtWidgets.QMainWindow):
         data['Eyetracker'] = self.eyeTracker
         data['Eyelink'] = {'par':self.eyelink, 'default':self.eyelinkDF}
         data['Tobii'] = {'par':self.tobii, 'default':self.tobiiDF}
-        writeFile('settings.txt', data)
+        writeFile('settings.json', data)
     
     def saveDefaultSettings(self):
         data = OrderedDict({})  
         data['Eyetracker'] = self.eyeTracker
         data['Eyelink'] = {'par':self.eyelinkDF, 'default':self.eyelinkDF}
         data['Tobii'] = {'par':self.tobiiDF, 'default':self.tobiiDF}
-        writeFile('settings.txt', data)
+        writeFile('settings.json', data)
     
     def loadDefaultSettings(self):
         choice = QtWidgets.QMessageBox.question(self, 'Default settings',
