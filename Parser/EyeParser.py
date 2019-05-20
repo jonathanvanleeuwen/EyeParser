@@ -13,6 +13,8 @@ Created on Tue Jan 24 14:01:49 2017
 import sys
 import os
 import pandas as pd
+import json
+from collections import OrderedDict
 from PyQt5 import QtGui, QtCore, QtWidgets
 import psutil
 import multiprocessing
@@ -46,7 +48,29 @@ def saveResults(data, name, dType):
         data.to_csv(name+dType, index = False, na_rep = '#N/A')
     elif dType == '.mat':
         saveToMat(data, name)
-        
+
+def readFile(fName):
+    with open(fName) as json_file:  
+        content = json.load(json_file)       
+    return content
+
+def writeFile(fName, data):
+    with open(fName, 'w') as outfile:  
+        json.dump(data, outfile, indent=4)
+
+def sortDict(data):
+    d = OrderedDict({})
+    for (key, value) in sorted(data.items()):
+        d[key] = value
+    return d
+
+def cleanDict(dirtyDict, cleanDict):
+    cleaned = OrderedDict({})
+    for key in dirtyDict.keys():
+        if key in cleanDict.keys():
+            cleaned[key] = dirtyDict[key]
+    return cleaned
+
 #==============================================================================
 #==============================================================================
 # #  GUI code
@@ -126,9 +150,7 @@ class Window(QtWidgets.QMainWindow):
         #======================================================================
         # Set variables
         self.files = []
-        self.generalSettingsLoc = 'generalSettings.txt'
         self.docLoc = 'Documentation.txt'
-        self.settingsLoc = 'SettingsEyelink.txt'
         self.progressValue = 0
 
         #======================================================================
@@ -150,7 +172,6 @@ class Window(QtWidgets.QMainWindow):
         
         # Load settings
         self.loadSettings()
-        self.loadGeneralSettings()
         
         #======================================================================
         # Set the menu bar triggers
@@ -180,8 +201,8 @@ class Window(QtWidgets.QMainWindow):
         # The trigger for pixels per degree mode
         self.ui.pixMode.currentIndexChanged.connect(self.setPxMode)
         # Trigger loading of data
-        self.ui.TobiiBox.clicked.connect(self.changeSettingsloc)
-        self.ui.EyelinkBox.clicked.connect(self.changeSettingsloc)
+        self.ui.TobiiBox.clicked.connect(self.changeEyetracker)
+        self.ui.EyelinkBox.clicked.connect(self.changeEyetracker)
         
         #======================================================================
         # Initiate options tab
@@ -196,7 +217,7 @@ class Window(QtWidgets.QMainWindow):
         maxCores = psutil.cpu_count()
         if int(self.par['nrCores']) > maxCores-1:
             self.par['nrCores'] = str(maxCores-1)
-        self.ui.nrCores.setText(self.par['nrCores'])
+        self.ui.nrCores.setText(str(int(self.par['nrCores'])))
         
         # Pixels per degree
         if self.par['pxMode'] == 'Automatic':
@@ -212,7 +233,7 @@ class Window(QtWidgets.QMainWindow):
         #Parsed Raw name
         self.ui.rawName.setText(self.par['saveRawExtension'])
         # Longformat name 
-        self.ui.longName.setText(self.par['DFsaveLongExtension'])
+        self.ui.longName.setText(self.par['saveLongExtension'])
         # Save raw button 
         self.ui.saveRawbtn.addItem("No")
         self.ui.saveRawbtn.addItem("Yes")
@@ -236,7 +257,7 @@ class Window(QtWidgets.QMainWindow):
         else:
             self.ui.duplicLongbtn.setCurrentIndex(1)
         # Save as dropDowns
-        idx = self.ui.fileTypeBtn.findText(self.par['defaultSaveAs'])
+        idx = self.ui.fileTypeBtn.findText(self.par['saveAs'])
         if idx != -1:
             self.ui.fileTypeBtn.setCurrentIndex(idx)
         idx = self.ui.fileTypeRawBtn.findText(self.par['rawSaveAs'])
@@ -289,77 +310,58 @@ class Window(QtWidgets.QMainWindow):
     #==============================================================================
     # Define button actions
     #==============================================================================   
-    def changeSettingsloc(self):
+    def changeEyetracker(self):
         if self.ui.TobiiBox.isChecked():
-            self.settingsLoc = 'SettingsTobii.txt'
             self.ui.pixMode.setCurrentIndex(1)
             self.ui.pixMode.setEnabled(False)
+            self.par = self.tobii
+            self.eyeTracker = 'Tobii'
         elif self.ui.EyelinkBox.isChecked():
-            self.settingsLoc = 'SettingsEyelink.txt'
             self.ui.pixMode.setEnabled(True)
-        self.loadSettings()
-            
-    def readFile(self, f):
-        with open(f, 'r') as f:
-            f = f.read().splitlines()
-            keys = []
-            values = []
-            for line in f:
-                key, value = line.split(':')
-                # Check for regularExpressions
-                if value[0] == '"':
-                    value = value.strip('"')
-                # Check for True False values
-                if value == 'False':
-                    value = False
-                elif value == 'True':
-                    value = True
-                keys.append(key)
-                values.append(value)
-        return keys, values
-    
-    def loadSettings(self):
-        keys, values = self.readFile(self.settingsLoc)
-        self.DFSettings = pd.DataFrame([values], columns = keys)
-        self.par = {key:self.DFSettings[key][0] for key in self.DFSettings.keys()}
+            self.par = self.eyelink
+            self.eyeTracker = 'Eyelink'
         self.updateGUI()
         
-    def loadGeneralSettings(self):
-        keys, values = self.readFile(self.generalSettingsLoc)
-        self.genSet = {k:v for (k,v) in zip(keys, values)}
+    def loadSettings(self):
+        settings = readFile('settings.txt')
+        self.eyeTracker = settings['Eyetracker']
+        self.eyelink = sortDict(settings['Eyelink']['par'])
+        self.eyelinkDF = sortDict(settings['Eyelink']['default'])
+        self.tobii = sortDict(settings['Tobii']['par'])
+        self.tobiiDF = sortDict(settings['Tobii']['default'])
         
         # Set the general settings
-        if self.genSet['runTobii'] == True:
+        if self.eyeTracker == 'Tobii':
             self.ui.TobiiBox.setChecked(True)
             self.ui.EyelinkBox.setChecked(False)
-        else:
+            self.par = self.tobii
+        elif self.eyeTracker == 'Eyelink':
             self.ui.TobiiBox.setChecked(False)
             self.ui.EyelinkBox.setChecked(True)
-        self.changeSettingsloc()
-        
-    def writeGeneralSettings(self):
-        settings = ''
-        for key in self.genSet.keys():
-             settings += key+':'+str(self.genSet[key])+'\n'
-        with open(self.generalSettingsLoc, 'w') as f:
-            f.write(settings)
-        
-    def writeSettings(self):
-        settings = ''
-        for key in self.DFSettings.keys():
-            if len(str(self.par[key])) == 0:
-                self.par[key] = self.par['DF'+key]
-            settings += key+':'+str(self.par[key])+'\n' 
-        with open(self.settingsLoc, 'w') as f:
-            f.write(settings)
+            self.par = self.eyelink
+        self.updateGUI()
 
-    def writeDefaultSettings(self):
-        with open(self.settingsLoc, 'w') as f:
-            for key in self.DFSettings.keys():
-                if key[0:2] != 'DF':
-                    self.DFSettings[key] = self.DFSettings['DF'+key]
-                f.write(key+':'+str(self.DFSettings[key][0])+'\n')
-
+    def saveSettings(self):
+        data = OrderedDict({})
+        # Clean data
+        if self.eyeTracker == 'Tobii':
+            self.tobii = self.par
+        elif self.eyeTracker == 'Eyelink':
+            self.eyelink = self.par
+        self.eyelink = cleanDict(self.eyelink, self.eyelinkDF)
+        self.tobii = cleanDict(self.tobii, self.tobiiDF)
+        data['Eyetracker'] = self.eyeTracker
+        data['Eyelink'] = {'par':self.eyelink, 'default':self.eyelinkDF}
+        data['Tobii'] = {'par':self.tobii, 'default':self.tobiiDF}
+        writeFile('settings.txt', data)
+    
+    def saveDefaultSettings(self):
+        data = OrderedDict({})  
+        data['Eyetracker'] = self.eyeTracker
+        data['Eyelink'] = {'par':self.eyelinkDF, 'default':self.eyelinkDF}
+        data['Tobii'] = {'par':self.tobiiDF, 'default':self.tobiiDF}
+        writeFile('settings.txt', data)
+    
     def loadDefaultSettings(self):
         choice = QtWidgets.QMessageBox.question(self, 'Default settings',
                                             "Loading default settings permanently\n"+\
@@ -368,7 +370,7 @@ class Window(QtWidgets.QMainWindow):
                                             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         if choice == QtWidgets.QMessageBox.Yes:
             # Write and load the deffault settings
-            self.writeDefaultSettings()
+            self.saveDefaultSettings()
             self.loadSettings()
         else:
             pass
@@ -386,7 +388,7 @@ class Window(QtWidgets.QMainWindow):
         maxCores = psutil.cpu_count()
         if int(self.par['nrCores']) > maxCores-1:
             self.par['nrCores'] = str(maxCores-1)
-        self.ui.nrCores.setText(self.par['nrCores'])
+        self.ui.nrCores.setText(str(int(self.par['nrCores'])))
 
         
         # Set button defaults
@@ -408,7 +410,7 @@ class Window(QtWidgets.QMainWindow):
         else:
             self.ui.duplicLongbtn.setCurrentIndex(1)
         # Save as dropDowns
-        idx = self.ui.fileTypeBtn.findText(self.par['defaultSaveAs'])
+        idx = self.ui.fileTypeBtn.findText(self.par['saveAs'])
         if idx != -1:
             self.ui.fileTypeBtn.setCurrentIndex(idx)
         idx = self.ui.fileTypeRawBtn.findText(self.par['rawSaveAs'])
@@ -566,27 +568,18 @@ class Window(QtWidgets.QMainWindow):
         self.par['longFormat'] = self.ui.longbtn.currentText()
         self.par['duplicateValues'] = self.ui.duplicLongbtn.currentText()
         
-        # Eytracker type
-        if self.ui.EyelinkBox.isChecked():
-            self.par['Eyetracker'] = 'Eyelink'
-            self.genSet['runTobii'] = False
-        elif self.ui.TobiiBox.isChecked():
-            self.par['Eyetracker'] = 'Tobii'
-            self.genSet['runTobii'] = True
-                       
         # Number of available cores
         maxCores = psutil.cpu_count()
         if int(self.par['nrCores']) > maxCores:
-            self.par['nrCores'] = str(maxCores)
-        self.ui.nrCores.setText(self.par['nrCores'])    
+            self.par['nrCores'] = int(maxCores)
+        self.ui.nrCores.setText(str(int(self.par['nrCores'])))  
         self.pool = multiprocessing.Pool(processes=int(self.par['nrCores']))
         
         #======================================================================
         # Save settings
         #======================================================================
-        self.writeSettings()
-        self.writeGeneralSettings()
-        
+        self.saveSettings()
+
         #======================================================================
         # Run parser
         #======================================================================

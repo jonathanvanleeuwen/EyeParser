@@ -644,10 +644,10 @@ def eventDetect(time, x, y, val, Hz = 300., pxPerDeg = 48.,
 #  Parser
 #==============================================================================
 def parseWrapper(f, kwargs):
-    if kwargs['Eyetracker'] == 'Eyelink':
+    if kwargs['eyetracker'] == 'Eyelink':
         results = eyeLinkDataParser(f, **kwargs)
         return results
-    elif kwargs['Eyetracker'] == 'Tobii':
+    elif kwargs['eyetracker'] == 'Tobii':
         results = dataParserTobii(f, **kwargs)
         return results
 

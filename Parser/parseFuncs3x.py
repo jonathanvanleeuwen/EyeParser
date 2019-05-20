@@ -637,9 +637,9 @@ def eventDetect(time, x, y, val, Hz = 300., pxPerDeg = 48.,
 #  Parser
 #==============================================================================
 def parseWrapper(f, kwargs):
-    if kwargs['Eyetracker'] == 'Eyelink':
+    if kwargs['eyetracker'] == 'Eyelink':
         return eyeLinkDataParser(f, **kwargs)
-    elif kwargs['Eyetracker'] == 'Tobii':
+    elif kwargs['eyetracker'] == 'Tobii':
         return dataParserTobii(f, **kwargs)
 
 def dataParserTobii(FILENAME, **par):
