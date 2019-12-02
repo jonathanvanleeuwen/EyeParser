@@ -615,25 +615,20 @@ class Window(QtWidgets.QMainWindow):
     def parse(self):
         self.startBussyBar()        
         self.parseStartTime = time.time()
-        # Only run parallel if system version is lover than 3.7
-        if (self.par['runParallel'] == 'Yes' and sys.version_info[0] < 3) \
-        or self.par['runParallel'] == 'Yes' and (sys.version_info[0] == 3 and sys.version_info[1] < 7):
-            try:
-                self.ui.statusL.setText(self.MCPL)
-                self.ui.statusL.show()
-                self.repaint()
-                # Start threading System resources
-                results = []
-                for sub in self.files:
-                    results.append(self.pool.apply_async(parseWrapper,
-                                               args = (sub, self.par, ),
-                                               callback=self.callbackParser))  
-            except:
-                self.ui.statusL.setText(self.MCERRORL)
-                self.ui.statusL.show()
-                self.parseSingleCore()
-        else:
-            self.parseSingleCore()
+		try:
+			self.ui.statusL.setText(self.MCPL)
+			self.ui.statusL.show()
+			self.repaint()
+			# Start threading System resources
+			results = []
+			for sub in self.files:
+				results.append(self.pool.apply_async(parseWrapper,
+										   args = (sub, self.par, ),
+										   callback=self.callbackParser))  
+		except:
+			self.ui.statusL.setText(self.MCERRORL)
+			self.ui.statusL.show()
+			self.parseSingleCore()
             
         if len(self.files) == 0:
             self.stopBussyBar()
